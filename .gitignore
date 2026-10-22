@@ -1,0 +1,16 @@
+node_modules/
+dist/
+work/
+.DS_Store
+*.tsbuildinfo
+
+# Local configuration and credentials
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.p12
+
+# Test and tool output
+coverage/
