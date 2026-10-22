@@ -1,6 +1,6 @@
 # SG Architecture Map — Prototype 01
 
-シンガポールの建築を地図から発見する、モバイルファーストの技術試作です。Vite、React、TypeScript、MapLibre GL JSで構成しています。
+シンガポールの建築を地図から発見する、モバイルファーストの技術試作です。Vite、React、TypeScript、MapLibre GL JSで構成しています。英語を初期言語とし、英語版と日本語版をURLで分離しています。
 
 ## ローカル実行
 
@@ -20,8 +20,12 @@ npm run dev
 
 公開後は次のURLをiPhone Safariで開き、同じデータ・条件で比較します。
 
-- `https://<account>.github.io/<repository>/?ui=a`
-- `https://<account>.github.io/<repository>/?ui=b`
+- `https://<account>.github.io/<repository>/en/?ui=a`
+- `https://<account>.github.io/<repository>/en/?ui=b`
+- `https://<account>.github.io/<repository>/ja/?ui=a`
+- `https://<account>.github.io/<repository>/ja/?ui=b`
+
+リポジトリ直下のURLは、クエリとハッシュを保ったまま `/en/` へ移動します。表示文言と建築名・設計者表記は `src/i18n.ts`、ID・座標・出典などの共通事実は `src/data/buildings.json` で管理します。言語切替時には同じタブ内の一時ストレージを使い、地図位置、ズーム、選択中の建築、詳細の開閉を引き継ぎます。
 
 実機確認項目は `docs/mobile-verification-checklist.md` にあります。
 

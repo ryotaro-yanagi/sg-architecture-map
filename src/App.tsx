@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import * as maplibregl from 'maplibre-gl'
 import type { GeoJSONSource, Map as MapLibreMap } from 'maplibre-gl'
 import data from './data/buildings.json'
+import { getBuildingCopy, getLocaleFromPath, localeHref, translations } from './i18n'
+import type { Locale, Translation } from './i18n'
 
 type Coordinates = [number, number]
 type Variant = 'a' | 'b'
@@ -10,7 +12,6 @@ type Building = {
   id: string
   name: string
   architects: string[]
-  architectCredit: string
   buildingType: string
   completionYear: number | null
   address: string
@@ -22,23 +23,42 @@ type Building = {
   publicAccess: string
 }
 
-const buildings = data.buildings as unknown as Building[]
-
-const typeLabels: Record<string, string> = {
-  civic_cultural: '文化・公共',
-  mixed_use: '複合用途',
-  retail: '商業',
-  community: 'コミュニティ',
+type RestoredMapState = {
+  savedAt: number
+  center: Coordinates
+  zoom: number
+  bearing: number
+  pitch: number
+  selectedId: string | null
+  expanded: boolean
 }
 
-const featureCollection = (selectedId: string | null): GeoJSON.FeatureCollection => ({
+const buildings = data.buildings as unknown as Building[]
+const defaultCenter: Coordinates = [103.879, 1.315]
+const defaultZoom = 11.35
+const mapStateKey = 'sgm-language-map-state'
+
+const readRestoredMapState = (): RestoredMapState | null => {
+  try {
+    const raw = window.sessionStorage.getItem(mapStateKey)
+    window.sessionStorage.removeItem(mapStateKey)
+    if (!raw) return null
+    const state = JSON.parse(raw) as RestoredMapState
+    if (Date.now() - state.savedAt > 5 * 60 * 1000 || !Array.isArray(state.center)) return null
+    return state
+  } catch {
+    return null
+  }
+}
+
+const featureCollection = (selectedId: string | null, locale: Locale): GeoJSON.FeatureCollection => ({
   type: 'FeatureCollection',
   features: buildings.map((building) => ({
     type: 'Feature',
     geometry: { type: 'Point', coordinates: building.coordinates },
     properties: {
       id: building.id,
-      name: building.name,
+      name: getBuildingCopy(locale, building.id, building.name).name,
       selected: building.id === selectedId,
     },
   })),
@@ -56,12 +76,15 @@ const Icon = ({ name }: { name: 'search' | 'locate' | 'arrow' | 'close' | 'exter
 }
 
 function App() {
+  const locale = useMemo(getLocaleFromPath, [])
+  const t = translations[locale]
+  const restoredState = useMemo(readRestoredMapState, [])
   const mapContainer = useRef<HTMLDivElement>(null)
   const mapRef = useRef<MapLibreMap | null>(null)
   const userMarkerRef = useRef<maplibregl.Marker | null>(null)
-  const selectedIdRef = useRef<string | null>(null)
-  const [selectedId, setSelectedId] = useState<string | null>(null)
-  const [expanded, setExpanded] = useState(false)
+  const variantEffectReady = useRef(false)
+  const [selectedId, setSelectedId] = useState<string | null>(restoredState?.selectedId ?? null)
+  const [expanded, setExpanded] = useState(restoredState?.expanded ?? false)
   const [query, setQuery] = useState('')
   const [searchOpen, setSearchOpen] = useState(false)
   const [locating, setLocating] = useState(false)
@@ -70,12 +93,18 @@ function App() {
 
   const selected = buildings.find((building) => building.id === selectedId) ?? null
   const results = useMemo(() => {
-    const normalized = query.trim().toLocaleLowerCase()
+    const normalized = query.trim().toLocaleLowerCase(locale)
     if (!normalized) return buildings
-    return buildings.filter((building) =>
-      `${building.name} ${building.architectCredit}`.toLocaleLowerCase().includes(normalized),
-    )
-  }, [query])
+    return buildings.filter((building) => {
+      const copy = getBuildingCopy(locale, building.id, building.name)
+      return `${copy.name} ${copy.architectCredit} ${building.architects.join(' ')}`.toLocaleLowerCase(locale).includes(normalized)
+    })
+  }, [locale, query])
+
+  useEffect(() => {
+    document.documentElement.lang = locale
+    document.documentElement.dir = 'ltr'
+  }, [locale])
 
   useEffect(() => {
     if (!mapContainer.current || mapRef.current) return
@@ -83,60 +112,36 @@ function App() {
     const map = new maplibregl.Map({
       container: mapContainer.current,
       style: 'https://tiles.openfreemap.org/styles/liberty',
-      center: [103.879, 1.315],
-      zoom: 11.35,
+      center: restoredState?.center ?? defaultCenter,
+      zoom: restoredState?.zoom ?? defaultZoom,
+      bearing: restoredState?.bearing ?? 0,
+      pitch: restoredState?.pitch ?? 0,
       minZoom: 9,
       maxZoom: 18,
       attributionControl: false,
+      locale: t.mapControls,
     })
 
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'bottom-right')
     map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-left')
 
     map.on('load', () => {
-      map.addSource('buildings', { type: 'geojson', data: featureCollection(null) })
+      map.addSource('buildings', { type: 'geojson', data: featureCollection(selectedId, locale) })
       map.addLayer({
-        id: 'building-halo',
-        type: 'circle',
-        source: 'buildings',
-        paint: {
-          'circle-radius': ['case', ['get', 'selected'], 13, 10],
-          'circle-color': 'rgba(255,255,255,.72)',
-          'circle-blur': 0.45,
-        },
+        id: 'building-halo', type: 'circle', source: 'buildings',
+        paint: { 'circle-radius': ['case', ['get', 'selected'], 13, 10], 'circle-color': 'rgba(255,255,255,.72)', 'circle-blur': 0.45 },
       })
       map.addLayer({
-        id: 'building-points',
-        type: 'circle',
-        source: 'buildings',
-        paint: {
-          'circle-radius': ['case', ['get', 'selected'], 8, 6],
-          'circle-color': ['case', ['get', 'selected'], '#ef6f51', '#f7f1e7'],
-          'circle-stroke-color': '#282724',
-          'circle-stroke-width': 1.7,
-        },
+        id: 'building-points', type: 'circle', source: 'buildings',
+        paint: { 'circle-radius': ['case', ['get', 'selected'], 8, 6], 'circle-color': ['case', ['get', 'selected'], '#ef6f51', '#f7f1e7'], 'circle-stroke-color': '#282724', 'circle-stroke-width': 1.7 },
       })
       map.addLayer({
-        id: 'building-labels',
-        type: 'symbol',
-        source: 'buildings',
-        minzoom: 13.2,
-        layout: {
-          'text-field': ['get', 'name'],
-          'text-size': 12,
-          'text-offset': [0, 1.45],
-          'text-anchor': 'top',
-          'text-variable-anchor': ['top', 'bottom', 'left', 'right'],
-          'text-radial-offset': 0.75,
-        },
-        paint: {
-          'text-color': '#282724',
-          'text-halo-color': '#f8f4ec',
-          'text-halo-width': 2,
-        },
+        id: 'building-labels', type: 'symbol', source: 'buildings', minzoom: 13.2,
+        layout: { 'text-field': ['get', 'name'], 'text-size': 12, 'text-offset': [0, 1.45], 'text-anchor': 'top', 'text-variable-anchor': ['top', 'bottom', 'left', 'right'], 'text-radial-offset': 0.75 },
+        paint: { 'text-color': '#282724', 'text-halo-color': '#f8f4ec', 'text-halo-width': 2 },
       })
 
-      const selectAtPoint = (event: maplibregl.MapMouseEvent) => {
+      map.on('click', (event) => {
         const features = map.queryRenderedFeatures(event.point, { layers: ['building-points'] })
         const id = features[0]?.properties?.id as string | undefined
         if (id) {
@@ -144,8 +149,7 @@ function App() {
           setExpanded(false)
           setSearchOpen(false)
         }
-      }
-      map.on('click', selectAtPoint)
+      })
       map.on('mouseenter', 'building-points', () => { map.getCanvas().style.cursor = 'pointer' })
       map.on('mouseleave', 'building-points', () => { map.getCanvas().style.cursor = '' })
     })
@@ -156,19 +160,19 @@ function App() {
       map.remove()
       mapRef.current = null
     }
-  }, [])
+  }, [locale, restoredState])
 
   useEffect(() => {
-    selectedIdRef.current = selectedId
     const source = mapRef.current?.getSource('buildings') as GeoJSONSource | undefined
-    source?.setData(featureCollection(selectedId))
-  }, [selectedId])
+    source?.setData(featureCollection(selectedId, locale))
+  }, [locale, selectedId])
 
   useEffect(() => {
     const url = new URL(window.location.href)
     url.searchParams.set('ui', variant)
     window.history.replaceState({}, '', url)
-    setExpanded(false)
+    if (variantEffectReady.current) setExpanded(false)
+    variantEffectReady.current = true
   }, [variant])
 
   useEffect(() => {
@@ -181,14 +185,22 @@ function App() {
     setSelectedId(building.id)
     setExpanded(false)
     setSearchOpen(false)
-    if (focusMap) {
-      mapRef.current?.flyTo({ center: building.coordinates, zoom: Math.max(mapRef.current.getZoom(), 14), duration: 900 })
+    if (focusMap) mapRef.current?.flyTo({ center: building.coordinates, zoom: Math.max(mapRef.current.getZoom(), 14), duration: 900 })
+  }
+
+  const switchLanguage = () => {
+    const map = mapRef.current
+    if (!map) return
+    const center = map.getCenter()
+    const state: RestoredMapState = {
+      savedAt: Date.now(), center: [center.lng, center.lat], zoom: map.getZoom(), bearing: map.getBearing(), pitch: map.getPitch(), selectedId, expanded,
     }
+    window.sessionStorage.setItem(mapStateKey, JSON.stringify(state))
   }
 
   const locate = () => {
     if (!navigator.geolocation) {
-      setNotice('このブラウザでは現在地を利用できません。地図はそのまま使えます。')
+      setNotice(t.locationUnsupported)
       return
     }
     setLocating(true)
@@ -198,81 +210,78 @@ function App() {
         userMarkerRef.current?.remove()
         const element = document.createElement('div')
         element.className = 'user-location-marker'
-        element.setAttribute('aria-label', '現在地')
+        element.setAttribute('aria-label', t.currentLocation)
         userMarkerRef.current = new maplibregl.Marker({ element }).setLngLat(location).addTo(mapRef.current!)
         mapRef.current?.flyTo({ center: location, zoom: Math.max(mapRef.current.getZoom(), 14), duration: 900 })
         setLocating(false)
-        setNotice('現在地を地図に表示しました。')
+        setNotice(t.locationSuccess)
       },
-      () => {
-        setLocating(false)
-        setNotice('現在地を取得できませんでした。許可しなくても地図は使えます。')
-      },
+      () => { setLocating(false); setNotice(t.locationFailure) },
       { enableHighAccuracy: true, timeout: 10000 },
     )
   }
 
   return (
     <main className={`app variant-${variant}`}>
-      <div ref={mapContainer} className="map" aria-label="シンガポール建築マップ" />
+      <div ref={mapContainer} className="map" aria-label={t.mapLabel} />
 
       <header className="topbar">
-        <button className="brand" type="button" onClick={() => mapRef.current?.flyTo({ center: [103.879, 1.315], zoom: 11.35 })} aria-label="シンガポール全体へ戻る">
+        <button className="brand" type="button" onClick={() => mapRef.current?.flyTo({ center: defaultCenter, zoom: defaultZoom })} aria-label={t.resetMap}>
           <span className="brand-mark">SGM</span>
           <span className="brand-title">Architecture<br />Map</span>
         </button>
-        <div className="variant-switch" aria-label="操作方式を切り替える">
-          <span>UI</span>
-          <button className={variant === 'a' ? 'active' : ''} onClick={() => setVariant('a')} aria-pressed={variant === 'a'}>A</button>
-          <button className={variant === 'b' ? 'active' : ''} onClick={() => setVariant('b')} aria-pressed={variant === 'b'}>B</button>
+        <div className="top-controls">
+          <div className="variant-switch" aria-label={t.uiSwitcher}>
+            <span>UI</span>
+            <button className={variant === 'a' ? 'active' : ''} onClick={() => setVariant('a')} aria-pressed={variant === 'a'}>A</button>
+            <button className={variant === 'b' ? 'active' : ''} onClick={() => setVariant('b')} aria-pressed={variant === 'b'}>B</button>
+          </div>
+          <nav className="language-switch" aria-label={t.languageSwitcher}>
+            <a className={locale === 'en' ? 'active' : ''} href={localeHref('en')} hrefLang="en" aria-current={locale === 'en' ? 'page' : undefined} onClick={switchLanguage}>EN</a>
+            <a className={locale === 'ja' ? 'active' : ''} href={localeHref('ja')} hrefLang="ja" aria-current={locale === 'ja' ? 'page' : undefined} onClick={switchLanguage}>日本語</a>
+          </nav>
         </div>
       </header>
 
       <section className={`search-shell ${searchOpen ? 'open' : ''}`}>
         <div className="search-input-wrap">
           <Icon name="search" />
-          <input
-            value={query}
-            onChange={(event) => { setQuery(event.target.value); setSearchOpen(true) }}
-            onFocus={() => setSearchOpen(true)}
-            aria-label="建築名または設計者で検索"
-            placeholder="建築名・設計者を検索"
-          />
-          {searchOpen && <button className="icon-button small" onClick={() => { setSearchOpen(false); setQuery('') }} aria-label="検索を閉じる"><Icon name="close" /></button>}
+          <input value={query} onChange={(event) => { setQuery(event.target.value); setSearchOpen(true) }} onFocus={() => setSearchOpen(true)} aria-label={t.searchLabel} placeholder={t.searchPlaceholder} />
+          {searchOpen && <button className="icon-button small" onClick={() => { setSearchOpen(false); setQuery('') }} aria-label={t.closeSearch}><Icon name="close" /></button>}
         </div>
         {searchOpen && (
-          <div className="search-results" role="listbox" aria-label="検索結果">
-            <p className="result-count">{results.length ? `${results.length}件の建築` : '一致する建築はありません'}</p>
-            {results.map((building) => (
-              <button key={building.id} role="option" aria-selected={building.id === selectedId} onClick={() => chooseBuilding(building, true)}>
-                <span><strong>{building.name}</strong><small>{building.architects.join(' · ')}</small></span>
-                <Icon name="arrow" />
-              </button>
-            ))}
+          <div className="search-results" role="listbox" aria-label={t.searchResults}>
+            <p className="result-count">{results.length ? t.resultCount(results.length) : t.noResults}</p>
+            {results.map((building) => {
+              const copy = getBuildingCopy(locale, building.id, building.name)
+              return (
+                <button key={building.id} role="option" aria-selected={building.id === selectedId} onClick={() => chooseBuilding(building, true)}>
+                  <span><strong>{copy.name}</strong><small>{copy.architectCredit}</small></span>
+                  <Icon name="arrow" />
+                </button>
+              )
+            })}
           </div>
         )}
       </section>
 
-      <button className={`locate-button ${locating ? 'loading' : ''}`} onClick={locate} disabled={locating} aria-label="現在地を表示">
-        <Icon name="locate" /><span>{locating ? '取得中' : '現在地'}</span>
+      <button className={`locate-button ${locating ? 'loading' : ''}`} onClick={locate} disabled={locating} aria-label={t.locate}>
+        <Icon name="locate" /><span>{locating ? t.locating : t.locate}</span>
       </button>
+      <div className="data-note">{t.dataNote}</div>
 
-      <div className="data-note">7 places · 座標は暫定</div>
-
-      {selected && variant === 'a' && !expanded && (
-        <PreviewCard building={selected} onDetails={() => setExpanded(true)} onClose={() => setSelectedId(null)} />
-      )}
+      {selected && variant === 'a' && !expanded && <PreviewCard building={selected} locale={locale} t={t} onDetails={() => setExpanded(true)} onClose={() => setSelectedId(null)} />}
       {selected && variant === 'a' && expanded && (
-        <aside className="detail-panel panel-a" aria-label={`${selected.name}の詳細`}>
-          <DetailContent building={selected} onClose={() => setExpanded(false)} />
+        <aside className="detail-panel panel-a" aria-label={t.detailLabel(getBuildingCopy(locale, selected.id, selected.name).name)}>
+          <DetailContent building={selected} locale={locale} t={t} onClose={() => setExpanded(false)} />
         </aside>
       )}
       {selected && variant === 'b' && (
-        <aside className={`bottom-sheet ${expanded ? 'expanded' : ''}`} aria-label={`${selected.name}${expanded ? 'の詳細' : 'のプレビュー'}`}>
-          <button className="sheet-handle" onClick={() => setExpanded(!expanded)} aria-label={expanded ? '詳細をたたむ' : '詳細を開く'}><span /></button>
+        <aside className={`bottom-sheet ${expanded ? 'expanded' : ''}`} aria-label={(expanded ? t.detailLabel : t.sheetPreviewLabel)(getBuildingCopy(locale, selected.id, selected.name).name)}>
+          <button className="sheet-handle" onClick={() => setExpanded(!expanded)} aria-label={expanded ? t.collapseDetails : t.expandDetails}><span /></button>
           {expanded
-            ? <DetailContent building={selected} onClose={() => setExpanded(false)} sheet />
-            : <PreviewCard building={selected} onDetails={() => setExpanded(true)} onClose={() => setSelectedId(null)} sheet />}
+            ? <DetailContent building={selected} locale={locale} t={t} onClose={() => setExpanded(false)} sheet />
+            : <PreviewCard building={selected} locale={locale} t={t} onDetails={() => setExpanded(true)} onClose={() => setSelectedId(null)} sheet />}
         </aside>
       )}
 
@@ -281,49 +290,53 @@ function App() {
   )
 }
 
-function PreviewCard({ building, onDetails, onClose, sheet = false }: { building: Building; onDetails: () => void; onClose: () => void; sheet?: boolean }) {
+type LocalizedProps = { building: Building; locale: Locale; t: Translation }
+
+function PreviewCard({ building, locale, t, onDetails, onClose, sheet = false }: LocalizedProps & { onDetails: () => void; onClose: () => void; sheet?: boolean }) {
+  const copy = getBuildingCopy(locale, building.id, building.name)
   return (
-    <section className={sheet ? 'sheet-preview' : 'preview-card'} aria-label={`${building.name}のプレビュー`}>
-      <button className="icon-button close-preview" onClick={onClose} aria-label="選択を解除"><Icon name="close" /></button>
-      <p className="eyebrow">{typeLabels[building.buildingType]}</p>
-      <h1>{building.name}</h1>
-      <p className="architects">{building.architects.join(' · ')}</p>
-      <button className="primary-button" onClick={onDetails}>詳しく見る <Icon name="arrow" /></button>
+    <section className={sheet ? 'sheet-preview' : 'preview-card'} aria-label={t.previewLabel(copy.name)}>
+      <button className="icon-button close-preview" onClick={onClose} aria-label={t.clearSelection}><Icon name="close" /></button>
+      <p className="eyebrow">{t.types[building.buildingType]}</p>
+      <h1>{copy.name}</h1>
+      <p className="architects">{copy.architectCredit}</p>
+      <button className="primary-button" onClick={onDetails}>{t.viewDetails} <Icon name="arrow" /></button>
     </section>
   )
 }
 
-function DetailContent({ building, onClose, sheet = false }: { building: Building; onClose: () => void; sheet?: boolean }) {
+function DetailContent({ building, locale, t, onClose, sheet = false }: LocalizedProps & { onClose: () => void; sheet?: boolean }) {
+  const copy = getBuildingCopy(locale, building.id, building.name)
   const mapsQuery = encodeURIComponent(`${building.coordinates[1]},${building.coordinates[0]}`)
-  const searchQuery = encodeURIComponent(`${building.name} Singapore architecture`)
+  const searchQuery = encodeURIComponent(`${copy.name} Singapore architecture`)
   return (
     <div className="detail-content">
       <div className="detail-heading">
-        <button className="back-button" onClick={onClose}>{sheet ? 'たたむ' : '地図へ戻る'}</button>
+        <button className="back-button" onClick={onClose}>{sheet ? t.collapse : t.backToMap}</button>
         <span className="record-index">SGM / {String(buildings.indexOf(building) + 1).padStart(2, '0')}</span>
       </div>
-      <div className="image-placeholder" aria-label="写真は未掲載">
-        <span>PHOTO<br />NOT ADDED</span>
-        <small>写真は検証後に掲載予定</small>
+      <div className="image-placeholder" aria-label={t.photoNotPublished}>
+        <span>{t.photoOverlay}</span>
+        <small>{t.photoPlaceholder}</small>
       </div>
-      <p className="eyebrow">{typeLabels[building.buildingType]}</p>
-      <h1>{building.name}</h1>
+      <p className="eyebrow">{t.types[building.buildingType]}</p>
+      <h1>{copy.name}</h1>
       <dl className="facts">
-        <div><dt>設計</dt><dd>{building.architectCredit}</dd></div>
-        <div><dt>竣工</dt><dd>{building.completionYear ?? '未確認'}</dd></div>
-        <div><dt>用途</dt><dd>{typeLabels[building.buildingType]}</dd></div>
-        <div><dt>所在地</dt><dd>{building.address}</dd></div>
+        <div><dt>{t.design}</dt><dd>{copy.architectCredit}</dd></div>
+        <div><dt>{t.completion}</dt><dd>{building.completionYear ?? t.unverified}</dd></div>
+        <div><dt>{t.type}</dt><dd>{t.types[building.buildingType]}</dd></div>
+        <div><dt>{t.address}</dt><dd>{building.address}</dd></div>
       </dl>
-      <p className="verification-note">座標は代表点の暫定データです。公開アクセスの可否は未確認です。</p>
+      <p className="verification-note">{t.verificationNote}</p>
       <div className="actions">
         <a className="primary-button" href={`https://www.google.com/maps/search/?api=1&query=${mapsQuery}`} target="_blank" rel="noreferrer">Google Maps <Icon name="external" /></a>
-        <a href={`https://www.google.com/search?q=${searchQuery}`} target="_blank" rel="noreferrer">Google検索 <Icon name="external" /></a>
-        <a href={`https://www.google.com/search?tbm=isch&q=${searchQuery}`} target="_blank" rel="noreferrer">画像検索 <Icon name="external" /></a>
+        <a href={`https://www.google.com/search?q=${searchQuery}`} target="_blank" rel="noreferrer">{t.googleSearch} <Icon name="external" /></a>
+        <a href={`https://www.google.com/search?tbm=isch&q=${searchQuery}`} target="_blank" rel="noreferrer">{t.imageSearch} <Icon name="external" /></a>
       </div>
       <div className="sources">
-        <p>出典</p>
-        <a href={building.officialSource} target="_blank" rel="noreferrer">DP Architects 公式プロジェクト <Icon name="external" /></a>
-        <a href={building.coordinateSource} target="_blank" rel="noreferrer">座標情報 <Icon name="external" /></a>
+        <p>{t.sources}</p>
+        <a href={building.officialSource} target="_blank" rel="noreferrer">{t.officialProject} <Icon name="external" /></a>
+        <a href={building.coordinateSource} target="_blank" rel="noreferrer">{t.coordinateSource} <Icon name="external" /></a>
       </div>
     </div>
   )
