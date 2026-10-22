@@ -238,7 +238,7 @@ function App() {
           </div>
           <nav className="language-switch" aria-label={t.languageSwitcher}>
             <a className={locale === 'en' ? 'active' : ''} href={localeHref('en')} hrefLang="en" aria-current={locale === 'en' ? 'page' : undefined} onClick={switchLanguage}>EN</a>
-            <a className={locale === 'ja' ? 'active' : ''} href={localeHref('ja')} hrefLang="ja" aria-current={locale === 'ja' ? 'page' : undefined} onClick={switchLanguage}>日本語</a>
+            <a className={locale === 'ja' ? 'active' : ''} href={localeHref('ja')} hrefLang="ja" aria-current={locale === 'ja' ? 'page' : undefined} onClick={switchLanguage}>JP</a>
           </nav>
         </div>
       </header>
