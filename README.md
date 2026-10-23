@@ -22,6 +22,8 @@ npm run dev
 
 英語版の組版は、既存のTA × Visual Cを`?scale=current`、GOV.UKのモバイル向けType ScaleをHanken Groteskへ適用した案を`?scale=govuk`で比較できます。詳細は`docs/typography-scale-test-01.md`を参照してください。
 
+絞り込み比較は`?preset=1`（TA + Visual A + M3）、`?preset=2`（TA + Visual C + M3）、`?preset=3`（TA + Visual A + M1）で直接表示できます。3案にはGOV.UKのサイズ体系をHanken Grotesk向けに軽量化した`scale=sgm`を共通適用します。詳細は`docs/design-set-test-01.md`を参照してください。
+
 公開後は次のURLをiPhone Safariで開き、同じデータ・条件で比較します。
 
 - `https://<account>.github.io/<repository>/en/?ui=a`

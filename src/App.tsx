@@ -10,7 +10,8 @@ type Variant = 'a' | 'b'
 type FontChoice = 'a' | 'b' | 'c'
 type VisualChoice = 'baseline' | 'cartographic' | 'editorial' | 'civic'
 type MapChoice = 'm1' | 'm2' | 'm3'
-type TypeScaleChoice = 'current' | 'govuk'
+type TypeScaleChoice = 'current' | 'govuk' | 'sgm'
+type DesignPresetId = '1' | '2' | '3'
 
 type Building = {
   id: string
@@ -50,6 +51,7 @@ const fontChoices: Record<FontChoice, { name: string; checks: string[] }> = {
 const typeScaleChoices: Record<TypeScaleChoice, { code: string; name: string }> = {
   current: { code: 'CUR', name: 'Current SGM scale' },
   govuk: { code: 'GOV', name: 'GOV.UK mobile scale' },
+  sgm: { code: 'SGM', name: 'SGM light mobile scale' },
 }
 
 const visualChoices: Record<VisualChoice, { code: string; name: string; pin: { default: string; selected: string; stroke: string; halo: string } }> = {
@@ -107,22 +109,39 @@ const mapChoices: Record<MapChoice, MapPalette> = {
   },
 }
 
+const designPresets: Record<DesignPresetId, { name: string; visual: VisualChoice; map: MapChoice }> = {
+  '1': { name: 'Visual A + Map M3', visual: 'cartographic', map: 'm3' },
+  '2': { name: 'Visual C + Map M3', visual: 'civic', map: 'm3' },
+  '3': { name: 'Visual A + Map M1', visual: 'cartographic', map: 'm1' },
+}
+
+const getRequestedPreset = (): DesignPresetId | null => {
+  const value = new URLSearchParams(window.location.search).get('preset')
+  return value && value in designPresets ? value as DesignPresetId : null
+}
+
 const getInitialFontChoice = (): FontChoice => {
+  if (getRequestedPreset()) return 'a'
   const value = new URLSearchParams(window.location.search).get('font')
   return value && value in fontChoices ? value as FontChoice : 'a'
 }
 
 const getInitialVisualChoice = (): VisualChoice => {
+  const preset = getRequestedPreset()
+  if (preset) return designPresets[preset].visual
   const value = new URLSearchParams(window.location.search).get('visual')
   return value && value in visualChoices ? value as VisualChoice : 'civic'
 }
 
 const getInitialMapChoice = (): MapChoice => {
+  const preset = getRequestedPreset()
+  if (preset) return designPresets[preset].map
   const value = new URLSearchParams(window.location.search).get('map')
   return value && value in mapChoices ? value as MapChoice : 'm1'
 }
 
 const getInitialTypeScaleChoice = (): TypeScaleChoice => {
+  if (getRequestedPreset()) return 'sgm'
   const value = new URLSearchParams(window.location.search).get('scale')
   return value && value in typeScaleChoices ? value as TypeScaleChoice : 'current'
 }
@@ -190,8 +209,8 @@ const applyPinTheme = (map: MapLibreMap, choice: VisualChoice, mapChoice: MapCho
 
 const applyTypeScaleToMap = (map: MapLibreMap, choice: TypeScaleChoice) => {
   if (!map.getLayer('building-labels')) return
-  map.setLayoutProperty('building-labels', 'text-size', choice === 'govuk' ? 16 : 12)
-  map.setLayoutProperty('building-labels', 'text-offset', choice === 'govuk' ? [0, 1.25] : [0, 1.45])
+  map.setLayoutProperty('building-labels', 'text-size', choice === 'current' ? 12 : 16)
+  map.setLayoutProperty('building-labels', 'text-offset', choice === 'current' ? [0, 1.45] : [0, 1.25])
 }
 
 const readRestoredMapState = (): RestoredMapState | null => {
@@ -259,6 +278,14 @@ function App() {
   const [typeScaleChoice, setTypeScaleChoice] = useState<TypeScaleChoice>(() => typeScaleChoiceRef.current)
   const [fontsReady, setFontsReady] = useState(false)
   const [comparisonOpen, setComparisonOpen] = useState(false)
+
+  const activePreset = useMemo(() => {
+    if (fontChoice !== 'a' || typeScaleChoice !== 'sgm') return null
+    return (Object.keys(designPresets) as DesignPresetId[]).find((id) => {
+      const preset = designPresets[id]
+      return preset.visual === visualChoice && preset.map === mapChoice
+    }) ?? null
+  }, [fontChoice, mapChoice, typeScaleChoice, visualChoice])
 
   const selected = buildings.find((building) => building.id === selectedId) ?? null
   const results = useMemo(() => {
@@ -392,6 +419,13 @@ function App() {
   }, [variant])
 
   useEffect(() => {
+    const url = new URL(window.location.href)
+    if (activePreset) url.searchParams.set('preset', activePreset)
+    else url.searchParams.delete('preset')
+    window.history.replaceState({}, '', url)
+  }, [activePreset])
+
+  useEffect(() => {
     if (!notice) return
     const timer = window.setTimeout(() => setNotice(null), 4200)
     return () => window.clearTimeout(timer)
@@ -421,6 +455,15 @@ function App() {
 
   const chooseTypeScale = (choice: TypeScaleChoice) => {
     setTypeScaleChoice(choice)
+    setVariant('b')
+  }
+
+  const choosePreset = (id: DesignPresetId) => {
+    const preset = designPresets[id]
+    setFontChoice('a')
+    setTypeScaleChoice('sgm')
+    setVisualChoice(preset.visual)
+    setMapChoice(preset.map)
     setVariant('b')
   }
 
@@ -458,7 +501,7 @@ function App() {
   }
 
   return (
-    <main className={`app variant-${variant} visual-study visual-${visualChoice} map-${mapChoice} type-scale-${typeScaleChoice}${locale === 'en' ? ` typography-test font-${fontChoice}` : ''}`} data-font-ready={locale === 'en' ? fontsReady : undefined} data-visual={visualChoice} data-map-style={mapChoice} data-type-scale={typeScaleChoice}>
+    <main className={`app variant-${variant} visual-study visual-${visualChoice} map-${mapChoice} type-scale-${typeScaleChoice}${typeScaleChoice !== 'current' ? ' type-scale-large' : ''}${locale === 'en' ? ` typography-test font-${fontChoice}` : ''}`} data-font-ready={locale === 'en' ? fontsReady : undefined} data-visual={visualChoice} data-map-style={mapChoice} data-type-scale={typeScaleChoice} data-design-preset={activePreset ?? undefined}>
       <div ref={mapContainer} className="map" aria-label={t.mapLabel} />
 
       <header className="topbar">
@@ -480,11 +523,21 @@ function App() {
       </header>
 
       {locale === 'en' && (
-        <section className={`experiment-switch ${comparisonOpen ? 'open' : ''}`} aria-label="Typography, type scale, visual system, and map style comparison">
+        <section className={`experiment-switch ${comparisonOpen ? 'open' : ''}`} aria-label="Design set, typography, type scale, visual system, and map style comparison">
           <button className="experiment-toggle" type="button" onClick={() => setComparisonOpen(!comparisonOpen)} aria-expanded={comparisonOpen} aria-controls="experiment-options">
-            <span>COMPARE</span><strong>T{fontChoice.toUpperCase()} · {visualChoices[visualChoice].code} · {mapChoices[mapChoice].code} · {typeScaleChoices[typeScaleChoice].code}</strong>
+            <span>COMPARE</span><strong>{activePreset ? `P${activePreset}` : `T${fontChoice.toUpperCase()} · ${visualChoices[visualChoice].code} · ${mapChoices[mapChoice].code} · ${typeScaleChoices[typeScaleChoice].code}`}</strong>
           </button>
           <div className="experiment-options" id="experiment-options" hidden={!comparisonOpen}>
+            <div className="experiment-group experiment-presets">
+              <span className="experiment-label">DESIGN SET</span>
+              <div>
+                {(Object.keys(designPresets) as DesignPresetId[]).map((id) => (
+                  <button key={id} type="button" className={activePreset === id ? 'active' : ''} onClick={() => choosePreset(id)} aria-label={`Preset ${id}: TA + ${designPresets[id].name}`} aria-pressed={activePreset === id}>
+                    P{id}
+                  </button>
+                ))}
+              </div>
+            </div>
             <div className="experiment-group">
               <span className="experiment-label">TYPOGRAPHY</span>
               <div>
@@ -525,7 +578,7 @@ function App() {
                 ))}
               </div>
             </div>
-            <small>{fontChoices[fontChoice].name}<br />{typeScaleChoices[typeScaleChoice].name}<br />{visualChoices[visualChoice].name}<br />{mapChoices[mapChoice].name}<br />{fontsReady ? 'fonts ready' : 'loading fonts'}</small>
+            <small>{activePreset ? `Preset ${activePreset}: ${designPresets[activePreset].name}` : 'Custom combination'}<br />{fontChoices[fontChoice].name}<br />{typeScaleChoices[typeScaleChoice].name}<br />{visualChoices[visualChoice].name}<br />{mapChoices[mapChoice].name}<br />{fontsReady ? 'fonts ready' : 'loading fonts'}</small>
           </div>
         </section>
       )}
