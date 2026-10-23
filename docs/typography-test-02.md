@@ -8,7 +8,7 @@
 - `en/?ui=b&font=b` — Legible Character: Atkinson Hyperlegible Next
 - `en/?ui=b&font=c` — Editorial Restraint: DM Sans + Newsreader
 
-英語版右側の `TYPE TEST 02` スイッチでも切り替えられます。`TYPE TEST 01` の既存3案も同じスイッチ内に残しています。長い建築名は「Esplanade – Theatres on the Bay」、複数設計者は「People’s Park Complex」、数字は詳細の竣工年・住所・レコード番号で確認します。
+英語版右側の `TYPE TEST` スイッチでも切り替えられます。比較対象はA/B/Cの3案だけです。長い建築名は「Esplanade – Theatres on the Bay」、複数設計者は「People’s Park Complex」、数字は詳細の竣工年・住所・レコード番号で確認します。
 
 ## 読み込むファイル
 

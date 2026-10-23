@@ -7,8 +7,7 @@ import type { Locale, Translation } from './i18n'
 
 type Coordinates = [number, number]
 type Variant = 'a' | 'b'
-type FontChoice = '1' | '2' | '3' | 'a' | 'b' | 'c'
-type FontTest = '01' | '02'
+type FontChoice = 'a' | 'b' | 'c'
 
 type Building = {
   id: string
@@ -40,22 +39,14 @@ const defaultCenter: Coordinates = [103.879, 1.315]
 const defaultZoom = 11.35
 const mapStateKey = 'sgm-language-map-state'
 const fontChoices: Record<FontChoice, { name: string; checks: string[] }> = {
-  '1': { name: 'Friendly Utility', checks: ['400 16px "Apfel Grotezk"', '700 16px "Apfel Grotezk"'] },
-  '2': { name: 'Quiet Editorial', checks: ['400 16px "Instrument Sans"', '500 16px "Newsreader"', '600 16px "Instrument Sans"'] },
-  '3': { name: 'Civic Simplicity', checks: ['400 16px "Instrument Sans"', '600 16px "Instrument Sans"'] },
   'a': { name: 'Quiet Grotesque', checks: ['400 16px "Hanken Grotesk"', '500 16px "Hanken Grotesk"', '600 16px "Hanken Grotesk"'] },
   'b': { name: 'Legible Character', checks: ['400 16px "Atkinson Hyperlegible Next"', '500 16px "Atkinson Hyperlegible Next"', '600 16px "Atkinson Hyperlegible Next"'] },
   'c': { name: 'Editorial Restraint', checks: ['400 16px "DM Sans"', '500 16px "Newsreader"', '600 16px "DM Sans"'] },
 }
 
-const fontTests: Record<FontTest, FontChoice[]> = {
-  '01': ['1', '2', '3'],
-  '02': ['a', 'b', 'c'],
-}
-
 const getInitialFontChoice = (): FontChoice => {
   const value = new URLSearchParams(window.location.search).get('font')
-  return value && value in fontChoices ? value as FontChoice : '2'
+  return value && value in fontChoices ? value as FontChoice : 'a'
 }
 
 const readRestoredMapState = (): RestoredMapState | null => {
@@ -292,18 +283,14 @@ function App() {
 
       {locale === 'en' && (
         <section className="type-test-switch" aria-label="Typography comparison experiments">
-          {(Object.entries(fontTests) as [FontTest, FontChoice[]][]).map(([test, choices]) => (
-            <div className="type-test-group" key={test}>
-              <span className="type-test-label">TYPE TEST {test}</span>
-              <div className="type-test-options">
-                {choices.map((choice) => (
-                  <button key={choice} type="button" className={fontChoice === choice ? 'active' : ''} onClick={() => chooseFont(choice)} aria-label={`${choice.toUpperCase()}: ${fontChoices[choice].name}`} aria-pressed={fontChoice === choice}>
-                    {test === '01' ? choice.padStart(2, '0') : choice.toUpperCase()}
-                  </button>
-                ))}
-              </div>
-            </div>
-          ))}
+          <span className="type-test-label">TYPE TEST</span>
+          <div className="type-test-options">
+            {(Object.keys(fontChoices) as FontChoice[]).map((choice) => (
+              <button key={choice} type="button" className={fontChoice === choice ? 'active' : ''} onClick={() => chooseFont(choice)} aria-label={`${choice.toUpperCase()}: ${fontChoices[choice].name}`} aria-pressed={fontChoice === choice}>
+                {choice.toUpperCase()}
+              </button>
+            ))}
+          </div>
           <small>{fontChoices[fontChoice].name} · {fontsReady ? 'fonts ready' : 'loading fonts'}</small>
         </section>
       )}
