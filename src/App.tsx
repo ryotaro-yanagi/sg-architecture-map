@@ -8,6 +8,7 @@ import type { Locale, Translation } from './i18n'
 type Coordinates = [number, number]
 type Variant = 'a' | 'b'
 type FontChoice = 'a' | 'b' | 'c'
+type VisualChoice = 'baseline' | 'cartographic' | 'editorial' | 'civic'
 
 type Building = {
   id: string
@@ -44,9 +45,31 @@ const fontChoices: Record<FontChoice, { name: string; checks: string[] }> = {
   'c': { name: 'Editorial Restraint', checks: ['400 16px "DM Sans"', '500 16px "Newsreader"', '600 16px "DM Sans"'] },
 }
 
+const visualChoices: Record<VisualChoice, { code: string; name: string; pin: { default: string; selected: string; stroke: string; halo: string } }> = {
+  baseline: { code: 'BASE', name: 'Warm Utility', pin: { default: '#f7f1e7', selected: '#ef6f51', stroke: '#282724', halo: 'rgba(255,255,255,.72)' } },
+  cartographic: { code: 'A', name: 'Cartographic Clarity', pin: { default: '#326b5d', selected: '#d26f40', stroke: '#24342e', halo: 'rgba(250,250,247,.82)' } },
+  editorial: { code: 'B', name: 'Editorial Index', pin: { default: '#414a43', selected: '#a4513b', stroke: '#252b28', halo: 'rgba(248,246,240,.82)' } },
+  civic: { code: 'C', name: 'Civic Character', pin: { default: '#286c84', selected: '#d98048', stroke: '#26362f', halo: 'rgba(249,247,241,.82)' } },
+}
+
 const getInitialFontChoice = (): FontChoice => {
   const value = new URLSearchParams(window.location.search).get('font')
   return value && value in fontChoices ? value as FontChoice : 'a'
+}
+
+const getInitialVisualChoice = (): VisualChoice => {
+  const value = new URLSearchParams(window.location.search).get('visual')
+  return value && value in visualChoices ? value as VisualChoice : 'baseline'
+}
+
+const applyPinTheme = (map: MapLibreMap, choice: VisualChoice) => {
+  if (!map.getLayer('building-points')) return
+  const { pin } = visualChoices[choice]
+  map.setPaintProperty('building-halo', 'circle-color', pin.halo)
+  map.setPaintProperty('building-points', 'circle-color', ['case', ['get', 'selected'], pin.selected, pin.default])
+  map.setPaintProperty('building-points', 'circle-stroke-color', pin.stroke)
+  map.setPaintProperty('building-labels', 'text-color', pin.stroke)
+  map.setPaintProperty('building-labels', 'text-halo-color', pin.halo)
 }
 
 const readRestoredMapState = (): RestoredMapState | null => {
@@ -92,6 +115,7 @@ function App() {
   const restoredState = useMemo(readRestoredMapState, [])
   const mapContainer = useRef<HTMLDivElement>(null)
   const mapRef = useRef<MapLibreMap | null>(null)
+  const visualChoiceRef = useRef<VisualChoice>(getInitialVisualChoice())
   const userMarkerRef = useRef<maplibregl.Marker | null>(null)
   const variantEffectReady = useRef(false)
   const [selectedId, setSelectedId] = useState<string | null>(restoredState?.selectedId ?? null)
@@ -106,7 +130,9 @@ function App() {
     return locale === 'en' ? 'b' : 'a'
   })
   const [fontChoice, setFontChoice] = useState<FontChoice>(getInitialFontChoice)
+  const [visualChoice, setVisualChoice] = useState<VisualChoice>(() => visualChoiceRef.current)
   const [fontsReady, setFontsReady] = useState(false)
+  const [comparisonOpen, setComparisonOpen] = useState(false)
 
   const selected = buildings.find((building) => building.id === selectedId) ?? null
   const results = useMemo(() => {
@@ -173,6 +199,7 @@ function App() {
         layout: { 'text-field': ['get', 'name'], 'text-size': 12, 'text-offset': [0, 1.45], 'text-anchor': 'top', 'text-variable-anchor': ['top', 'bottom', 'left', 'right'], 'text-radial-offset': 0.75 },
         paint: { 'text-color': '#282724', 'text-halo-color': '#f8f4ec', 'text-halo-width': 2 },
       })
+      applyPinTheme(map, visualChoiceRef.current)
 
       map.on('click', (event) => {
         const features = map.queryRenderedFeatures(event.point, { layers: ['building-points'] })
@@ -201,6 +228,14 @@ function App() {
   }, [locale, selectedId])
 
   useEffect(() => {
+    visualChoiceRef.current = visualChoice
+    const url = new URL(window.location.href)
+    url.searchParams.set('visual', visualChoice)
+    window.history.replaceState({}, '', url)
+    if (mapRef.current) applyPinTheme(mapRef.current, visualChoice)
+  }, [visualChoice])
+
+  useEffect(() => {
     const url = new URL(window.location.href)
     url.searchParams.set('ui', variant)
     window.history.replaceState({}, '', url)
@@ -223,6 +258,11 @@ function App() {
 
   const chooseFont = (choice: FontChoice) => {
     setFontChoice(choice)
+    setVariant('b')
+  }
+
+  const chooseVisual = (choice: VisualChoice) => {
+    setVisualChoice(choice)
     setVariant('b')
   }
 
@@ -260,7 +300,7 @@ function App() {
   }
 
   return (
-    <main className={`app variant-${variant}${locale === 'en' ? ` typography-test font-${fontChoice}` : ''}`} data-font-ready={locale === 'en' ? fontsReady : undefined}>
+    <main className={`app variant-${variant} visual-study visual-${visualChoice}${locale === 'en' ? ` typography-test font-${fontChoice}` : ''}`} data-font-ready={locale === 'en' ? fontsReady : undefined} data-visual={visualChoice}>
       <div ref={mapContainer} className="map" aria-label={t.mapLabel} />
 
       <header className="topbar">
@@ -275,23 +315,40 @@ function App() {
             <button className={variant === 'b' ? 'active' : ''} onClick={() => setVariant('b')} aria-pressed={variant === 'b'}>B</button>
           </div>
           <nav className="language-switch" aria-label={t.languageSwitcher}>
-            <a className={locale === 'en' ? 'active' : ''} href={localeHref('en', { font: fontChoice })} hrefLang="en" aria-current={locale === 'en' ? 'page' : undefined} onClick={switchLanguage}>EN</a>
-            <a className={locale === 'ja' ? 'active' : ''} href={localeHref('ja', { font: fontChoice })} hrefLang="ja" aria-current={locale === 'ja' ? 'page' : undefined} onClick={switchLanguage}>JP</a>
+            <a className={locale === 'en' ? 'active' : ''} href={localeHref('en', { font: fontChoice, visual: visualChoice })} hrefLang="en" aria-current={locale === 'en' ? 'page' : undefined} onClick={switchLanguage}>EN</a>
+            <a className={locale === 'ja' ? 'active' : ''} href={localeHref('ja', { font: fontChoice, visual: visualChoice })} hrefLang="ja" aria-current={locale === 'ja' ? 'page' : undefined} onClick={switchLanguage}>JP</a>
           </nav>
         </div>
       </header>
 
       {locale === 'en' && (
-        <section className="type-test-switch" aria-label="Typography comparison experiments">
-          <span className="type-test-label">TYPE TEST</span>
-          <div className="type-test-options">
-            {(Object.keys(fontChoices) as FontChoice[]).map((choice) => (
-              <button key={choice} type="button" className={fontChoice === choice ? 'active' : ''} onClick={() => chooseFont(choice)} aria-label={`${choice.toUpperCase()}: ${fontChoices[choice].name}`} aria-pressed={fontChoice === choice}>
-                {choice.toUpperCase()}
-              </button>
-            ))}
+        <section className={`experiment-switch ${comparisonOpen ? 'open' : ''}`} aria-label="Typography and visual system comparison">
+          <button className="experiment-toggle" type="button" onClick={() => setComparisonOpen(!comparisonOpen)} aria-expanded={comparisonOpen} aria-controls="experiment-options">
+            <span>COMPARE</span><strong>T{fontChoice.toUpperCase()} · {visualChoices[visualChoice].code}</strong>
+          </button>
+          <div className="experiment-options" id="experiment-options" hidden={!comparisonOpen}>
+            <div className="experiment-group">
+              <span className="experiment-label">TYPOGRAPHY</span>
+              <div>
+                {(Object.keys(fontChoices) as FontChoice[]).map((choice) => (
+                  <button key={choice} type="button" className={fontChoice === choice ? 'active' : ''} onClick={() => chooseFont(choice)} aria-label={`Typography ${choice.toUpperCase()}: ${fontChoices[choice].name}`} aria-pressed={fontChoice === choice}>
+                    T{choice.toUpperCase()}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="experiment-group">
+              <span className="experiment-label">VISUAL SYSTEM</span>
+              <div>
+                {(Object.keys(visualChoices) as VisualChoice[]).map((choice) => (
+                  <button key={choice} type="button" className={visualChoice === choice ? 'active' : ''} onClick={() => chooseVisual(choice)} aria-label={`${visualChoices[choice].code}: ${visualChoices[choice].name}`} aria-pressed={visualChoice === choice}>
+                    {visualChoices[choice].code}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <small>{fontChoices[fontChoice].name}<br />{visualChoices[visualChoice].name}<br />{fontsReady ? 'fonts ready' : 'loading fonts'}</small>
           </div>
-          <small>{fontChoices[fontChoice].name} · {fontsReady ? 'fonts ready' : 'loading fonts'}</small>
         </section>
       )}
 
