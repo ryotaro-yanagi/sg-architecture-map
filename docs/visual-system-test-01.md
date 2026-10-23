@@ -33,4 +33,8 @@
 
 ## 隔離
 
-作業ブランチは`experiment/visual-system-test-01`。`main`へはマージせず、現行GitHub Pagesもデプロイしません。
+比較実験は`experiment/visual-system-test-01`、選定実装は`implementation/ta-c`へ隔離する。`main`へはまだマージしない。GitHub Pagesへの手動デプロイは、リポジトリの本番ブランチを変更せず実機確認するために使用する。
+
+## 現時点の選定実装
+
+2026-10-23時点の選定はTypography A（Hanken Grotesk）× Visual System C（Civic Character）。英語版で`font`または`visual`を指定しない場合の標準表示をTA × Cとする。比較UI、9通りの直接URL、Warm Utility baselineは引き続き利用できる。Visual B（Editorial Index）の落ち着いた構成は次回以降の調整時の参照として残す。

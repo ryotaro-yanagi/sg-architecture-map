@@ -59,7 +59,7 @@ const getInitialFontChoice = (): FontChoice => {
 
 const getInitialVisualChoice = (): VisualChoice => {
   const value = new URLSearchParams(window.location.search).get('visual')
-  return value && value in visualChoices ? value as VisualChoice : 'baseline'
+  return value && value in visualChoices ? value as VisualChoice : 'civic'
 }
 
 const applyPinTheme = (map: MapLibreMap, choice: VisualChoice) => {
