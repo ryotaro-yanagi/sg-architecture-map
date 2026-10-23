@@ -19,6 +19,9 @@
 .typography-test.font-1 { --font-ui: 'Apfel Grotezk', sans-serif; --font-display: 'Apfel Grotezk', sans-serif; }
 .typography-test.font-2 { --font-ui: 'Instrument Sans', sans-serif; --font-display: 'Newsreader', serif; }
 .typography-test.font-3 { --font-ui: 'Instrument Sans', sans-serif; --font-display: 'Instrument Sans', sans-serif; }
+.typography-test.font-a { --font-ui: 'Hanken Grotesk', sans-serif; --font-display: 'Hanken Grotesk', sans-serif; }
+.typography-test.font-b { --font-ui: 'Atkinson Hyperlegible Next', sans-serif; --font-display: 'Atkinson Hyperlegible Next', sans-serif; }
+.typography-test.font-c { --font-ui: 'DM Sans', sans-serif; --font-display: 'Newsreader', serif; }
 .typography-test { font-family: var(--font-ui); }
 
 * { box-sizing: border-box; }
@@ -49,7 +52,8 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid 
 .language-switch a.active { color: #fff; background: var(--ink); }
 .type-test-switch { position: absolute; z-index: 16; top: max(140px, calc(env(safe-area-inset-top) + 128px)); right: 14px; display: grid; gap: 4px; padding: 7px 8px; color: #fff; background: #282724; border: 1px solid rgba(255,255,255,.34); border-radius: 11px; box-shadow: 0 6px 24px rgba(45,42,36,.18); }
 .type-test-label { font-size: 8px; font-weight: 600; letter-spacing: .14em; }
-.type-test-switch div { display: flex; gap: 3px; }
+.type-test-group { display: grid; gap: 3px; }
+.type-test-options { display: flex; gap: 3px; }
 .type-test-switch button { width: 30px; height: 27px; padding: 0; color: rgba(255,255,255,.68); background: transparent; border: 1px solid rgba(255,255,255,.28); border-radius: 7px; font-size: 10px; cursor: pointer; }
 .type-test-switch button.active { color: var(--ink); background: var(--paper-strong); border-color: var(--paper-strong); }
 .type-test-switch small { max-width: 96px; color: rgba(255,255,255,.74); font-size: 8px; line-height: 1.25; }
