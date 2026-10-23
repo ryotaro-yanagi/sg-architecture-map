@@ -9,6 +9,7 @@ type Coordinates = [number, number]
 type Variant = 'a' | 'b'
 type FontChoice = 'a' | 'b' | 'c'
 type VisualChoice = 'baseline' | 'cartographic' | 'editorial' | 'civic'
+type MapChoice = 'm1' | 'm2' | 'm3'
 
 type Building = {
   id: string
@@ -52,6 +53,54 @@ const visualChoices: Record<VisualChoice, { code: string; name: string; pin: { d
   civic: { code: 'C', name: 'Civic Character', pin: { default: '#286c84', selected: '#d98048', stroke: '#26362f', halo: 'rgba(249,247,241,.82)' } },
 }
 
+type MapPalette = {
+  code: string
+  name: string
+  background: string
+  residential: string
+  park: string
+  wood: string
+  grass: string
+  water: string
+  waterway: string
+  roadMinor: string
+  roadMajor: string
+  roadMotorway: string
+  roadCasing: string
+  building: string
+  buildingOutline: string
+  label: string
+  labelSecondary: string
+  labelWater: string
+  labelHalo: string
+  poiOpacity: number
+  pin: { default: string; selected: string; stroke: string; halo: string; radius: number; selectedRadius: number }
+}
+
+const mapChoices: Record<MapChoice, MapPalette> = {
+  m1: {
+    code: 'M1', name: 'Balanced Context',
+    background: '#eef0ea', residential: '#e9ece7', park: '#dce8dc', wood: '#d4e2d4', grass: '#e2ebde',
+    water: '#d8e8eb', waterway: '#92b8c0', roadMinor: '#ffffff', roadMajor: '#f8f5ee', roadMotorway: '#f5eee1', roadCasing: '#c9d0ca',
+    building: '#e1ddd4', buildingOutline: '#cbc7bf', label: '#34453e', labelSecondary: '#66756e', labelWater: '#416d79', labelHalo: '#fafaf7', poiOpacity: .68,
+    pin: { default: '#286c84', selected: '#d98048', stroke: '#26362f', halo: 'rgba(249,247,241,.84)', radius: 6, selectedRadius: 8 },
+  },
+  m2: {
+    code: 'M2', name: 'Quiet Infrastructure',
+    background: '#eeeee9', residential: '#e9e9e4', park: '#dfe5dd', wood: '#d9e1d8', grass: '#e4e7df',
+    water: '#dce3e5', waterway: '#aebfc3', roadMinor: '#f8f7f2', roadMajor: '#f4f1e8', roadMotorway: '#eee8dc', roadCasing: '#b9c0ba',
+    building: '#dddcd7', buildingOutline: '#c6c6c0', label: '#303732', labelSecondary: '#626a64', labelWater: '#566d73', labelHalo: '#f8f6f0', poiOpacity: .5,
+    pin: { default: '#414a43', selected: '#a4513b', stroke: '#252b28', halo: 'rgba(248,246,240,.86)', radius: 5.5, selectedRadius: 8 },
+  },
+  m3: {
+    code: 'M3', name: 'Living Geography',
+    background: '#f0efe7', residential: '#ebece5', park: '#cfe3d3', wood: '#c5dcca', grass: '#dbe8d3',
+    water: '#cce5eb', waterway: '#75aebb', roadMinor: '#fffdf7', roadMajor: '#f8f0dd', roadMotorway: '#f1dfbf', roadCasing: '#b8c5bd',
+    building: '#dfd9cc', buildingOutline: '#c2bbae', label: '#26362f', labelSecondary: '#56685f', labelWater: '#245f77', labelHalo: '#f9f7f1', poiOpacity: .72,
+    pin: { default: '#1f6a82', selected: '#e07b3f', stroke: '#203a33', halo: 'rgba(249,247,241,.88)', radius: 6.5, selectedRadius: 9 },
+  },
+}
+
 const getInitialFontChoice = (): FontChoice => {
   const value = new URLSearchParams(window.location.search).get('font')
   return value && value in fontChoices ? value as FontChoice : 'a'
@@ -62,14 +111,70 @@ const getInitialVisualChoice = (): VisualChoice => {
   return value && value in visualChoices ? value as VisualChoice : 'civic'
 }
 
-const applyPinTheme = (map: MapLibreMap, choice: VisualChoice) => {
+const getInitialMapChoice = (): MapChoice => {
+  const value = new URLSearchParams(window.location.search).get('map')
+  return value && value in mapChoices ? value as MapChoice : 'm1'
+}
+
+const setPaint = (map: MapLibreMap, layerId: string, property: string, value: unknown) => {
+  if (map.getLayer(layerId)) map.setPaintProperty(layerId, property as never, value as never)
+}
+
+const applyMapTheme = (map: MapLibreMap, choice: MapChoice) => {
+  const palette = mapChoices[choice]
+
+  setPaint(map, 'background', 'background-color', palette.background)
+  setPaint(map, 'landuse_residential', 'fill-color', palette.residential)
+  setPaint(map, 'park', 'fill-color', palette.park)
+  setPaint(map, 'park_outline', 'line-color', palette.park)
+  setPaint(map, 'landcover_wood', 'fill-color', palette.wood)
+  setPaint(map, 'landcover_grass', 'fill-color', palette.grass)
+  ;['landuse_pitch', 'landuse_track', 'landuse_cemetery', 'landuse_hospital', 'landuse_school'].forEach((id) => setPaint(map, id, 'fill-color', palette.grass))
+  setPaint(map, 'water', 'fill-color', palette.water)
+  ;['waterway_tunnel', 'waterway_river', 'waterway_other'].forEach((id) => setPaint(map, id, 'line-color', palette.waterway))
+  setPaint(map, 'building', 'fill-color', palette.building)
+  setPaint(map, 'building', 'fill-outline-color', palette.buildingOutline)
+  setPaint(map, 'building-3d', 'fill-extrusion-color', palette.building)
+
+  const layers = map.getStyle().layers ?? []
+  layers.forEach((layer) => {
+    const id = layer.id
+    if (layer.type === 'line' && /^(road|bridge|tunnel)_/.test(id)) {
+      const color = id.includes('casing')
+        ? palette.roadCasing
+        : /(motorway|trunk_primary)/.test(id)
+          ? palette.roadMotorway
+          : /(secondary_tertiary|motorway_link|road_link)/.test(id)
+            ? palette.roadMajor
+            : palette.roadMinor
+      setPaint(map, id, 'line-color', color)
+    }
+
+    if (layer.type !== 'symbol' || id === 'building-labels') return
+    const isWater = id.startsWith('water')
+    const isPoi = id.startsWith('poi_')
+    const isSecondary = isPoi || /^(airport|railway|highway-name)/.test(id)
+    if (isWater || isSecondary || id.startsWith('label_')) {
+      setPaint(map, id, 'text-color', isWater ? palette.labelWater : isSecondary ? palette.labelSecondary : palette.label)
+      setPaint(map, id, 'text-halo-color', palette.labelHalo)
+      setPaint(map, id, 'text-halo-width', 1.25)
+      if (isPoi) setPaint(map, id, 'text-opacity', palette.poiOpacity)
+    }
+  })
+}
+
+const applyPinTheme = (map: MapLibreMap, choice: VisualChoice, mapChoice: MapChoice) => {
   if (!map.getLayer('building-points')) return
-  const { pin } = visualChoices[choice]
+  const pin = choice === 'civic'
+    ? mapChoices[mapChoice].pin
+    : { ...visualChoices[choice].pin, radius: 6, selectedRadius: 8 }
   map.setPaintProperty('building-halo', 'circle-color', pin.halo)
   map.setPaintProperty('building-points', 'circle-color', ['case', ['get', 'selected'], pin.selected, pin.default])
   map.setPaintProperty('building-points', 'circle-stroke-color', pin.stroke)
   map.setPaintProperty('building-labels', 'text-color', pin.stroke)
   map.setPaintProperty('building-labels', 'text-halo-color', pin.halo)
+  map.setPaintProperty('building-points', 'circle-radius', ['case', ['get', 'selected'], pin.selectedRadius, pin.radius])
+  map.setPaintProperty('building-halo', 'circle-radius', ['case', ['get', 'selected'], pin.selectedRadius + 5, pin.radius + 4])
 }
 
 const readRestoredMapState = (): RestoredMapState | null => {
@@ -116,6 +221,7 @@ function App() {
   const mapContainer = useRef<HTMLDivElement>(null)
   const mapRef = useRef<MapLibreMap | null>(null)
   const visualChoiceRef = useRef<VisualChoice>(getInitialVisualChoice())
+  const mapChoiceRef = useRef<MapChoice>(getInitialMapChoice())
   const userMarkerRef = useRef<maplibregl.Marker | null>(null)
   const variantEffectReady = useRef(false)
   const [selectedId, setSelectedId] = useState<string | null>(restoredState?.selectedId ?? null)
@@ -131,6 +237,7 @@ function App() {
   })
   const [fontChoice, setFontChoice] = useState<FontChoice>(getInitialFontChoice)
   const [visualChoice, setVisualChoice] = useState<VisualChoice>(() => visualChoiceRef.current)
+  const [mapChoice, setMapChoice] = useState<MapChoice>(() => mapChoiceRef.current)
   const [fontsReady, setFontsReady] = useState(false)
   const [comparisonOpen, setComparisonOpen] = useState(false)
 
@@ -199,7 +306,8 @@ function App() {
         layout: { 'text-field': ['get', 'name'], 'text-size': 12, 'text-offset': [0, 1.45], 'text-anchor': 'top', 'text-variable-anchor': ['top', 'bottom', 'left', 'right'], 'text-radial-offset': 0.75 },
         paint: { 'text-color': '#282724', 'text-halo-color': '#f8f4ec', 'text-halo-width': 2 },
       })
-      applyPinTheme(map, visualChoiceRef.current)
+      applyMapTheme(map, mapChoiceRef.current)
+      applyPinTheme(map, visualChoiceRef.current, mapChoiceRef.current)
 
       map.on('click', (event) => {
         const features = map.queryRenderedFeatures(event.point, { layers: ['building-points'] })
@@ -232,8 +340,20 @@ function App() {
     const url = new URL(window.location.href)
     url.searchParams.set('visual', visualChoice)
     window.history.replaceState({}, '', url)
-    if (mapRef.current) applyPinTheme(mapRef.current, visualChoice)
+    if (mapRef.current?.isStyleLoaded()) applyPinTheme(mapRef.current, visualChoice, mapChoiceRef.current)
   }, [visualChoice])
+
+  useEffect(() => {
+    mapChoiceRef.current = mapChoice
+    const url = new URL(window.location.href)
+    url.searchParams.set('map', mapChoice)
+    window.history.replaceState({}, '', url)
+    const map = mapRef.current
+    if (map?.isStyleLoaded()) {
+      applyMapTheme(map, mapChoice)
+      applyPinTheme(map, visualChoiceRef.current, mapChoice)
+    }
+  }, [mapChoice])
 
   useEffect(() => {
     const url = new URL(window.location.href)
@@ -263,6 +383,11 @@ function App() {
 
   const chooseVisual = (choice: VisualChoice) => {
     setVisualChoice(choice)
+    setVariant('b')
+  }
+
+  const chooseMap = (choice: MapChoice) => {
+    setMapChoice(choice)
     setVariant('b')
   }
 
@@ -300,7 +425,7 @@ function App() {
   }
 
   return (
-    <main className={`app variant-${variant} visual-study visual-${visualChoice}${locale === 'en' ? ` typography-test font-${fontChoice}` : ''}`} data-font-ready={locale === 'en' ? fontsReady : undefined} data-visual={visualChoice}>
+    <main className={`app variant-${variant} visual-study visual-${visualChoice} map-${mapChoice}${locale === 'en' ? ` typography-test font-${fontChoice}` : ''}`} data-font-ready={locale === 'en' ? fontsReady : undefined} data-visual={visualChoice} data-map-style={mapChoice}>
       <div ref={mapContainer} className="map" aria-label={t.mapLabel} />
 
       <header className="topbar">
@@ -315,16 +440,16 @@ function App() {
             <button className={variant === 'b' ? 'active' : ''} onClick={() => setVariant('b')} aria-pressed={variant === 'b'}>B</button>
           </div>
           <nav className="language-switch" aria-label={t.languageSwitcher}>
-            <a className={locale === 'en' ? 'active' : ''} href={localeHref('en', { font: fontChoice, visual: visualChoice })} hrefLang="en" aria-current={locale === 'en' ? 'page' : undefined} onClick={switchLanguage}>EN</a>
-            <a className={locale === 'ja' ? 'active' : ''} href={localeHref('ja', { font: fontChoice, visual: visualChoice })} hrefLang="ja" aria-current={locale === 'ja' ? 'page' : undefined} onClick={switchLanguage}>JP</a>
+            <a className={locale === 'en' ? 'active' : ''} href={localeHref('en', { font: fontChoice, visual: visualChoice, map: mapChoice })} hrefLang="en" aria-current={locale === 'en' ? 'page' : undefined} onClick={switchLanguage}>EN</a>
+            <a className={locale === 'ja' ? 'active' : ''} href={localeHref('ja', { font: fontChoice, visual: visualChoice, map: mapChoice })} hrefLang="ja" aria-current={locale === 'ja' ? 'page' : undefined} onClick={switchLanguage}>JP</a>
           </nav>
         </div>
       </header>
 
       {locale === 'en' && (
-        <section className={`experiment-switch ${comparisonOpen ? 'open' : ''}`} aria-label="Typography and visual system comparison">
+        <section className={`experiment-switch ${comparisonOpen ? 'open' : ''}`} aria-label="Typography, visual system, and map style comparison">
           <button className="experiment-toggle" type="button" onClick={() => setComparisonOpen(!comparisonOpen)} aria-expanded={comparisonOpen} aria-controls="experiment-options">
-            <span>COMPARE</span><strong>T{fontChoice.toUpperCase()} · {visualChoices[visualChoice].code}</strong>
+            <span>COMPARE</span><strong>T{fontChoice.toUpperCase()} · {visualChoices[visualChoice].code} · {mapChoices[mapChoice].code}</strong>
           </button>
           <div className="experiment-options" id="experiment-options" hidden={!comparisonOpen}>
             <div className="experiment-group">
@@ -347,7 +472,17 @@ function App() {
                 ))}
               </div>
             </div>
-            <small>{fontChoices[fontChoice].name}<br />{visualChoices[visualChoice].name}<br />{fontsReady ? 'fonts ready' : 'loading fonts'}</small>
+            <div className="experiment-group">
+              <span className="experiment-label">MAP STYLE</span>
+              <div>
+                {(Object.keys(mapChoices) as MapChoice[]).map((choice) => (
+                  <button key={choice} type="button" className={mapChoice === choice ? 'active' : ''} onClick={() => chooseMap(choice)} aria-label={`${mapChoices[choice].code}: ${mapChoices[choice].name}`} aria-pressed={mapChoice === choice}>
+                    {mapChoices[choice].code}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <small>{fontChoices[fontChoice].name}<br />{visualChoices[visualChoice].name}<br />{mapChoices[mapChoice].name}<br />{fontsReady ? 'fonts ready' : 'loading fonts'}</small>
           </div>
         </section>
       )}
