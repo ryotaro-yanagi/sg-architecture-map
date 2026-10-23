@@ -13,6 +13,12 @@ type MapChoice = 'm1' | 'm2' | 'm3'
 type TypeScaleChoice = 'current' | 'govuk' | 'sgm'
 type DesignPresetId = '1' | '2' | '3'
 type VisualLabChoice = 'baseline' | 'signal' | 'tile' | 'orbit'
+type ShapeAxis = 'square' | 'round'
+type MapColorAxis = 'neutral' | 'colored'
+type TypographyAxis = 'light' | 'bold'
+type PinAxis = 'minimal' | 'symbolic'
+type SurfaceAxis = 'flat' | 'layered'
+type SpacingAxis = 'compact' | 'spacious'
 
 type Building = {
   id: string
@@ -133,6 +139,55 @@ const visualLabChoices: Record<VisualLabChoice, { code: string; name: string; no
   signal: { code: 'S1', name: 'Signal Field', note: 'Directional pin · soft floating surface' },
   tile: { code: 'S2', name: 'Civic Tiles', note: 'Architectural tile · flat indexed surface' },
   orbit: { code: 'S3', name: 'Island Orbit', note: 'Ring marker · translucent connected surface' },
+}
+
+const visualAxisChoices = {
+  shape: {
+    label: 'UI SHAPE',
+    values: { square: 'Square', round: 'Round' } satisfies Record<ShapeAxis, string>,
+  },
+  mapColor: {
+    label: 'MAP COLOR',
+    values: { neutral: 'Neutral', colored: 'Colored' } satisfies Record<MapColorAxis, string>,
+  },
+  typography: {
+    label: 'TYPOGRAPHY',
+    values: { light: 'Light', bold: 'Bold' } satisfies Record<TypographyAxis, string>,
+  },
+  pin: {
+    label: 'MAP PIN',
+    values: { minimal: 'Minimal', symbolic: 'Symbolic' } satisfies Record<PinAxis, string>,
+  },
+  surface: {
+    label: 'SURFACE',
+    values: { flat: 'Flat', layered: 'Layered' } satisfies Record<SurfaceAxis, string>,
+  },
+  spacing: {
+    label: 'SPACING',
+    values: { compact: 'Compact', spacious: 'Spacious' } satisfies Record<SpacingAxis, string>,
+  },
+}
+
+const axisMapChoices: Record<MapColorAxis, MapPalette> = {
+  neutral: {
+    code: 'N', name: 'Neutral',
+    background: '#eceeeb', residential: '#e8eae7', park: '#dfe4dc', wood: '#d9dfd6', grass: '#e3e7df',
+    water: '#dce5e7', waterway: '#9aafb3', roadMinor: '#ffffff', roadMajor: '#f7f6f1', roadMotorway: '#f1eee5', roadCasing: '#bfc4bf',
+    building: '#dddcd7', buildingOutline: '#c4c4bf', label: '#2c3531', labelSecondary: '#626b66', labelWater: '#4e6870', labelHalo: '#fafbf8', poiOpacity: .52,
+    pin: { default: '#32423c', selected: '#c85f3f', stroke: '#1f2c27', halo: 'rgba(250,251,248,.9)', radius: 6, selectedRadius: 9 },
+  },
+  colored: {
+    code: 'C', name: 'Colored',
+    background: '#eef0e8', residential: '#e8ebe4', park: '#c9dfca', wood: '#bfd7c2', grass: '#d9e7d3',
+    water: '#bedde6', waterway: '#67a7b7', roadMinor: '#fffdf6', roadMajor: '#f8edd2', roadMotorway: '#f0d8a9', roadCasing: '#aebdb4',
+    building: '#ddd8cc', buildingOutline: '#bbb7ab', label: '#203b33', labelSecondary: '#526860', labelWater: '#216b7c', labelHalo: '#fafbf5', poiOpacity: .68,
+    pin: { default: '#17697c', selected: '#e5653f', stroke: '#183c3b', halo: 'rgba(250,251,245,.92)', radius: 6.5, selectedRadius: 9.5 },
+  },
+}
+
+const getAxisValue = <T extends string>(key: string, allowed: readonly T[], fallback: T): T => {
+  const value = new URLSearchParams(window.location.search).get(key) as T | null
+  return value && allowed.includes(value) ? value : fallback
 }
 
 const labMapChoices: Record<Exclude<VisualLabChoice, 'baseline'>, MapPalette> = {
@@ -266,13 +321,42 @@ const addLabMarkerImages = (map: MapLibreMap) => {
   })
 }
 
+const createAxisMarkerImage = (mapColor: MapColorAxis, selected: boolean): ImageData => {
+  const canvas = document.createElement('canvas')
+  canvas.width = 64
+  canvas.height = 64
+  const context = canvas.getContext('2d')!
+  const pin = axisMapChoices[mapColor].pin
+  context.save()
+  context.translate(32, 32)
+  context.rotate(Math.PI / 4)
+  context.beginPath()
+  context.roundRect(-20, -20, 40, 40, 5)
+  context.fillStyle = selected ? pin.selected : pin.default
+  context.fill()
+  context.lineWidth = 5
+  context.strokeStyle = pin.stroke
+  context.stroke()
+  context.restore()
+  context.fillStyle = selected ? pin.stroke : '#f9faf6'
+  context.fillRect(28, 27, 8, 17)
+  return context.getImageData(0, 0, 64, 64)
+}
+
+const addAxisMarkerImages = (map: MapLibreMap) => {
+  ;(['neutral', 'colored'] as const).forEach((mapColor) => {
+    ;([false, true] as const).forEach((selected) => {
+      const id = `sgm-axis-${mapColor}-${selected ? 'selected' : 'default'}`
+      if (!map.hasImage(id)) map.addImage(id, createAxisMarkerImage(mapColor, selected), { pixelRatio: 2 })
+    })
+  })
+}
+
 const setPaint = (map: MapLibreMap, layerId: string, property: string, value: unknown) => {
   if (map.getLayer(layerId)) map.setPaintProperty(layerId, property as never, value as never)
 }
 
-const applyMapTheme = (map: MapLibreMap, choice: MapChoice, labChoice: VisualLabChoice = 'baseline') => {
-  const palette = labChoice === 'baseline' ? mapChoices[choice] : labMapChoices[labChoice]
-
+const applyMapPalette = (map: MapLibreMap, palette: MapPalette) => {
   setPaint(map, 'background', 'background-color', palette.background)
   setPaint(map, 'landuse_residential', 'fill-color', palette.residential)
   setPaint(map, 'park', 'fill-color', palette.park)
@@ -311,6 +395,39 @@ const applyMapTheme = (map: MapLibreMap, choice: MapChoice, labChoice: VisualLab
       if (isPoi) setPaint(map, id, 'text-opacity', palette.poiOpacity)
     }
   })
+}
+
+const applyMapTheme = (map: MapLibreMap, choice: MapChoice, labChoice: VisualLabChoice = 'baseline') => {
+  applyMapPalette(map, labChoice === 'baseline' ? mapChoices[choice] : labMapChoices[labChoice])
+}
+
+const applyAxisMapTheme = (map: MapLibreMap, choice: MapColorAxis) => {
+  applyMapPalette(map, axisMapChoices[choice])
+}
+
+const applyAxisPinTheme = (map: MapLibreMap, pinChoice: PinAxis, mapColor: MapColorAxis) => {
+  if (!map.getLayer('building-points')) return
+  const pin = axisMapChoices[mapColor].pin
+  map.setPaintProperty('building-halo', 'circle-color', pin.halo)
+  map.setPaintProperty('building-halo', 'circle-radius', ['case', ['get', 'selected'], pin.selectedRadius + 6, pin.radius + 4])
+  map.setPaintProperty('building-halo', 'circle-opacity', ['case', ['get', 'selected'], .88, .62])
+  map.setPaintProperty('building-labels', 'text-color', pin.stroke)
+  map.setPaintProperty('building-labels', 'text-halo-color', pin.halo)
+
+  if (pinChoice === 'minimal') {
+    map.setPaintProperty('building-symbols', 'icon-opacity', 0)
+    map.setPaintProperty('building-points', 'circle-opacity', 1)
+    map.setPaintProperty('building-points', 'circle-stroke-opacity', 1)
+    map.setPaintProperty('building-points', 'circle-color', ['case', ['get', 'selected'], pin.selected, pin.default])
+    map.setPaintProperty('building-points', 'circle-stroke-color', pin.stroke)
+    map.setPaintProperty('building-points', 'circle-radius', ['case', ['get', 'selected'], pin.selectedRadius, pin.radius])
+    return
+  }
+
+  map.setPaintProperty('building-points', 'circle-opacity', 0)
+  map.setPaintProperty('building-points', 'circle-stroke-opacity', 0)
+  map.setPaintProperty('building-symbols', 'icon-opacity', 1)
+  map.setLayoutProperty('building-symbols', 'icon-image', ['case', ['get', 'selected'], `sgm-axis-${mapColor}-selected`, `sgm-axis-${mapColor}-default`])
 }
 
 const applyPinTheme = (map: MapLibreMap, choice: VisualChoice, mapChoice: MapChoice, labChoice: VisualLabChoice = 'baseline') => {
@@ -393,10 +510,12 @@ function App() {
   const restoredState = useMemo(readRestoredMapState, [])
   const mapContainer = useRef<HTMLDivElement>(null)
   const mapRef = useRef<MapLibreMap | null>(null)
-  const visualChoiceRef = useRef<VisualChoice>(getInitialVisualChoice())
-  const mapChoiceRef = useRef<MapChoice>(getInitialMapChoice())
-  const typeScaleChoiceRef = useRef<TypeScaleChoice>(getInitialTypeScaleChoice())
-  const visualLabChoiceRef = useRef<VisualLabChoice>(getInitialVisualLabChoice())
+  const visualChoiceRef = useRef<VisualChoice>('civic')
+  const mapChoiceRef = useRef<MapChoice>('m1')
+  const typeScaleChoiceRef = useRef<TypeScaleChoice>('sgm')
+  const visualLabChoiceRef = useRef<VisualLabChoice>('baseline')
+  const mapColorAxisRef = useRef<MapColorAxis>(getAxisValue('mapColor', ['neutral', 'colored'], 'neutral'))
+  const pinAxisRef = useRef<PinAxis>(getAxisValue('pin', ['minimal', 'symbolic'], 'minimal'))
   const userMarkerRef = useRef<maplibregl.Marker | null>(null)
   const [selectedId, setSelectedId] = useState<string | null>(getRequestedSelectedId() ?? restoredState?.selectedId ?? null)
   const [expanded, setExpanded] = useState(getRequestedExpandedState() ?? restoredState?.expanded ?? false)
@@ -410,21 +529,19 @@ function App() {
     return locale === 'en' ? 'b' : 'a'
   })
   const previousVariantRef = useRef<Variant>(variant)
-  const [fontChoice, setFontChoice] = useState<FontChoice>(getInitialFontChoice)
-  const [visualChoice, setVisualChoice] = useState<VisualChoice>(() => visualChoiceRef.current)
-  const [mapChoice, setMapChoice] = useState<MapChoice>(() => mapChoiceRef.current)
-  const [typeScaleChoice, setTypeScaleChoice] = useState<TypeScaleChoice>(() => typeScaleChoiceRef.current)
-  const [visualLabChoice, setVisualLabChoice] = useState<VisualLabChoice>(() => visualLabChoiceRef.current)
+  const fontChoice: FontChoice = 'a'
+  const visualChoice: VisualChoice = 'civic'
+  const mapChoice: MapChoice = 'm1'
+  const typeScaleChoice: TypeScaleChoice = 'sgm'
+  const visualLabChoice: VisualLabChoice = 'baseline'
+  const [shapeAxis, setShapeAxis] = useState<ShapeAxis>(() => getAxisValue('shape', ['square', 'round'], 'square'))
+  const [mapColorAxis, setMapColorAxis] = useState<MapColorAxis>(() => mapColorAxisRef.current)
+  const [typographyAxis, setTypographyAxis] = useState<TypographyAxis>(() => getAxisValue('weight', ['light', 'bold'], 'light'))
+  const [pinAxis, setPinAxis] = useState<PinAxis>(() => pinAxisRef.current)
+  const [surfaceAxis, setSurfaceAxis] = useState<SurfaceAxis>(() => getAxisValue('surface', ['flat', 'layered'], 'flat'))
+  const [spacingAxis, setSpacingAxis] = useState<SpacingAxis>(() => getAxisValue('spacing', ['compact', 'spacious'], 'compact'))
   const [fontsReady, setFontsReady] = useState(false)
   const [comparisonOpen, setComparisonOpen] = useState(false)
-
-  const activePreset = useMemo(() => {
-    if (visualLabChoice !== 'baseline' || fontChoice !== 'a' || typeScaleChoice !== 'sgm') return null
-    return (Object.keys(designPresets) as DesignPresetId[]).find((id) => {
-      const preset = designPresets[id]
-      return preset.visual === visualChoice && preset.map === mapChoice
-    }) ?? null
-  }, [fontChoice, mapChoice, typeScaleChoice, visualChoice, visualLabChoice])
 
   const selected = buildings.find((building) => building.id === selectedId) ?? null
   const results = useMemo(() => {
@@ -479,6 +596,7 @@ function App() {
     map.on('load', () => {
       map.addSource('buildings', { type: 'geojson', data: featureCollection(selectedId, locale) })
       addLabMarkerImages(map)
+      addAxisMarkerImages(map)
       map.addLayer({
         id: 'building-halo', type: 'circle', source: 'buildings',
         paint: { 'circle-radius': ['case', ['get', 'selected'], 13, 10], 'circle-color': 'rgba(255,255,255,.72)', 'circle-blur': 0.45 },
@@ -500,6 +618,8 @@ function App() {
       applyMapTheme(map, mapChoiceRef.current, visualLabChoiceRef.current)
       applyPinTheme(map, visualChoiceRef.current, mapChoiceRef.current, visualLabChoiceRef.current)
       applyTypeScaleToMap(map, locale === 'en' ? typeScaleChoiceRef.current : 'current')
+      applyAxisMapTheme(map, mapColorAxisRef.current)
+      applyAxisPinTheme(map, pinAxisRef.current, mapColorAxisRef.current)
 
       map.on('click', (event) => {
         const features = map.queryRenderedFeatures(event.point, { layers: ['building-symbols', 'building-points'] })
@@ -530,44 +650,48 @@ function App() {
   }, [locale, selectedId])
 
   useEffect(() => {
-    visualChoiceRef.current = visualChoice
+    mapColorAxisRef.current = mapColorAxis
     const url = new URL(window.location.href)
-    url.searchParams.set('visual', visualChoice)
-    window.history.replaceState({}, '', url)
-    if (mapRef.current?.isStyleLoaded()) applyPinTheme(mapRef.current, visualChoice, mapChoiceRef.current, visualLabChoiceRef.current)
-  }, [visualChoice])
-
-  useEffect(() => {
-    mapChoiceRef.current = mapChoice
-    const url = new URL(window.location.href)
-    url.searchParams.set('map', mapChoice)
+    url.searchParams.set('mapColor', mapColorAxis)
     window.history.replaceState({}, '', url)
     const map = mapRef.current
     if (map?.isStyleLoaded()) {
-      applyMapTheme(map, mapChoice, visualLabChoiceRef.current)
-      applyPinTheme(map, visualChoiceRef.current, mapChoice, visualLabChoiceRef.current)
+      applyAxisMapTheme(map, mapColorAxis)
+      applyAxisPinTheme(map, pinAxisRef.current, mapColorAxis)
     }
-  }, [mapChoice])
+  }, [mapColorAxis])
 
   useEffect(() => {
-    typeScaleChoiceRef.current = typeScaleChoice
+    pinAxisRef.current = pinAxis
     const url = new URL(window.location.href)
-    url.searchParams.set('scale', typeScaleChoice)
+    url.searchParams.set('pin', pinAxis)
     window.history.replaceState({}, '', url)
-    if (mapRef.current) applyTypeScaleToMap(mapRef.current, locale === 'en' ? typeScaleChoice : 'current')
-  }, [locale, typeScaleChoice])
+    if (mapRef.current?.isStyleLoaded()) applyAxisPinTheme(mapRef.current, pinAxis, mapColorAxisRef.current)
+  }, [pinAxis])
 
   useEffect(() => {
-    visualLabChoiceRef.current = visualLabChoice
     const url = new URL(window.location.href)
-    url.searchParams.set('lab', visualLabChoice)
+    url.searchParams.set('shape', shapeAxis)
     window.history.replaceState({}, '', url)
-    const map = mapRef.current
-    if (map?.isStyleLoaded()) {
-      applyMapTheme(map, mapChoiceRef.current, visualLabChoice)
-      applyPinTheme(map, visualChoiceRef.current, mapChoiceRef.current, visualLabChoice)
-    }
-  }, [visualLabChoice])
+  }, [shapeAxis])
+
+  useEffect(() => {
+    const url = new URL(window.location.href)
+    url.searchParams.set('weight', typographyAxis)
+    window.history.replaceState({}, '', url)
+  }, [typographyAxis])
+
+  useEffect(() => {
+    const url = new URL(window.location.href)
+    url.searchParams.set('surface', surfaceAxis)
+    window.history.replaceState({}, '', url)
+  }, [surfaceAxis])
+
+  useEffect(() => {
+    const url = new URL(window.location.href)
+    url.searchParams.set('spacing', spacingAxis)
+    window.history.replaceState({}, '', url)
+  }, [spacingAxis])
 
   useEffect(() => {
     const url = new URL(window.location.href)
@@ -576,13 +700,6 @@ function App() {
     if (previousVariantRef.current !== variant) setExpanded(false)
     previousVariantRef.current = variant
   }, [variant])
-
-  useEffect(() => {
-    const url = new URL(window.location.href)
-    if (activePreset) url.searchParams.set('preset', activePreset)
-    else url.searchParams.delete('preset')
-    window.history.replaceState({}, '', url)
-  }, [activePreset])
 
   useEffect(() => {
     if (!notice) return
@@ -595,49 +712,6 @@ function App() {
     setExpanded(false)
     setSearchOpen(false)
     if (focusMap) mapRef.current?.flyTo({ center: building.coordinates, zoom: Math.max(mapRef.current.getZoom(), 14), duration: 900 })
-  }
-
-  const chooseFont = (choice: FontChoice) => {
-    setVisualLabChoice('baseline')
-    setFontChoice(choice)
-    setVariant('b')
-  }
-
-  const chooseVisual = (choice: VisualChoice) => {
-    setVisualLabChoice('baseline')
-    setVisualChoice(choice)
-    setVariant('b')
-  }
-
-  const chooseMap = (choice: MapChoice) => {
-    setVisualLabChoice('baseline')
-    setMapChoice(choice)
-    setVariant('b')
-  }
-
-  const chooseTypeScale = (choice: TypeScaleChoice) => {
-    setVisualLabChoice('baseline')
-    setTypeScaleChoice(choice)
-    setVariant('b')
-  }
-
-  const choosePreset = (id: DesignPresetId) => {
-    const preset = designPresets[id]
-    setFontChoice('a')
-    setTypeScaleChoice('sgm')
-    setVisualChoice(preset.visual)
-    setMapChoice(preset.map)
-    setVisualLabChoice('baseline')
-    setVariant('b')
-  }
-
-  const chooseVisualLab = (choice: VisualLabChoice) => {
-    setVisualLabChoice(choice)
-    setFontChoice('a')
-    setTypeScaleChoice(choice === 'baseline' ? 'current' : 'sgm')
-    setVisualChoice('civic')
-    setMapChoice(choice === 'baseline' ? 'm1' : 'm3')
-    setVariant('b')
   }
 
   const switchLanguage = () => {
@@ -673,8 +747,26 @@ function App() {
     )
   }
 
+  const axisSettings = [
+    { key: 'shape', meta: visualAxisChoices.shape, current: shapeAxis, select: (value: string) => setShapeAxis(value as ShapeAxis) },
+    { key: 'mapColor', meta: visualAxisChoices.mapColor, current: mapColorAxis, select: (value: string) => setMapColorAxis(value as MapColorAxis) },
+    { key: 'typography', meta: visualAxisChoices.typography, current: typographyAxis, select: (value: string) => setTypographyAxis(value as TypographyAxis) },
+    { key: 'pin', meta: visualAxisChoices.pin, current: pinAxis, select: (value: string) => setPinAxis(value as PinAxis) },
+    { key: 'surface', meta: visualAxisChoices.surface, current: surfaceAxis, select: (value: string) => setSurfaceAxis(value as SurfaceAxis) },
+    { key: 'spacing', meta: visualAxisChoices.spacing, current: spacingAxis, select: (value: string) => setSpacingAxis(value as SpacingAxis) },
+  ]
+
   return (
-    <main className={`app variant-${variant} visual-study visual-${visualChoice} map-${mapChoice} lab-${visualLabChoice} type-scale-${typeScaleChoice}${typeScaleChoice !== 'current' ? ' type-scale-large' : ''}${locale === 'en' ? ` typography-test font-${fontChoice}` : ''}`} data-font-ready={locale === 'en' ? fontsReady : undefined} data-visual={visualChoice} data-map-style={mapChoice} data-type-scale={typeScaleChoice} data-visual-lab={visualLabChoice} data-design-preset={activePreset ?? undefined}>
+    <main
+      className={`app variant-${variant} visual-study visual-${visualChoice} map-${mapChoice} lab-${visualLabChoice} type-scale-${typeScaleChoice} type-scale-large typography-test font-${fontChoice} axis-shape-${shapeAxis} axis-map-${mapColorAxis} axis-type-${typographyAxis} axis-pin-${pinAxis} axis-surface-${surfaceAxis} axis-spacing-${spacingAxis}`}
+      data-font-ready={fontsReady}
+      data-shape={shapeAxis}
+      data-map-color={mapColorAxis}
+      data-typography={typographyAxis}
+      data-pin={pinAxis}
+      data-surface={surfaceAxis}
+      data-spacing={spacingAxis}
+    >
       <div ref={mapContainer} className="map" aria-label={t.mapLabel} />
 
       <header className="topbar">
@@ -689,80 +781,34 @@ function App() {
             <button className={variant === 'b' ? 'active' : ''} onClick={() => setVariant('b')} aria-pressed={variant === 'b'}>B</button>
           </div>
           <nav className="language-switch" aria-label={t.languageSwitcher}>
-            <a className={locale === 'en' ? 'active' : ''} href={localeHref('en', { font: fontChoice, visual: visualChoice, map: mapChoice, scale: typeScaleChoice, lab: visualLabChoice, selected: selectedId ?? '', sheet: expanded ? 'expanded' : 'compact' })} hrefLang="en" aria-current={locale === 'en' ? 'page' : undefined} onClick={switchLanguage}>EN</a>
-            <a className={locale === 'ja' ? 'active' : ''} href={localeHref('ja', { font: fontChoice, visual: visualChoice, map: mapChoice, scale: typeScaleChoice, lab: visualLabChoice, selected: selectedId ?? '', sheet: expanded ? 'expanded' : 'compact' })} hrefLang="ja" aria-current={locale === 'ja' ? 'page' : undefined} onClick={switchLanguage}>JP</a>
+            <a className={locale === 'en' ? 'active' : ''} href={localeHref('en', { ui: variant, shape: shapeAxis, mapColor: mapColorAxis, weight: typographyAxis, pin: pinAxis, surface: surfaceAxis, spacing: spacingAxis, selected: selectedId ?? '', sheet: expanded ? 'expanded' : 'compact' })} hrefLang="en" aria-current={locale === 'en' ? 'page' : undefined} onClick={switchLanguage}>EN</a>
+            <a className={locale === 'ja' ? 'active' : ''} href={localeHref('ja', { ui: variant, shape: shapeAxis, mapColor: mapColorAxis, weight: typographyAxis, pin: pinAxis, surface: surfaceAxis, spacing: spacingAxis, selected: selectedId ?? '', sheet: expanded ? 'expanded' : 'compact' })} hrefLang="ja" aria-current={locale === 'ja' ? 'page' : undefined} onClick={switchLanguage}>JP</a>
           </nav>
         </div>
       </header>
 
       {locale === 'en' && (
-        <section className={`experiment-switch ${comparisonOpen ? 'open' : ''}`} aria-label="Design set, typography, type scale, visual system, and map style comparison">
+        <section className={`experiment-switch ${comparisonOpen ? 'open' : ''}`} aria-label="Independent visual system comparison axes">
           <button className="experiment-toggle" type="button" onClick={() => setComparisonOpen(!comparisonOpen)} aria-expanded={comparisonOpen} aria-controls="experiment-options">
-            <span>VISUAL LAB</span><strong>{visualLabChoices[visualLabChoice].code}</strong>
+            <span>SYSTEM LAB</span>
+            <strong>{`${shapeAxis === 'square' ? 'SQ' : 'RD'} · ${mapColorAxis === 'neutral' ? 'N' : 'C'} · ${typographyAxis === 'light' ? 'L' : 'B'} · ${pinAxis === 'minimal' ? 'M' : 'S'} · ${surfaceAxis === 'flat' ? 'F' : 'L'} · ${spacingAxis === 'compact' ? 'C' : 'S'}`}</strong>
           </button>
           <div className="experiment-options" id="experiment-options" hidden={!comparisonOpen}>
-            <div className="experiment-group experiment-lab">
-              <span className="experiment-label">VISUAL LANGUAGE</span>
-              <div>
-                {(Object.keys(visualLabChoices) as VisualLabChoice[]).map((choice) => (
-                  <button key={choice} type="button" className={visualLabChoice === choice ? 'active' : ''} onClick={() => chooseVisualLab(choice)} aria-label={`${visualLabChoices[choice].code}: ${visualLabChoices[choice].name}`} aria-pressed={visualLabChoice === choice}>
-                    {visualLabChoices[choice].code}
-                  </button>
-                ))}
-              </div>
-              <small>{visualLabChoices[visualLabChoice].name}<br />{visualLabChoices[visualLabChoice].note}</small>
-            </div>
-            <div className="experiment-group experiment-presets">
-              <span className="experiment-label">DESIGN SET</span>
-              <div>
-                {(Object.keys(designPresets) as DesignPresetId[]).map((id) => (
-                  <button key={id} type="button" className={activePreset === id ? 'active' : ''} onClick={() => choosePreset(id)} aria-label={`Preset ${id}: TA + ${designPresets[id].name}`} aria-pressed={activePreset === id}>
-                    P{id}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div className="experiment-group">
-              <span className="experiment-label">TYPOGRAPHY</span>
-              <div>
-                {(Object.keys(fontChoices) as FontChoice[]).map((choice) => (
-                  <button key={choice} type="button" className={fontChoice === choice ? 'active' : ''} onClick={() => chooseFont(choice)} aria-label={`Typography ${choice.toUpperCase()}: ${fontChoices[choice].name}`} aria-pressed={fontChoice === choice}>
-                    T{choice.toUpperCase()}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div className="experiment-group">
-              <span className="experiment-label">TYPE SCALE</span>
-              <div>
-                {(Object.keys(typeScaleChoices) as TypeScaleChoice[]).map((choice) => (
-                  <button key={choice} type="button" className={typeScaleChoice === choice ? 'active' : ''} onClick={() => chooseTypeScale(choice)} aria-label={`${typeScaleChoices[choice].code}: ${typeScaleChoices[choice].name}`} aria-pressed={typeScaleChoice === choice}>
-                    {typeScaleChoices[choice].code}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div className="experiment-group">
-              <span className="experiment-label">VISUAL SYSTEM</span>
-              <div>
-                {(Object.keys(visualChoices) as VisualChoice[]).map((choice) => (
-                  <button key={choice} type="button" className={visualChoice === choice ? 'active' : ''} onClick={() => chooseVisual(choice)} aria-label={`${visualChoices[choice].code}: ${visualChoices[choice].name}`} aria-pressed={visualChoice === choice}>
-                    {visualChoices[choice].code}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div className="experiment-group">
-              <span className="experiment-label">MAP STYLE</span>
-              <div>
-                {(Object.keys(mapChoices) as MapChoice[]).map((choice) => (
-                  <button key={choice} type="button" className={mapChoice === choice ? 'active' : ''} onClick={() => chooseMap(choice)} aria-label={`${mapChoices[choice].code}: ${mapChoices[choice].name}`} aria-pressed={mapChoice === choice}>
-                    {mapChoices[choice].code}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <small>{visualLabChoice === 'baseline' ? (activePreset ? `Preset ${activePreset}: ${designPresets[activePreset].name}` : 'Historic custom combination') : 'Integrated lab proposal'}<br />{fontChoices[fontChoice].name}<br />{typeScaleChoices[typeScaleChoice].name}<br />{visualLabChoice === 'baseline' ? visualChoices[visualChoice].name : visualLabChoices[visualLabChoice].name}<br />{visualLabChoice === 'baseline' ? mapChoices[mapChoice].name : labMapChoices[visualLabChoice].name}<br />{fontsReady ? 'fonts ready' : 'loading fonts'}</small>
+            {axisSettings.map(({ key, meta, current, select }) => {
+              return (
+                <div className="experiment-group" key={key}>
+                  <span className="experiment-label">{meta.label}</span>
+                  <div>
+                    {Object.entries(meta.values).map(([value, label]) => (
+                      <button key={value} type="button" className={current === value ? 'active' : ''} onClick={() => select(value)} aria-pressed={current === value}>
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )
+            })}
+            <small>Each axis changes independently.<br />{fontsReady ? 'Hanken Grotesk ready' : 'Loading Hanken Grotesk'}</small>
           </div>
         </section>
       )}
