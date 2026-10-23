@@ -182,9 +182,12 @@ export const getLocaleFromPath = (): Locale => /\/ja(?:\/|$)/.test(window.locati
 export const getBuildingCopy = (locale: Locale, id: string, fallbackName: string): BuildingCopy =>
   buildingCopy[locale][id] ?? { name: fallbackName, architectCredit: '' }
 
-export const localeHref = (locale: Locale): string => {
+export const localeHref = (locale: Locale, updates: Record<string, string> = {}): string => {
   const basePath = window.location.pathname
     .replace(/\/(en|ja)\/?(?:index\.html)?$/, '/')
     .replace(/\/index\.html$/, '/')
-  return `${basePath}${locale}/${window.location.search}${window.location.hash}`
+  const search = new URLSearchParams(window.location.search)
+  Object.entries(updates).forEach(([key, value]) => search.set(key, value))
+  const query = search.toString()
+  return `${basePath}${locale}/${query ? `?${query}` : ''}${window.location.hash}`
 }

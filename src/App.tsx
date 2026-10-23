@@ -7,6 +7,7 @@ import type { Locale, Translation } from './i18n'
 
 type Coordinates = [number, number]
 type Variant = 'a' | 'b'
+type FontChoice = '1' | '2' | '3'
 
 type Building = {
   id: string
@@ -37,6 +38,16 @@ const buildings = data.buildings as unknown as Building[]
 const defaultCenter: Coordinates = [103.879, 1.315]
 const defaultZoom = 11.35
 const mapStateKey = 'sgm-language-map-state'
+const fontChoices: Record<FontChoice, { name: string; checks: string[] }> = {
+  '1': { name: 'Friendly Utility', checks: ['400 16px "Apfel Grotezk"', '700 16px "Apfel Grotezk"'] },
+  '2': { name: 'Quiet Editorial', checks: ['400 16px "Instrument Sans"', '500 16px "Newsreader"', '600 16px "Instrument Sans"'] },
+  '3': { name: 'Civic Simplicity', checks: ['400 16px "Instrument Sans"', '600 16px "Instrument Sans"'] },
+}
+
+const getInitialFontChoice = (): FontChoice => {
+  const value = new URLSearchParams(window.location.search).get('font')
+  return value === '1' || value === '2' || value === '3' ? value : '2'
+}
 
 const readRestoredMapState = (): RestoredMapState | null => {
   try {
@@ -89,7 +100,13 @@ function App() {
   const [searchOpen, setSearchOpen] = useState(false)
   const [locating, setLocating] = useState(false)
   const [notice, setNotice] = useState<string | null>(null)
-  const [variant, setVariant] = useState<Variant>(() => new URLSearchParams(window.location.search).get('ui') === 'b' ? 'b' : 'a')
+  const [variant, setVariant] = useState<Variant>(() => {
+    const requested = new URLSearchParams(window.location.search).get('ui')
+    if (requested === 'a' || requested === 'b') return requested
+    return locale === 'en' ? 'b' : 'a'
+  })
+  const [fontChoice, setFontChoice] = useState<FontChoice>(getInitialFontChoice)
+  const [fontsReady, setFontsReady] = useState(false)
 
   const selected = buildings.find((building) => building.id === selectedId) ?? null
   const results = useMemo(() => {
@@ -105,6 +122,22 @@ function App() {
     document.documentElement.lang = locale
     document.documentElement.dir = 'ltr'
   }, [locale])
+
+  useEffect(() => {
+    if (locale !== 'en') return
+    const url = new URL(window.location.href)
+    url.searchParams.set('font', fontChoice)
+    window.history.replaceState({}, '', url)
+    setFontsReady(false)
+    const checks = fontChoices[fontChoice].checks
+    const fontSet = document.fonts
+    const loading = typeof fontSet.load === 'function'
+      ? Promise.all(checks.map((font) => fontSet.load(font)))
+      : fontSet.ready
+    void loading.then(() => {
+      setFontsReady(checks.every((font) => document.fonts.check(font)))
+    })
+  }, [fontChoice, locale])
 
   useEffect(() => {
     if (!mapContainer.current || mapRef.current) return
@@ -188,6 +221,11 @@ function App() {
     if (focusMap) mapRef.current?.flyTo({ center: building.coordinates, zoom: Math.max(mapRef.current.getZoom(), 14), duration: 900 })
   }
 
+  const chooseFont = (choice: FontChoice) => {
+    setFontChoice(choice)
+    setVariant('b')
+  }
+
   const switchLanguage = () => {
     const map = mapRef.current
     if (!map) return
@@ -222,7 +260,7 @@ function App() {
   }
 
   return (
-    <main className={`app variant-${variant}`}>
+    <main className={`app variant-${variant}${locale === 'en' ? ` typography-test font-${fontChoice}` : ''}`} data-font-ready={locale === 'en' ? fontsReady : undefined}>
       <div ref={mapContainer} className="map" aria-label={t.mapLabel} />
 
       <header className="topbar">
@@ -237,11 +275,25 @@ function App() {
             <button className={variant === 'b' ? 'active' : ''} onClick={() => setVariant('b')} aria-pressed={variant === 'b'}>B</button>
           </div>
           <nav className="language-switch" aria-label={t.languageSwitcher}>
-            <a className={locale === 'en' ? 'active' : ''} href={localeHref('en')} hrefLang="en" aria-current={locale === 'en' ? 'page' : undefined} onClick={switchLanguage}>EN</a>
-            <a className={locale === 'ja' ? 'active' : ''} href={localeHref('ja')} hrefLang="ja" aria-current={locale === 'ja' ? 'page' : undefined} onClick={switchLanguage}>JP</a>
+            <a className={locale === 'en' ? 'active' : ''} href={localeHref('en', { font: fontChoice })} hrefLang="en" aria-current={locale === 'en' ? 'page' : undefined} onClick={switchLanguage}>EN</a>
+            <a className={locale === 'ja' ? 'active' : ''} href={localeHref('ja', { font: fontChoice })} hrefLang="ja" aria-current={locale === 'ja' ? 'page' : undefined} onClick={switchLanguage}>JP</a>
           </nav>
         </div>
       </header>
+
+      {locale === 'en' && (
+        <section className="type-test-switch" aria-label="Typography Test 01">
+          <span className="type-test-label">TYPE TEST 01</span>
+          <div>
+            {(Object.keys(fontChoices) as FontChoice[]).map((choice) => (
+              <button key={choice} type="button" className={fontChoice === choice ? 'active' : ''} onClick={() => chooseFont(choice)} aria-label={`${choice}: ${fontChoices[choice].name}`} aria-pressed={fontChoice === choice}>
+                {choice.padStart(2, '0')}
+              </button>
+            ))}
+          </div>
+          <small>{fontChoices[fontChoice].name} · {fontsReady ? 'fonts ready' : 'loading fonts'}</small>
+        </section>
+      )}
 
       <section className={`search-shell ${searchOpen ? 'open' : ''}`}>
         <div className="search-input-wrap">
