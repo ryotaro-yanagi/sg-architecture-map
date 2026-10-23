@@ -24,6 +24,8 @@ npm run dev
 
 絞り込み比較は`?preset=1`（TA + Visual A + M3）、`?preset=2`（TA + Visual C + M3）、`?preset=3`（TA + Visual A + M1）で直接表示できます。3案にはGOV.UKのサイズ体系をHanken Grotesk向けに軽量化した`scale=sgm`を共通適用します。詳細は`docs/design-set-test-01.md`を参照してください。
 
+Visual Language Labは、現行基準を`?lab=baseline`、新しい統合案を`?lab=signal`、`?lab=tile`、`?lab=orbit`で比較します。ピン、地図色、surface、geometry、motionを一体として切り替え、B Bottom Sheetと機能・データは共通です。詳細は`docs/visual-language-lab-01.md`を参照してください。
+
 公開後は次のURLをiPhone Safariで開き、同じデータ・条件で比較します。
 
 - `https://<account>.github.io/<repository>/en/?ui=a`

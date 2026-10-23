@@ -12,6 +12,7 @@ type VisualChoice = 'baseline' | 'cartographic' | 'editorial' | 'civic'
 type MapChoice = 'm1' | 'm2' | 'm3'
 type TypeScaleChoice = 'current' | 'govuk' | 'sgm'
 type DesignPresetId = '1' | '2' | '3'
+type VisualLabChoice = 'baseline' | 'signal' | 'tile' | 'orbit'
 
 type Building = {
   id: string
@@ -42,6 +43,18 @@ const buildings = data.buildings as unknown as Building[]
 const defaultCenter: Coordinates = [103.879, 1.315]
 const defaultZoom = 11.35
 const mapStateKey = 'sgm-language-map-state'
+
+const getRequestedSelectedId = (): string | null => {
+  const value = new URLSearchParams(window.location.search).get('selected')
+  return value && buildings.some((building) => building.id === value) ? value : null
+}
+
+const getRequestedExpandedState = (): boolean | null => {
+  const value = new URLSearchParams(window.location.search).get('sheet')
+  if (value === 'expanded') return true
+  if (value === 'compact') return false
+  return null
+}
 const fontChoices: Record<FontChoice, { name: string; checks: string[] }> = {
   'a': { name: 'Quiet Grotesque', checks: ['400 16px "Hanken Grotesk"', '500 16px "Hanken Grotesk"', '600 16px "Hanken Grotesk"', '700 16px "Hanken Grotesk"'] },
   'b': { name: 'Legible Character', checks: ['400 16px "Atkinson Hyperlegible Next"', '500 16px "Atkinson Hyperlegible Next"', '600 16px "Atkinson Hyperlegible Next"'] },
@@ -115,18 +128,55 @@ const designPresets: Record<DesignPresetId, { name: string; visual: VisualChoice
   '3': { name: 'Visual A + Map M1', visual: 'cartographic', map: 'm1' },
 }
 
+const visualLabChoices: Record<VisualLabChoice, { code: string; name: string; note: string }> = {
+  baseline: { code: 'BL', name: 'Current baseline', note: 'TA + Civic Character + Balanced Context' },
+  signal: { code: 'S1', name: 'Signal Field', note: 'Directional pin · soft floating surface' },
+  tile: { code: 'S2', name: 'Civic Tiles', note: 'Architectural tile · flat indexed surface' },
+  orbit: { code: 'S3', name: 'Island Orbit', note: 'Ring marker · translucent connected surface' },
+}
+
+const labMapChoices: Record<Exclude<VisualLabChoice, 'baseline'>, MapPalette> = {
+  signal: {
+    code: 'S1', name: 'Signal Field',
+    background: '#e9efe9', residential: '#e4ebe5', park: '#c9ddcc', wood: '#bfd5c4', grass: '#d7e5d5',
+    water: '#bedce2', waterway: '#72a8b3', roadMinor: '#fffdf4', roadMajor: '#f7edd6', roadMotorway: '#efdcb5', roadCasing: '#aebdb4',
+    building: '#d9d9ce', buildingOutline: '#bfc2b7', label: '#183a33', labelSecondary: '#557068', labelWater: '#266b7a', labelHalo: '#f7fbf5', poiOpacity: .62,
+    pin: { default: '#146b5c', selected: '#e45d3f', stroke: '#11352f', halo: 'rgba(247,251,245,.9)', radius: 7, selectedRadius: 10 },
+  },
+  tile: {
+    code: 'S2', name: 'Civic Tiles',
+    background: '#f2eee3', residential: '#ece8de', park: '#d8dfce', wood: '#ced9c8', grass: '#e1e4d5',
+    water: '#d5e5e5', waterway: '#8eafb0', roadMinor: '#fffdf7', roadMajor: '#f7f0df', roadMotorway: '#f0dfbd', roadCasing: '#b9b4a8',
+    building: '#ded8cc', buildingOutline: '#bdb5a8', label: '#252b28', labelSecondary: '#62665e', labelWater: '#3b6d73', labelHalo: '#faf7ef', poiOpacity: .54,
+    pin: { default: '#244d42', selected: '#f0b83d', stroke: '#172b26', halo: 'rgba(250,247,239,.94)', radius: 7, selectedRadius: 10 },
+  },
+  orbit: {
+    code: 'S3', name: 'Island Orbit',
+    background: '#edf1e8', residential: '#e7ece3', park: '#c5ddbf', wood: '#b9d2b6', grass: '#d7e6cf',
+    water: '#b8dbe6', waterway: '#62a2b5', roadMinor: '#fffdf4', roadMajor: '#f8edcf', roadMotorway: '#f2d9a7', roadCasing: '#afbeb2',
+    building: '#ded9cb', buildingOutline: '#bcb8aa', label: '#183731', labelSecondary: '#4c675f', labelWater: '#1d667c', labelHalo: '#f7faef', poiOpacity: .68,
+    pin: { default: '#195f78', selected: '#ef7041', stroke: '#153a3b', halo: 'rgba(247,250,239,.88)', radius: 7, selectedRadius: 10 },
+  },
+}
+
 const getRequestedPreset = (): DesignPresetId | null => {
   const value = new URLSearchParams(window.location.search).get('preset')
   return value && value in designPresets ? value as DesignPresetId : null
 }
 
+const getRequestedVisualLab = (): VisualLabChoice => {
+  const value = new URLSearchParams(window.location.search).get('lab')
+  return value && value in visualLabChoices ? value as VisualLabChoice : 'baseline'
+}
+
 const getInitialFontChoice = (): FontChoice => {
-  if (getRequestedPreset()) return 'a'
+  if (getRequestedPreset() || getRequestedVisualLab() !== 'baseline') return 'a'
   const value = new URLSearchParams(window.location.search).get('font')
   return value && value in fontChoices ? value as FontChoice : 'a'
 }
 
 const getInitialVisualChoice = (): VisualChoice => {
+  if (getRequestedVisualLab() !== 'baseline') return 'civic'
   const preset = getRequestedPreset()
   if (preset) return designPresets[preset].visual
   const value = new URLSearchParams(window.location.search).get('visual')
@@ -134,6 +184,7 @@ const getInitialVisualChoice = (): VisualChoice => {
 }
 
 const getInitialMapChoice = (): MapChoice => {
+  if (getRequestedVisualLab() !== 'baseline') return 'm3'
   const preset = getRequestedPreset()
   if (preset) return designPresets[preset].map
   const value = new URLSearchParams(window.location.search).get('map')
@@ -141,17 +192,86 @@ const getInitialMapChoice = (): MapChoice => {
 }
 
 const getInitialTypeScaleChoice = (): TypeScaleChoice => {
-  if (getRequestedPreset()) return 'sgm'
+  if (getRequestedPreset() || getRequestedVisualLab() !== 'baseline') return 'sgm'
   const value = new URLSearchParams(window.location.search).get('scale')
   return value && value in typeScaleChoices ? value as TypeScaleChoice : 'current'
+}
+
+const getInitialVisualLabChoice = (): VisualLabChoice => {
+  return getRequestedVisualLab()
+}
+
+const createMarkerImage = (choice: Exclude<VisualLabChoice, 'baseline'>, selected: boolean): ImageData => {
+  const canvas = document.createElement('canvas')
+  canvas.width = 64
+  canvas.height = 64
+  const context = canvas.getContext('2d')!
+  const palette = labMapChoices[choice].pin
+  context.lineJoin = 'round'
+  context.lineCap = 'round'
+
+  if (choice === 'signal') {
+    context.beginPath()
+    context.moveTo(32, 5)
+    context.lineTo(57, 32)
+    context.lineTo(32, 59)
+    context.lineTo(7, 32)
+    context.closePath()
+    context.fillStyle = selected ? palette.selected : palette.default
+    context.fill()
+    context.lineWidth = 5
+    context.strokeStyle = palette.stroke
+    context.stroke()
+    context.beginPath()
+    context.arc(32, 32, selected ? 8 : 6, 0, Math.PI * 2)
+    context.fillStyle = '#fffaf0'
+    context.fill()
+  } else if (choice === 'tile') {
+    context.save()
+    context.translate(32, 32)
+    context.rotate(Math.PI / 4)
+    context.beginPath()
+    context.roundRect(-20, -20, 40, 40, 7)
+    context.fillStyle = selected ? palette.selected : palette.default
+    context.fill()
+    context.lineWidth = 5
+    context.strokeStyle = palette.stroke
+    context.stroke()
+    context.restore()
+    context.fillStyle = selected ? palette.stroke : '#f8f4e9'
+    context.fillRect(28, 27, 8, 16)
+  } else {
+    context.beginPath()
+    context.arc(31, 33, 20, 0, Math.PI * 2)
+    context.fillStyle = '#f8faef'
+    context.fill()
+    context.lineWidth = selected ? 8 : 6
+    context.strokeStyle = selected ? palette.selected : palette.default
+    context.stroke()
+    context.beginPath()
+    context.arc(selected ? 31 : 42, selected ? 33 : 22, selected ? 7 : 5, 0, Math.PI * 2)
+    context.fillStyle = selected ? palette.default : palette.selected
+    context.fill()
+  }
+
+  return context.getImageData(0, 0, 64, 64)
+}
+
+const addLabMarkerImages = (map: MapLibreMap) => {
+  ;(['signal', 'tile', 'orbit'] as const).forEach((choice) => {
+    ;([false, true] as const).forEach((selected) => {
+      const id = `sgm-${choice}-${selected ? 'selected' : 'default'}`
+      if (!map.hasImage(id)) map.addImage(id, createMarkerImage(choice, selected), { pixelRatio: 2 })
+    })
+  })
 }
 
 const setPaint = (map: MapLibreMap, layerId: string, property: string, value: unknown) => {
   if (map.getLayer(layerId)) map.setPaintProperty(layerId, property as never, value as never)
 }
 
-const applyMapTheme = (map: MapLibreMap, choice: MapChoice) => {
-  const palette = mapChoices[choice]
+const applyMapTheme = (map: MapLibreMap, choice: MapChoice, labChoice: VisualLabChoice = 'baseline') => {
+  const palette = labChoice === 'baseline' ? mapChoices[choice] : labMapChoices[labChoice]
 
   setPaint(map, 'background', 'background-color', palette.background)
   setPaint(map, 'landuse_residential', 'fill-color', palette.residential)
@@ -193,11 +313,28 @@ const applyMapTheme = (map: MapLibreMap, choice: MapChoice) => {
   })
 }
 
-const applyPinTheme = (map: MapLibreMap, choice: VisualChoice, mapChoice: MapChoice) => {
+const applyPinTheme = (map: MapLibreMap, choice: VisualChoice, mapChoice: MapChoice, labChoice: VisualLabChoice = 'baseline') => {
   if (!map.getLayer('building-points')) return
+  if (labChoice !== 'baseline') {
+    const pin = labMapChoices[labChoice].pin
+    map.setPaintProperty('building-halo', 'circle-color', pin.halo)
+    map.setPaintProperty('building-halo', 'circle-radius', ['case', ['get', 'selected'], pin.selectedRadius + 8, pin.radius + 5])
+    map.setPaintProperty('building-halo', 'circle-opacity', ['case', ['get', 'selected'], .9, .58])
+    map.setPaintProperty('building-points', 'circle-opacity', 0)
+    map.setPaintProperty('building-points', 'circle-stroke-opacity', 0)
+    map.setPaintProperty('building-symbols', 'icon-opacity', 1)
+    map.setLayoutProperty('building-symbols', 'icon-image', ['case', ['get', 'selected'], `sgm-${labChoice}-selected`, `sgm-${labChoice}-default`])
+    map.setPaintProperty('building-labels', 'text-color', pin.stroke)
+    map.setPaintProperty('building-labels', 'text-halo-color', pin.halo)
+    return
+  }
   const pin = choice === 'civic'
     ? mapChoices[mapChoice].pin
     : { ...visualChoices[choice].pin, radius: 6, selectedRadius: 8 }
+  map.setPaintProperty('building-symbols', 'icon-opacity', 0)
+  map.setPaintProperty('building-points', 'circle-opacity', 1)
+  map.setPaintProperty('building-points', 'circle-stroke-opacity', 1)
+  map.setPaintProperty('building-halo', 'circle-opacity', 1)
   map.setPaintProperty('building-halo', 'circle-color', pin.halo)
   map.setPaintProperty('building-points', 'circle-color', ['case', ['get', 'selected'], pin.selected, pin.default])
   map.setPaintProperty('building-points', 'circle-stroke-color', pin.stroke)
@@ -259,10 +396,10 @@ function App() {
   const visualChoiceRef = useRef<VisualChoice>(getInitialVisualChoice())
   const mapChoiceRef = useRef<MapChoice>(getInitialMapChoice())
   const typeScaleChoiceRef = useRef<TypeScaleChoice>(getInitialTypeScaleChoice())
+  const visualLabChoiceRef = useRef<VisualLabChoice>(getInitialVisualLabChoice())
   const userMarkerRef = useRef<maplibregl.Marker | null>(null)
-  const variantEffectReady = useRef(false)
-  const [selectedId, setSelectedId] = useState<string | null>(restoredState?.selectedId ?? null)
-  const [expanded, setExpanded] = useState(restoredState?.expanded ?? false)
+  const [selectedId, setSelectedId] = useState<string | null>(getRequestedSelectedId() ?? restoredState?.selectedId ?? null)
+  const [expanded, setExpanded] = useState(getRequestedExpandedState() ?? restoredState?.expanded ?? false)
   const [query, setQuery] = useState('')
   const [searchOpen, setSearchOpen] = useState(false)
   const [locating, setLocating] = useState(false)
@@ -272,20 +409,22 @@ function App() {
     if (requested === 'a' || requested === 'b') return requested
     return locale === 'en' ? 'b' : 'a'
   })
+  const previousVariantRef = useRef<Variant>(variant)
   const [fontChoice, setFontChoice] = useState<FontChoice>(getInitialFontChoice)
   const [visualChoice, setVisualChoice] = useState<VisualChoice>(() => visualChoiceRef.current)
   const [mapChoice, setMapChoice] = useState<MapChoice>(() => mapChoiceRef.current)
   const [typeScaleChoice, setTypeScaleChoice] = useState<TypeScaleChoice>(() => typeScaleChoiceRef.current)
+  const [visualLabChoice, setVisualLabChoice] = useState<VisualLabChoice>(() => visualLabChoiceRef.current)
   const [fontsReady, setFontsReady] = useState(false)
   const [comparisonOpen, setComparisonOpen] = useState(false)
 
   const activePreset = useMemo(() => {
-    if (fontChoice !== 'a' || typeScaleChoice !== 'sgm') return null
+    if (visualLabChoice !== 'baseline' || fontChoice !== 'a' || typeScaleChoice !== 'sgm') return null
     return (Object.keys(designPresets) as DesignPresetId[]).find((id) => {
       const preset = designPresets[id]
       return preset.visual === visualChoice && preset.map === mapChoice
     }) ?? null
-  }, [fontChoice, mapChoice, typeScaleChoice, visualChoice])
+  }, [fontChoice, mapChoice, typeScaleChoice, visualChoice, visualLabChoice])
 
   const selected = buildings.find((building) => building.id === selectedId) ?? null
   const results = useMemo(() => {
@@ -339,6 +478,7 @@ function App() {
 
     map.on('load', () => {
       map.addSource('buildings', { type: 'geojson', data: featureCollection(selectedId, locale) })
+      addLabMarkerImages(map)
       map.addLayer({
         id: 'building-halo', type: 'circle', source: 'buildings',
         paint: { 'circle-radius': ['case', ['get', 'selected'], 13, 10], 'circle-color': 'rgba(255,255,255,.72)', 'circle-blur': 0.45 },
@@ -348,16 +488,21 @@ function App() {
         paint: { 'circle-radius': ['case', ['get', 'selected'], 8, 6], 'circle-color': ['case', ['get', 'selected'], '#ef6f51', '#f7f1e7'], 'circle-stroke-color': '#282724', 'circle-stroke-width': 1.7 },
       })
       map.addLayer({
+        id: 'building-symbols', type: 'symbol', source: 'buildings',
+        layout: { 'icon-image': 'sgm-signal-default', 'icon-size': 1, 'icon-allow-overlap': true, 'icon-ignore-placement': true },
+        paint: { 'icon-opacity': 0 },
+      })
+      map.addLayer({
         id: 'building-labels', type: 'symbol', source: 'buildings', minzoom: 13.2,
         layout: { 'text-field': ['get', 'name'], 'text-size': 12, 'text-offset': [0, 1.45], 'text-anchor': 'top', 'text-variable-anchor': ['top', 'bottom', 'left', 'right'], 'text-radial-offset': 0.75 },
         paint: { 'text-color': '#282724', 'text-halo-color': '#f8f4ec', 'text-halo-width': 2 },
       })
-      applyMapTheme(map, mapChoiceRef.current)
-      applyPinTheme(map, visualChoiceRef.current, mapChoiceRef.current)
+      applyMapTheme(map, mapChoiceRef.current, visualLabChoiceRef.current)
+      applyPinTheme(map, visualChoiceRef.current, mapChoiceRef.current, visualLabChoiceRef.current)
       applyTypeScaleToMap(map, locale === 'en' ? typeScaleChoiceRef.current : 'current')
 
       map.on('click', (event) => {
-        const features = map.queryRenderedFeatures(event.point, { layers: ['building-points'] })
+        const features = map.queryRenderedFeatures(event.point, { layers: ['building-symbols', 'building-points'] })
         const id = features[0]?.properties?.id as string | undefined
         if (id) {
           setSelectedId(id)
@@ -367,6 +512,8 @@ function App() {
       })
       map.on('mouseenter', 'building-points', () => { map.getCanvas().style.cursor = 'pointer' })
       map.on('mouseleave', 'building-points', () => { map.getCanvas().style.cursor = '' })
+      map.on('mouseenter', 'building-symbols', () => { map.getCanvas().style.cursor = 'pointer' })
+      map.on('mouseleave', 'building-symbols', () => { map.getCanvas().style.cursor = '' })
     })
 
     mapRef.current = map
@@ -387,7 +534,7 @@ function App() {
     const url = new URL(window.location.href)
     url.searchParams.set('visual', visualChoice)
     window.history.replaceState({}, '', url)
-    if (mapRef.current?.isStyleLoaded()) applyPinTheme(mapRef.current, visualChoice, mapChoiceRef.current)
+    if (mapRef.current?.isStyleLoaded()) applyPinTheme(mapRef.current, visualChoice, mapChoiceRef.current, visualLabChoiceRef.current)
   }, [visualChoice])
 
   useEffect(() => {
@@ -397,8 +544,8 @@ function App() {
     window.history.replaceState({}, '', url)
     const map = mapRef.current
     if (map?.isStyleLoaded()) {
-      applyMapTheme(map, mapChoice)
-      applyPinTheme(map, visualChoiceRef.current, mapChoice)
+      applyMapTheme(map, mapChoice, visualLabChoiceRef.current)
+      applyPinTheme(map, visualChoiceRef.current, mapChoice, visualLabChoiceRef.current)
     }
   }, [mapChoice])
 
@@ -411,11 +558,23 @@ function App() {
   }, [locale, typeScaleChoice])
 
   useEffect(() => {
+    visualLabChoiceRef.current = visualLabChoice
+    const url = new URL(window.location.href)
+    url.searchParams.set('lab', visualLabChoice)
+    window.history.replaceState({}, '', url)
+    const map = mapRef.current
+    if (map?.isStyleLoaded()) {
+      applyMapTheme(map, mapChoiceRef.current, visualLabChoice)
+      applyPinTheme(map, visualChoiceRef.current, mapChoiceRef.current, visualLabChoice)
+    }
+  }, [visualLabChoice])
+
+  useEffect(() => {
     const url = new URL(window.location.href)
     url.searchParams.set('ui', variant)
     window.history.replaceState({}, '', url)
-    if (variantEffectReady.current) setExpanded(false)
-    variantEffectReady.current = true
+    if (previousVariantRef.current !== variant) setExpanded(false)
+    previousVariantRef.current = variant
   }, [variant])
 
   useEffect(() => {
@@ -439,21 +598,25 @@ function App() {
   }
 
   const chooseFont = (choice: FontChoice) => {
+    setVisualLabChoice('baseline')
     setFontChoice(choice)
     setVariant('b')
   }
 
   const chooseVisual = (choice: VisualChoice) => {
+    setVisualLabChoice('baseline')
     setVisualChoice(choice)
     setVariant('b')
   }
 
   const chooseMap = (choice: MapChoice) => {
+    setVisualLabChoice('baseline')
     setMapChoice(choice)
     setVariant('b')
   }
 
   const chooseTypeScale = (choice: TypeScaleChoice) => {
+    setVisualLabChoice('baseline')
     setTypeScaleChoice(choice)
     setVariant('b')
   }
@@ -464,6 +627,16 @@ function App() {
     setTypeScaleChoice('sgm')
     setVisualChoice(preset.visual)
     setMapChoice(preset.map)
+    setVisualLabChoice('baseline')
+    setVariant('b')
+  }
+
+  const chooseVisualLab = (choice: VisualLabChoice) => {
+    setVisualLabChoice(choice)
+    setFontChoice('a')
+    setTypeScaleChoice(choice === 'baseline' ? 'current' : 'sgm')
+    setVisualChoice('civic')
+    setMapChoice(choice === 'baseline' ? 'm1' : 'm3')
     setVariant('b')
   }
 
@@ -501,7 +674,7 @@ function App() {
   }
 
   return (
-    <main className={`app variant-${variant} visual-study visual-${visualChoice} map-${mapChoice} type-scale-${typeScaleChoice}${typeScaleChoice !== 'current' ? ' type-scale-large' : ''}${locale === 'en' ? ` typography-test font-${fontChoice}` : ''}`} data-font-ready={locale === 'en' ? fontsReady : undefined} data-visual={visualChoice} data-map-style={mapChoice} data-type-scale={typeScaleChoice} data-design-preset={activePreset ?? undefined}>
+    <main className={`app variant-${variant} visual-study visual-${visualChoice} map-${mapChoice} lab-${visualLabChoice} type-scale-${typeScaleChoice}${typeScaleChoice !== 'current' ? ' type-scale-large' : ''}${locale === 'en' ? ` typography-test font-${fontChoice}` : ''}`} data-font-ready={locale === 'en' ? fontsReady : undefined} data-visual={visualChoice} data-map-style={mapChoice} data-type-scale={typeScaleChoice} data-visual-lab={visualLabChoice} data-design-preset={activePreset ?? undefined}>
       <div ref={mapContainer} className="map" aria-label={t.mapLabel} />
 
       <header className="topbar">
@@ -516,8 +689,8 @@ function App() {
             <button className={variant === 'b' ? 'active' : ''} onClick={() => setVariant('b')} aria-pressed={variant === 'b'}>B</button>
           </div>
           <nav className="language-switch" aria-label={t.languageSwitcher}>
-            <a className={locale === 'en' ? 'active' : ''} href={localeHref('en', { font: fontChoice, visual: visualChoice, map: mapChoice, scale: typeScaleChoice })} hrefLang="en" aria-current={locale === 'en' ? 'page' : undefined} onClick={switchLanguage}>EN</a>
-            <a className={locale === 'ja' ? 'active' : ''} href={localeHref('ja', { font: fontChoice, visual: visualChoice, map: mapChoice, scale: typeScaleChoice })} hrefLang="ja" aria-current={locale === 'ja' ? 'page' : undefined} onClick={switchLanguage}>JP</a>
+            <a className={locale === 'en' ? 'active' : ''} href={localeHref('en', { font: fontChoice, visual: visualChoice, map: mapChoice, scale: typeScaleChoice, lab: visualLabChoice, selected: selectedId ?? '', sheet: expanded ? 'expanded' : 'compact' })} hrefLang="en" aria-current={locale === 'en' ? 'page' : undefined} onClick={switchLanguage}>EN</a>
+            <a className={locale === 'ja' ? 'active' : ''} href={localeHref('ja', { font: fontChoice, visual: visualChoice, map: mapChoice, scale: typeScaleChoice, lab: visualLabChoice, selected: selectedId ?? '', sheet: expanded ? 'expanded' : 'compact' })} hrefLang="ja" aria-current={locale === 'ja' ? 'page' : undefined} onClick={switchLanguage}>JP</a>
           </nav>
         </div>
       </header>
@@ -525,9 +698,20 @@ function App() {
       {locale === 'en' && (
         <section className={`experiment-switch ${comparisonOpen ? 'open' : ''}`} aria-label="Design set, typography, type scale, visual system, and map style comparison">
           <button className="experiment-toggle" type="button" onClick={() => setComparisonOpen(!comparisonOpen)} aria-expanded={comparisonOpen} aria-controls="experiment-options">
-            <span>COMPARE</span><strong>{activePreset ? `P${activePreset}` : `T${fontChoice.toUpperCase()} · ${visualChoices[visualChoice].code} · ${mapChoices[mapChoice].code} · ${typeScaleChoices[typeScaleChoice].code}`}</strong>
+            <span>VISUAL LAB</span><strong>{visualLabChoices[visualLabChoice].code}</strong>
           </button>
           <div className="experiment-options" id="experiment-options" hidden={!comparisonOpen}>
+            <div className="experiment-group experiment-lab">
+              <span className="experiment-label">VISUAL LANGUAGE</span>
+              <div>
+                {(Object.keys(visualLabChoices) as VisualLabChoice[]).map((choice) => (
+                  <button key={choice} type="button" className={visualLabChoice === choice ? 'active' : ''} onClick={() => chooseVisualLab(choice)} aria-label={`${visualLabChoices[choice].code}: ${visualLabChoices[choice].name}`} aria-pressed={visualLabChoice === choice}>
+                    {visualLabChoices[choice].code}
+                  </button>
+                ))}
+              </div>
+              <small>{visualLabChoices[visualLabChoice].name}<br />{visualLabChoices[visualLabChoice].note}</small>
+            </div>
             <div className="experiment-group experiment-presets">
               <span className="experiment-label">DESIGN SET</span>
               <div>
@@ -578,7 +762,7 @@ function App() {
                 ))}
               </div>
             </div>
-            <small>{activePreset ? `Preset ${activePreset}: ${designPresets[activePreset].name}` : 'Custom combination'}<br />{fontChoices[fontChoice].name}<br />{typeScaleChoices[typeScaleChoice].name}<br />{visualChoices[visualChoice].name}<br />{mapChoices[mapChoice].name}<br />{fontsReady ? 'fonts ready' : 'loading fonts'}</small>
+            <small>{visualLabChoice === 'baseline' ? (activePreset ? `Preset ${activePreset}: ${designPresets[activePreset].name}` : 'Historic custom combination') : 'Integrated lab proposal'}<br />{fontChoices[fontChoice].name}<br />{typeScaleChoices[typeScaleChoice].name}<br />{visualLabChoice === 'baseline' ? visualChoices[visualChoice].name : visualLabChoices[visualLabChoice].name}<br />{visualLabChoice === 'baseline' ? mapChoices[mapChoice].name : labMapChoices[visualLabChoice].name}<br />{fontsReady ? 'fonts ready' : 'loading fonts'}</small>
           </div>
         </section>
       )}
