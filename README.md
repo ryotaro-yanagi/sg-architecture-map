@@ -20,6 +20,8 @@ npm run dev
 
 実験ブランチでは、Typography A × Visual System Cを基準にした地図スタイルを `?map=m1`、`?map=m2`、`?map=m3` で比較できます。英語版の `COMPARE` パネルからも切り替えられます。詳細は `docs/map-style-test-01.md` を参照してください。
 
+英語版の組版は、既存のTA × Visual Cを`?scale=current`、GOV.UKのモバイル向けType ScaleをHanken Groteskへ適用した案を`?scale=govuk`で比較できます。詳細は`docs/typography-scale-test-01.md`を参照してください。
+
 公開後は次のURLをiPhone Safariで開き、同じデータ・条件で比較します。
 
 - `https://<account>.github.io/<repository>/en/?ui=a`

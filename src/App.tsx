@@ -10,6 +10,7 @@ type Variant = 'a' | 'b'
 type FontChoice = 'a' | 'b' | 'c'
 type VisualChoice = 'baseline' | 'cartographic' | 'editorial' | 'civic'
 type MapChoice = 'm1' | 'm2' | 'm3'
+type TypeScaleChoice = 'current' | 'govuk'
 
 type Building = {
   id: string
@@ -41,9 +42,14 @@ const defaultCenter: Coordinates = [103.879, 1.315]
 const defaultZoom = 11.35
 const mapStateKey = 'sgm-language-map-state'
 const fontChoices: Record<FontChoice, { name: string; checks: string[] }> = {
-  'a': { name: 'Quiet Grotesque', checks: ['400 16px "Hanken Grotesk"', '500 16px "Hanken Grotesk"', '600 16px "Hanken Grotesk"'] },
+  'a': { name: 'Quiet Grotesque', checks: ['400 16px "Hanken Grotesk"', '500 16px "Hanken Grotesk"', '600 16px "Hanken Grotesk"', '700 16px "Hanken Grotesk"'] },
   'b': { name: 'Legible Character', checks: ['400 16px "Atkinson Hyperlegible Next"', '500 16px "Atkinson Hyperlegible Next"', '600 16px "Atkinson Hyperlegible Next"'] },
   'c': { name: 'Editorial Restraint', checks: ['400 16px "DM Sans"', '500 16px "Newsreader"', '600 16px "DM Sans"'] },
+}
+
+const typeScaleChoices: Record<TypeScaleChoice, { code: string; name: string }> = {
+  current: { code: 'CUR', name: 'Current SGM scale' },
+  govuk: { code: 'GOV', name: 'GOV.UK mobile scale' },
 }
 
 const visualChoices: Record<VisualChoice, { code: string; name: string; pin: { default: string; selected: string; stroke: string; halo: string } }> = {
@@ -116,6 +122,11 @@ const getInitialMapChoice = (): MapChoice => {
   return value && value in mapChoices ? value as MapChoice : 'm1'
 }
 
+const getInitialTypeScaleChoice = (): TypeScaleChoice => {
+  const value = new URLSearchParams(window.location.search).get('scale')
+  return value && value in typeScaleChoices ? value as TypeScaleChoice : 'current'
+}
+
 const setPaint = (map: MapLibreMap, layerId: string, property: string, value: unknown) => {
   if (map.getLayer(layerId)) map.setPaintProperty(layerId, property as never, value as never)
 }
@@ -177,6 +188,12 @@ const applyPinTheme = (map: MapLibreMap, choice: VisualChoice, mapChoice: MapCho
   map.setPaintProperty('building-halo', 'circle-radius', ['case', ['get', 'selected'], pin.selectedRadius + 5, pin.radius + 4])
 }
 
+const applyTypeScaleToMap = (map: MapLibreMap, choice: TypeScaleChoice) => {
+  if (!map.getLayer('building-labels')) return
+  map.setLayoutProperty('building-labels', 'text-size', choice === 'govuk' ? 16 : 12)
+  map.setLayoutProperty('building-labels', 'text-offset', choice === 'govuk' ? [0, 1.25] : [0, 1.45])
+}
+
 const readRestoredMapState = (): RestoredMapState | null => {
   try {
     const raw = window.sessionStorage.getItem(mapStateKey)
@@ -222,6 +239,7 @@ function App() {
   const mapRef = useRef<MapLibreMap | null>(null)
   const visualChoiceRef = useRef<VisualChoice>(getInitialVisualChoice())
   const mapChoiceRef = useRef<MapChoice>(getInitialMapChoice())
+  const typeScaleChoiceRef = useRef<TypeScaleChoice>(getInitialTypeScaleChoice())
   const userMarkerRef = useRef<maplibregl.Marker | null>(null)
   const variantEffectReady = useRef(false)
   const [selectedId, setSelectedId] = useState<string | null>(restoredState?.selectedId ?? null)
@@ -238,6 +256,7 @@ function App() {
   const [fontChoice, setFontChoice] = useState<FontChoice>(getInitialFontChoice)
   const [visualChoice, setVisualChoice] = useState<VisualChoice>(() => visualChoiceRef.current)
   const [mapChoice, setMapChoice] = useState<MapChoice>(() => mapChoiceRef.current)
+  const [typeScaleChoice, setTypeScaleChoice] = useState<TypeScaleChoice>(() => typeScaleChoiceRef.current)
   const [fontsReady, setFontsReady] = useState(false)
   const [comparisonOpen, setComparisonOpen] = useState(false)
 
@@ -308,6 +327,7 @@ function App() {
       })
       applyMapTheme(map, mapChoiceRef.current)
       applyPinTheme(map, visualChoiceRef.current, mapChoiceRef.current)
+      applyTypeScaleToMap(map, locale === 'en' ? typeScaleChoiceRef.current : 'current')
 
       map.on('click', (event) => {
         const features = map.queryRenderedFeatures(event.point, { layers: ['building-points'] })
@@ -356,6 +376,14 @@ function App() {
   }, [mapChoice])
 
   useEffect(() => {
+    typeScaleChoiceRef.current = typeScaleChoice
+    const url = new URL(window.location.href)
+    url.searchParams.set('scale', typeScaleChoice)
+    window.history.replaceState({}, '', url)
+    if (mapRef.current) applyTypeScaleToMap(mapRef.current, locale === 'en' ? typeScaleChoice : 'current')
+  }, [locale, typeScaleChoice])
+
+  useEffect(() => {
     const url = new URL(window.location.href)
     url.searchParams.set('ui', variant)
     window.history.replaceState({}, '', url)
@@ -388,6 +416,11 @@ function App() {
 
   const chooseMap = (choice: MapChoice) => {
     setMapChoice(choice)
+    setVariant('b')
+  }
+
+  const chooseTypeScale = (choice: TypeScaleChoice) => {
+    setTypeScaleChoice(choice)
     setVariant('b')
   }
 
@@ -425,7 +458,7 @@ function App() {
   }
 
   return (
-    <main className={`app variant-${variant} visual-study visual-${visualChoice} map-${mapChoice}${locale === 'en' ? ` typography-test font-${fontChoice}` : ''}`} data-font-ready={locale === 'en' ? fontsReady : undefined} data-visual={visualChoice} data-map-style={mapChoice}>
+    <main className={`app variant-${variant} visual-study visual-${visualChoice} map-${mapChoice} type-scale-${typeScaleChoice}${locale === 'en' ? ` typography-test font-${fontChoice}` : ''}`} data-font-ready={locale === 'en' ? fontsReady : undefined} data-visual={visualChoice} data-map-style={mapChoice} data-type-scale={typeScaleChoice}>
       <div ref={mapContainer} className="map" aria-label={t.mapLabel} />
 
       <header className="topbar">
@@ -440,16 +473,16 @@ function App() {
             <button className={variant === 'b' ? 'active' : ''} onClick={() => setVariant('b')} aria-pressed={variant === 'b'}>B</button>
           </div>
           <nav className="language-switch" aria-label={t.languageSwitcher}>
-            <a className={locale === 'en' ? 'active' : ''} href={localeHref('en', { font: fontChoice, visual: visualChoice, map: mapChoice })} hrefLang="en" aria-current={locale === 'en' ? 'page' : undefined} onClick={switchLanguage}>EN</a>
-            <a className={locale === 'ja' ? 'active' : ''} href={localeHref('ja', { font: fontChoice, visual: visualChoice, map: mapChoice })} hrefLang="ja" aria-current={locale === 'ja' ? 'page' : undefined} onClick={switchLanguage}>JP</a>
+            <a className={locale === 'en' ? 'active' : ''} href={localeHref('en', { font: fontChoice, visual: visualChoice, map: mapChoice, scale: typeScaleChoice })} hrefLang="en" aria-current={locale === 'en' ? 'page' : undefined} onClick={switchLanguage}>EN</a>
+            <a className={locale === 'ja' ? 'active' : ''} href={localeHref('ja', { font: fontChoice, visual: visualChoice, map: mapChoice, scale: typeScaleChoice })} hrefLang="ja" aria-current={locale === 'ja' ? 'page' : undefined} onClick={switchLanguage}>JP</a>
           </nav>
         </div>
       </header>
 
       {locale === 'en' && (
-        <section className={`experiment-switch ${comparisonOpen ? 'open' : ''}`} aria-label="Typography, visual system, and map style comparison">
+        <section className={`experiment-switch ${comparisonOpen ? 'open' : ''}`} aria-label="Typography, type scale, visual system, and map style comparison">
           <button className="experiment-toggle" type="button" onClick={() => setComparisonOpen(!comparisonOpen)} aria-expanded={comparisonOpen} aria-controls="experiment-options">
-            <span>COMPARE</span><strong>T{fontChoice.toUpperCase()} · {visualChoices[visualChoice].code} · {mapChoices[mapChoice].code}</strong>
+            <span>COMPARE</span><strong>T{fontChoice.toUpperCase()} · {visualChoices[visualChoice].code} · {mapChoices[mapChoice].code} · {typeScaleChoices[typeScaleChoice].code}</strong>
           </button>
           <div className="experiment-options" id="experiment-options" hidden={!comparisonOpen}>
             <div className="experiment-group">
@@ -458,6 +491,16 @@ function App() {
                 {(Object.keys(fontChoices) as FontChoice[]).map((choice) => (
                   <button key={choice} type="button" className={fontChoice === choice ? 'active' : ''} onClick={() => chooseFont(choice)} aria-label={`Typography ${choice.toUpperCase()}: ${fontChoices[choice].name}`} aria-pressed={fontChoice === choice}>
                     T{choice.toUpperCase()}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="experiment-group">
+              <span className="experiment-label">TYPE SCALE</span>
+              <div>
+                {(Object.keys(typeScaleChoices) as TypeScaleChoice[]).map((choice) => (
+                  <button key={choice} type="button" className={typeScaleChoice === choice ? 'active' : ''} onClick={() => chooseTypeScale(choice)} aria-label={`${typeScaleChoices[choice].code}: ${typeScaleChoices[choice].name}`} aria-pressed={typeScaleChoice === choice}>
+                    {typeScaleChoices[choice].code}
                   </button>
                 ))}
               </div>
@@ -482,7 +525,7 @@ function App() {
                 ))}
               </div>
             </div>
-            <small>{fontChoices[fontChoice].name}<br />{visualChoices[visualChoice].name}<br />{mapChoices[mapChoice].name}<br />{fontsReady ? 'fonts ready' : 'loading fonts'}</small>
+            <small>{fontChoices[fontChoice].name}<br />{typeScaleChoices[typeScaleChoice].name}<br />{visualChoices[visualChoice].name}<br />{mapChoices[mapChoice].name}<br />{fontsReady ? 'fonts ready' : 'loading fonts'}</small>
           </div>
         </section>
       )}

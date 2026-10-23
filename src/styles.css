@@ -60,6 +60,20 @@
   --vs-sheet-inline: 20px; --vs-section-space: 20px; --vs-text-space: 8px; --vs-sheet-radius: 18px; --vs-control-radius: 12px; --vs-divider-width: 1px;
 }
 
+/* Type Scale Study: GOV.UK's current small-screen points, retained in Hanken Grotesk. */
+.typography-test.type-scale-govuk {
+  --vs-title-size: 27px;
+  --vs-title-line: 30px;
+  --vs-title-weight: 700;
+  --vs-title-tracking: 0;
+  --vs-body-size: 19px;
+  --vs-body-line: 25px;
+  --vs-meta-size: 16px;
+  --vs-meta-line: 20px;
+  --vs-meta-weight: 400;
+  --vs-meta-tracking: 0;
+}
+
 * { box-sizing: border-box; }
 html, body, #root { width: 100%; height: 100%; margin: 0; overflow: hidden; }
 button, input { font: inherit; }
@@ -220,6 +234,29 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid 
 .visual-editorial .facts div { padding: 12px 0; }
 .visual-editorial .sources { padding-top: var(--vs-section-space); }
 .visual-civic .bottom-sheet { border-width: 1px; }
+
+.typography-test.type-scale-govuk .brand-title { font-size: 16px; font-weight: 700; line-height: 20px; letter-spacing: 0; }
+.typography-test.type-scale-govuk .variant-switch span,
+.typography-test.type-scale-govuk .variant-switch button,
+.typography-test.type-scale-govuk .language-switch a { font-size: 16px; font-weight: 700; line-height: 20px; letter-spacing: 0; }
+.typography-test.type-scale-govuk .search-input-wrap input { font-size: 19px; line-height: 25px; letter-spacing: 0; }
+.typography-test.type-scale-govuk .result-count,
+.typography-test.type-scale-govuk .search-results small { font-size: 16px; line-height: 20px; letter-spacing: 0; }
+.typography-test.type-scale-govuk .search-results strong { font-size: 19px; font-weight: 700; line-height: 25px; letter-spacing: 0; }
+.typography-test.type-scale-govuk .locate-button span,
+.typography-test.type-scale-govuk .primary-button,
+.typography-test.type-scale-govuk .back-button,
+.typography-test.type-scale-govuk .actions a,
+.typography-test.type-scale-govuk .sources a { font-size: 16px; font-weight: 700; line-height: 20px; letter-spacing: 0; }
+.typography-test.type-scale-govuk .data-note,
+.typography-test.type-scale-govuk .record-index,
+.typography-test.type-scale-govuk .image-placeholder span,
+.typography-test.type-scale-govuk .image-placeholder small,
+.typography-test.type-scale-govuk .notice { font-size: 16px; line-height: 20px; letter-spacing: 0; }
+.typography-test.type-scale-govuk .eyebrow,
+.typography-test.type-scale-govuk .sources p { font-weight: 700; letter-spacing: 0; }
+.typography-test.type-scale-govuk .bottom-sheet:not(.expanded) { height: min(285px, 43vh); }
+.typography-test.type-scale-govuk .facts div { grid-template-columns: 92px 1fr; }
 
 @keyframes rise { from { opacity: 0; transform: translateY(16px); } }
 @keyframes slide-in { from { opacity: 0; transform: translateX(30px); } }
