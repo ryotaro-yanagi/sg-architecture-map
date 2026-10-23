@@ -3,6 +3,7 @@ import * as maplibregl from 'maplibre-gl'
 import type { GeoJSONSource, Map as MapLibreMap } from 'maplibre-gl'
 import data from './data/buildings.json'
 import { getBuildingCopy, getLocaleFromPath, localeHref, translations } from './i18n'
+import type { RefObject } from 'react'
 import type { Locale, Translation } from './i18n'
 
 type Coordinates = [number, number]
@@ -19,6 +20,9 @@ type TypographyAxis = 'light' | 'bold'
 type PinAxis = 'minimal' | 'symbolic'
 type SurfaceAxis = 'flat' | 'layered'
 type SpacingAxis = 'compact' | 'spacious'
+type ColorSystem = 'civic' | 'graphic' | 'archive'
+type IdentityChoice = 'plot' | 'frame' | 'link'
+type MapMode = 'colored' | 'mono' | 'satellite'
 
 type Building = {
   id: string
@@ -49,6 +53,16 @@ const buildings = data.buildings as unknown as Building[]
 const defaultCenter: Coordinates = [103.879, 1.315]
 const defaultZoom = 11.35
 const mapStateKey = 'sgm-language-map-state'
+
+const motionDuration = (duration: number) =>
+  window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : duration
+
+const revealBuilding = (map: MapLibreMap | null, coordinates: Coordinates, variant: Variant) => {
+  if (!map) return
+  const wide = window.matchMedia('(min-width: 720px)').matches
+  const offset: [number, number] = wide && variant === 'a' ? [210, 0] : [0, variant === 'b' ? -120 : -76]
+  map.flyTo({ center: coordinates, zoom: Math.max(map.getZoom(), 14), offset, duration: motionDuration(700) })
+}
 
 const getRequestedSelectedId = (): string | null => {
   const value = new URLSearchParams(window.location.search).get('selected')
@@ -142,6 +156,18 @@ const visualLabChoices: Record<VisualLabChoice, { code: string; name: string; no
 }
 
 const visualAxisChoices = {
+  colorSystem: {
+    label: 'COLOR SYSTEM',
+    values: { civic: 'Civic', graphic: 'Graphic', archive: 'Archive' } satisfies Record<ColorSystem, string>,
+  },
+  identity: {
+    label: 'IDENTITY',
+    values: { plot: 'Plot', frame: 'Frame', link: 'Link' } satisfies Record<IdentityChoice, string>,
+  },
+  mapMode: {
+    label: 'MAP MODE',
+    values: { colored: 'Color', mono: 'Mono', satellite: 'Aerial' } satisfies Record<MapMode, string>,
+  },
   shape: {
     label: 'UI SHAPE',
     values: { square: 'Square', round: 'Round' } satisfies Record<ShapeAxis, string>,
@@ -174,14 +200,14 @@ const axisMapChoices: Record<MapColorAxis, MapPalette> = {
     background: '#eceeeb', residential: '#e8eae7', park: '#dfe4dc', wood: '#d9dfd6', grass: '#e3e7df',
     water: '#dce5e7', waterway: '#9aafb3', roadMinor: '#ffffff', roadMajor: '#f7f6f1', roadMotorway: '#f1eee5', roadCasing: '#bfc4bf',
     building: '#dddcd7', buildingOutline: '#c4c4bf', label: '#2c3531', labelSecondary: '#626b66', labelWater: '#4e6870', labelHalo: '#fafbf8', poiOpacity: .52,
-    pin: { default: '#32423c', selected: '#c85f3f', stroke: '#1f2c27', halo: 'rgba(250,251,248,.9)', radius: 6, selectedRadius: 9 },
+    pin: { default: '#32423c', selected: '#c85f3f', stroke: '#1f2c27', halo: 'rgba(250,251,248,.9)', radius: 5, selectedRadius: 8 },
   },
   colored: {
     code: 'C', name: 'Colored',
     background: '#eef0e8', residential: '#e8ebe4', park: '#c9dfca', wood: '#bfd7c2', grass: '#d9e7d3',
     water: '#bedde6', waterway: '#67a7b7', roadMinor: '#fffdf6', roadMajor: '#f8edd2', roadMotorway: '#f0d8a9', roadCasing: '#aebdb4',
     building: '#ddd8cc', buildingOutline: '#bbb7ab', label: '#203b33', labelSecondary: '#526860', labelWater: '#216b7c', labelHalo: '#fafbf5', poiOpacity: .68,
-    pin: { default: '#17697c', selected: '#e5653f', stroke: '#183c3b', halo: 'rgba(250,251,245,.92)', radius: 6.5, selectedRadius: 9.5 },
+    pin: { default: '#17697c', selected: '#e5653f', stroke: '#183c3b', halo: 'rgba(250,251,245,.92)', radius: 5.5, selectedRadius: 8.5 },
   },
 }
 
@@ -430,6 +456,23 @@ const applyAxisPinTheme = (map: MapLibreMap, pinChoice: PinAxis, mapColor: MapCo
   map.setLayoutProperty('building-symbols', 'icon-image', ['case', ['get', 'selected'], `sgm-axis-${mapColor}-selected`, `sgm-axis-${mapColor}-default`])
 }
 
+const applyMapMode = (map: MapLibreMap, mode: MapMode, pinChoice: PinAxis) => {
+  if (map.getLayer('sgm-satellite')) map.setLayoutProperty('sgm-satellite', 'visibility', mode === 'satellite' ? 'visible' : 'none')
+  ;(map.getStyle().layers ?? []).forEach((layer) => {
+    if (layer.type === 'symbol' && layer.id.startsWith('poi_')) {
+      setPaint(map, layer.id, 'icon-opacity', mode === 'mono' ? .12 : mode === 'satellite' ? 0 : .72)
+    }
+  })
+  if (mode !== 'satellite' || pinChoice !== 'minimal' || !map.getLayer('building-points')) return
+  map.setPaintProperty('building-halo', 'circle-color', 'rgba(255,255,255,.96)')
+  map.setPaintProperty('building-halo', 'circle-opacity', ['case', ['get', 'selected'], .96, .82])
+  map.setPaintProperty('building-points', 'circle-color', ['case', ['get', 'selected'], '#ff6b45', '#f7f4e9'])
+  map.setPaintProperty('building-points', 'circle-stroke-color', '#10231e')
+  map.setPaintProperty('building-labels', 'text-color', '#f8f6ef')
+  map.setPaintProperty('building-labels', 'text-halo-color', '#10231e')
+  map.setPaintProperty('building-labels', 'text-halo-width', 3)
+}
+
 const applyPinTheme = (map: MapLibreMap, choice: VisualChoice, mapChoice: MapChoice, labChoice: VisualLabChoice = 'baseline') => {
   if (!map.getLayer('building-points')) return
   if (labChoice !== 'baseline') {
@@ -504,10 +547,20 @@ const Icon = ({ name }: { name: 'search' | 'locate' | 'arrow' | 'close' | 'exter
   return <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">{paths[name]}</svg>
 }
 
+const BrandMark = ({ choice }: { choice: IdentityChoice }) => {
+  const drawings = {
+    plot: <><path d="M7 7h10v10H7z"/><circle cx="17" cy="7" r="2.25" fill="currentColor" stroke="none"/><path d="M4 20h16"/></>,
+    frame: <><path d="M5 10V5h5M14 5h5v5M19 14v5h-5M10 19H5v-5"/><path d="m9 15 6-6"/></>,
+    link: <><path d="M4 12h16M12 4v16"/><path d="m6 6 12 12"/><circle cx="12" cy="12" r="3.25" fill="var(--paper-strong)"/></>,
+  }
+  return <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="square" strokeLinejoin="miter">{drawings[choice]}</svg>
+}
+
 function App() {
   const locale = useMemo(getLocaleFromPath, [])
   const t = translations[locale]
   const restoredState = useMemo(readRestoredMapState, [])
+  const requestedSelectedId = useMemo(getRequestedSelectedId, [])
   const mapContainer = useRef<HTMLDivElement>(null)
   const mapRef = useRef<MapLibreMap | null>(null)
   const visualChoiceRef = useRef<VisualChoice>('civic')
@@ -516,8 +569,12 @@ function App() {
   const visualLabChoiceRef = useRef<VisualLabChoice>('baseline')
   const mapColorAxisRef = useRef<MapColorAxis>(getAxisValue('mapColor', ['neutral', 'colored'], 'neutral'))
   const pinAxisRef = useRef<PinAxis>(getAxisValue('pin', ['minimal', 'symbolic'], 'minimal'))
+  const variantRef = useRef<Variant>('b')
   const userMarkerRef = useRef<maplibregl.Marker | null>(null)
-  const [selectedId, setSelectedId] = useState<string | null>(getRequestedSelectedId() ?? restoredState?.selectedId ?? null)
+  const detailBackRef = useRef<HTMLButtonElement>(null)
+  const sheetHandleRef = useRef<HTMLButtonElement>(null)
+  const searchInputRef = useRef<HTMLInputElement>(null)
+  const [selectedId, setSelectedId] = useState<string | null>(requestedSelectedId ?? restoredState?.selectedId ?? null)
   const [expanded, setExpanded] = useState(getRequestedExpandedState() ?? restoredState?.expanded ?? false)
   const [query, setQuery] = useState('')
   const [searchOpen, setSearchOpen] = useState(false)
@@ -526,7 +583,7 @@ function App() {
   const [variant, setVariant] = useState<Variant>(() => {
     const requested = new URLSearchParams(window.location.search).get('ui')
     if (requested === 'a' || requested === 'b') return requested
-    return locale === 'en' ? 'b' : 'a'
+    return 'b'
   })
   const previousVariantRef = useRef<Variant>(variant)
   const fontChoice: FontChoice = 'a'
@@ -540,6 +597,9 @@ function App() {
   const [pinAxis, setPinAxis] = useState<PinAxis>(() => pinAxisRef.current)
   const [surfaceAxis, setSurfaceAxis] = useState<SurfaceAxis>(() => getAxisValue('surface', ['flat', 'layered'], 'flat'))
   const [spacingAxis, setSpacingAxis] = useState<SpacingAxis>(() => getAxisValue('spacing', ['compact', 'spacious'], 'compact'))
+  const [colorSystem, setColorSystem] = useState<ColorSystem>(() => getAxisValue('color', ['civic', 'graphic', 'archive'], 'archive'))
+  const [identityChoice, setIdentityChoice] = useState<IdentityChoice>(() => getAxisValue('identity', ['plot', 'frame', 'link'], 'plot'))
+  const [mapMode, setMapMode] = useState<MapMode>(() => getAxisValue('mapMode', ['colored', 'mono', 'satellite'], 'colored'))
   const [fontsReady, setFontsReady] = useState(false)
   const [comparisonOpen, setComparisonOpen] = useState(false)
 
@@ -557,6 +617,13 @@ function App() {
     document.documentElement.lang = locale
     document.documentElement.dir = 'ltr'
   }, [locale])
+
+  useEffect(() => {
+    if (expanded) {
+      detailBackRef.current?.closest('.bottom-sheet, .detail-panel')?.scrollTo({ top: 0 })
+      detailBackRef.current?.focus({ preventScroll: true })
+    }
+  }, [expanded, selectedId])
 
   useEffect(() => {
     if (locale !== 'en') return
@@ -595,8 +662,18 @@ function App() {
 
     map.on('load', () => {
       map.addSource('buildings', { type: 'geojson', data: featureCollection(selectedId, locale) })
+      map.addSource('sgm-satellite', {
+        type: 'raster',
+        tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
+        tileSize: 256,
+        attribution: 'Imagery &copy; Esri and contributors',
+      })
       addLabMarkerImages(map)
       addAxisMarkerImages(map)
+      map.addLayer({
+        id: 'building-hit-targets', type: 'circle', source: 'buildings',
+        paint: { 'circle-radius': 22, 'circle-opacity': 0 },
+      })
       map.addLayer({
         id: 'building-halo', type: 'circle', source: 'buildings',
         paint: { 'circle-radius': ['case', ['get', 'selected'], 13, 10], 'circle-color': 'rgba(255,255,255,.72)', 'circle-blur': 0.45 },
@@ -615,25 +692,35 @@ function App() {
         layout: { 'text-field': ['get', 'name'], 'text-size': 12, 'text-offset': [0, 1.45], 'text-anchor': 'top', 'text-variable-anchor': ['top', 'bottom', 'left', 'right'], 'text-radial-offset': 0.75 },
         paint: { 'text-color': '#282724', 'text-halo-color': '#f8f4ec', 'text-halo-width': 2 },
       })
+      map.addLayer({
+        id: 'sgm-satellite', type: 'raster', source: 'sgm-satellite',
+        layout: { visibility: mapMode === 'satellite' ? 'visible' : 'none' },
+        paint: { 'raster-saturation': -.22, 'raster-contrast': .08, 'raster-brightness-max': .9, 'raster-fade-duration': 180 },
+      }, 'building-hit-targets')
       applyMapTheme(map, mapChoiceRef.current, visualLabChoiceRef.current)
       applyPinTheme(map, visualChoiceRef.current, mapChoiceRef.current, visualLabChoiceRef.current)
       applyTypeScaleToMap(map, locale === 'en' ? typeScaleChoiceRef.current : 'current')
       applyAxisMapTheme(map, mapColorAxisRef.current)
       applyAxisPinTheme(map, pinAxisRef.current, mapColorAxisRef.current)
+      applyMapMode(map, mapMode, pinAxisRef.current)
+      const deepLinkedBuilding = buildings.find((building) => building.id === requestedSelectedId)
+      if (deepLinkedBuilding && !restoredState) {
+        window.requestAnimationFrame(() => revealBuilding(map, deepLinkedBuilding.coordinates, variantRef.current))
+      }
 
       map.on('click', (event) => {
-        const features = map.queryRenderedFeatures(event.point, { layers: ['building-symbols', 'building-points'] })
+        const features = map.queryRenderedFeatures(event.point, { layers: ['building-hit-targets', 'building-symbols', 'building-points'] })
         const id = features[0]?.properties?.id as string | undefined
         if (id) {
           setSelectedId(id)
           setExpanded(false)
           setSearchOpen(false)
+          const building = buildings.find((candidate) => candidate.id === id)
+          if (building) window.requestAnimationFrame(() => revealBuilding(map, building.coordinates, variantRef.current))
         }
       })
-      map.on('mouseenter', 'building-points', () => { map.getCanvas().style.cursor = 'pointer' })
-      map.on('mouseleave', 'building-points', () => { map.getCanvas().style.cursor = '' })
-      map.on('mouseenter', 'building-symbols', () => { map.getCanvas().style.cursor = 'pointer' })
-      map.on('mouseleave', 'building-symbols', () => { map.getCanvas().style.cursor = '' })
+      map.on('mouseenter', 'building-hit-targets', () => { map.getCanvas().style.cursor = 'pointer' })
+      map.on('mouseleave', 'building-hit-targets', () => { map.getCanvas().style.cursor = '' })
     })
 
     mapRef.current = map
@@ -666,8 +753,11 @@ function App() {
     const url = new URL(window.location.href)
     url.searchParams.set('pin', pinAxis)
     window.history.replaceState({}, '', url)
-    if (mapRef.current?.isStyleLoaded()) applyAxisPinTheme(mapRef.current, pinAxis, mapColorAxisRef.current)
-  }, [pinAxis])
+    if (mapRef.current?.isStyleLoaded()) {
+      applyAxisPinTheme(mapRef.current, pinAxis, mapColorAxisRef.current)
+      applyMapMode(mapRef.current, mapMode, pinAxis)
+    }
+  }, [mapMode, pinAxis])
 
   useEffect(() => {
     const url = new URL(window.location.href)
@@ -695,11 +785,58 @@ function App() {
 
   useEffect(() => {
     const url = new URL(window.location.href)
+    url.searchParams.set('color', colorSystem)
+    url.searchParams.set('identity', identityChoice)
+    window.history.replaceState({}, '', url)
+  }, [colorSystem, identityChoice])
+
+  useEffect(() => {
+    const derivedMapColor: MapColorAxis = mapMode === 'colored' ? 'colored' : 'neutral'
+    mapColorAxisRef.current = derivedMapColor
+    setMapColorAxis(derivedMapColor)
+    const url = new URL(window.location.href)
+    url.searchParams.set('mapMode', mapMode)
+    window.history.replaceState({}, '', url)
+    const map = mapRef.current
+    if (!map?.isStyleLoaded()) return
+    applyAxisMapTheme(map, derivedMapColor)
+    applyAxisPinTheme(map, pinAxisRef.current, derivedMapColor)
+    applyMapMode(map, mapMode, pinAxisRef.current)
+  }, [mapMode])
+
+  useEffect(() => {
+    const url = new URL(window.location.href)
     url.searchParams.set('ui', variant)
     window.history.replaceState({}, '', url)
+    variantRef.current = variant
     if (previousVariantRef.current !== variant) setExpanded(false)
     previousVariantRef.current = variant
   }, [variant])
+
+  useEffect(() => {
+    const url = new URL(window.location.href)
+    if (selectedId) url.searchParams.set('selected', selectedId)
+    else url.searchParams.delete('selected')
+    url.searchParams.set('sheet', expanded ? 'expanded' : 'compact')
+    window.history.replaceState({}, '', url)
+  }, [expanded, selectedId])
+
+  useEffect(() => {
+    const closeLayer = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return
+      if (comparisonOpen) {
+        setComparisonOpen(false)
+      } else if (searchOpen) {
+        setSearchOpen(false)
+        searchInputRef.current?.focus()
+      } else if (expanded) {
+        setExpanded(false)
+        window.requestAnimationFrame(() => sheetHandleRef.current?.focus())
+      }
+    }
+    window.addEventListener('keydown', closeLayer)
+    return () => window.removeEventListener('keydown', closeLayer)
+  }, [comparisonOpen, expanded, searchOpen])
 
   useEffect(() => {
     if (!notice) return
@@ -711,7 +848,7 @@ function App() {
     setSelectedId(building.id)
     setExpanded(false)
     setSearchOpen(false)
-    if (focusMap) mapRef.current?.flyTo({ center: building.coordinates, zoom: Math.max(mapRef.current.getZoom(), 14), duration: 900 })
+    if (focusMap) revealBuilding(mapRef.current, building.coordinates, variant)
   }
 
   const switchLanguage = () => {
@@ -738,7 +875,7 @@ function App() {
         element.className = 'user-location-marker'
         element.setAttribute('aria-label', t.currentLocation)
         userMarkerRef.current = new maplibregl.Marker({ element }).setLngLat(location).addTo(mapRef.current!)
-        mapRef.current?.flyTo({ center: location, zoom: Math.max(mapRef.current.getZoom(), 14), duration: 900 })
+        revealBuilding(mapRef.current, location, variant)
         setLocating(false)
         setNotice(t.locationSuccess)
       },
@@ -748,8 +885,10 @@ function App() {
   }
 
   const axisSettings = [
+    { key: 'colorSystem', meta: visualAxisChoices.colorSystem, current: colorSystem, select: (value: string) => setColorSystem(value as ColorSystem) },
+    { key: 'identity', meta: visualAxisChoices.identity, current: identityChoice, select: (value: string) => setIdentityChoice(value as IdentityChoice) },
+    { key: 'mapMode', meta: visualAxisChoices.mapMode, current: mapMode, select: (value: string) => setMapMode(value as MapMode) },
     { key: 'shape', meta: visualAxisChoices.shape, current: shapeAxis, select: (value: string) => setShapeAxis(value as ShapeAxis) },
-    { key: 'mapColor', meta: visualAxisChoices.mapColor, current: mapColorAxis, select: (value: string) => setMapColorAxis(value as MapColorAxis) },
     { key: 'typography', meta: visualAxisChoices.typography, current: typographyAxis, select: (value: string) => setTypographyAxis(value as TypographyAxis) },
     { key: 'pin', meta: visualAxisChoices.pin, current: pinAxis, select: (value: string) => setPinAxis(value as PinAxis) },
     { key: 'surface', meta: visualAxisChoices.surface, current: surfaceAxis, select: (value: string) => setSurfaceAxis(value as SurfaceAxis) },
@@ -758,7 +897,7 @@ function App() {
 
   return (
     <main
-      className={`app variant-${variant} visual-study visual-${visualChoice} map-${mapChoice} lab-${visualLabChoice} type-scale-${typeScaleChoice} type-scale-large typography-test font-${fontChoice} axis-shape-${shapeAxis} axis-map-${mapColorAxis} axis-type-${typographyAxis} axis-pin-${pinAxis} axis-surface-${surfaceAxis} axis-spacing-${spacingAxis}`}
+      className={`app variant-${variant} ${selected ? 'has-selection' : ''} ${expanded ? 'details-expanded' : ''} visual-study visual-${visualChoice} map-${mapChoice} lab-${visualLabChoice} type-scale-${typeScaleChoice} type-scale-large typography-test font-${fontChoice} color-system-${colorSystem} identity-${identityChoice} map-mode-${mapMode} axis-shape-${shapeAxis} axis-map-${mapColorAxis} axis-type-${typographyAxis} axis-pin-${pinAxis} axis-surface-${surfaceAxis} axis-spacing-${spacingAxis}`}
       data-font-ready={fontsReady}
       data-shape={shapeAxis}
       data-map-color={mapColorAxis}
@@ -767,22 +906,21 @@ function App() {
       data-surface={surfaceAxis}
       data-spacing={spacingAxis}
     >
-      <div ref={mapContainer} className="map" aria-label={t.mapLabel} />
+      <div ref={mapContainer} className="map" role="region" aria-label={t.mapLabel} />
 
       <header className="topbar">
         <button className="brand" type="button" onClick={() => mapRef.current?.flyTo({ center: defaultCenter, zoom: defaultZoom })} aria-label={t.resetMap}>
-          <span className="brand-mark">SGM</span>
-          <span className="brand-title">Architecture<br />Map</span>
+          <span className="brand-mark"><BrandMark choice={identityChoice} /></span>
         </button>
         <div className="top-controls">
-          <div className="variant-switch" aria-label={t.uiSwitcher}>
+          <div className="variant-switch" role="group" aria-label={t.uiSwitcher}>
             <span>UI</span>
             <button className={variant === 'a' ? 'active' : ''} onClick={() => setVariant('a')} aria-pressed={variant === 'a'}>A</button>
             <button className={variant === 'b' ? 'active' : ''} onClick={() => setVariant('b')} aria-pressed={variant === 'b'}>B</button>
           </div>
           <nav className="language-switch" aria-label={t.languageSwitcher}>
-            <a className={locale === 'en' ? 'active' : ''} href={localeHref('en', { ui: variant, shape: shapeAxis, mapColor: mapColorAxis, weight: typographyAxis, pin: pinAxis, surface: surfaceAxis, spacing: spacingAxis, selected: selectedId ?? '', sheet: expanded ? 'expanded' : 'compact' })} hrefLang="en" aria-current={locale === 'en' ? 'page' : undefined} onClick={switchLanguage}>EN</a>
-            <a className={locale === 'ja' ? 'active' : ''} href={localeHref('ja', { ui: variant, shape: shapeAxis, mapColor: mapColorAxis, weight: typographyAxis, pin: pinAxis, surface: surfaceAxis, spacing: spacingAxis, selected: selectedId ?? '', sheet: expanded ? 'expanded' : 'compact' })} hrefLang="ja" aria-current={locale === 'ja' ? 'page' : undefined} onClick={switchLanguage}>JP</a>
+            <a className={locale === 'en' ? 'active' : ''} href={localeHref('en', { ui: variant, shape: shapeAxis, mapColor: mapColorAxis, mapMode, color: colorSystem, identity: identityChoice, weight: typographyAxis, pin: pinAxis, surface: surfaceAxis, spacing: spacingAxis, selected: selectedId ?? '', sheet: expanded ? 'expanded' : 'compact' })} hrefLang="en" aria-current={locale === 'en' ? 'page' : undefined} onClick={switchLanguage}>EN</a>
+            <a className={locale === 'ja' ? 'active' : ''} href={localeHref('ja', { ui: variant, shape: shapeAxis, mapColor: mapColorAxis, mapMode, color: colorSystem, identity: identityChoice, weight: typographyAxis, pin: pinAxis, surface: surfaceAxis, spacing: spacingAxis, selected: selectedId ?? '', sheet: expanded ? 'expanded' : 'compact' })} hrefLang="ja" aria-current={locale === 'ja' ? 'page' : undefined} onClick={switchLanguage}>JP</a>
           </nav>
         </div>
       </header>
@@ -791,7 +929,7 @@ function App() {
         <section className={`experiment-switch ${comparisonOpen ? 'open' : ''}`} aria-label="Independent visual system comparison axes">
           <button className="experiment-toggle" type="button" onClick={() => setComparisonOpen(!comparisonOpen)} aria-expanded={comparisonOpen} aria-controls="experiment-options">
             <span>SYSTEM LAB</span>
-            <strong>{`${shapeAxis === 'square' ? 'SQ' : 'RD'} · ${mapColorAxis === 'neutral' ? 'N' : 'C'} · ${typographyAxis === 'light' ? 'L' : 'B'} · ${pinAxis === 'minimal' ? 'M' : 'S'} · ${surfaceAxis === 'flat' ? 'F' : 'L'} · ${spacingAxis === 'compact' ? 'C' : 'S'}`}</strong>
+            <strong>{`${colorSystem.slice(0, 1).toUpperCase()} · ${identityChoice.slice(0, 1).toUpperCase()} · ${mapMode === 'colored' ? 'C' : mapMode === 'mono' ? 'M' : 'A'} · UI ${variant.toUpperCase()}`}</strong>
           </button>
           <div className="experiment-options" id="experiment-options" hidden={!comparisonOpen}>
             {axisSettings.map(({ key, meta, current, select }) => {
@@ -813,19 +951,19 @@ function App() {
         </section>
       )}
 
-      <section className={`search-shell ${searchOpen ? 'open' : ''}`}>
+      <search className={`search-shell ${searchOpen ? 'open' : ''}`}>
         <div className="search-input-wrap">
           <Icon name="search" />
-          <input value={query} onChange={(event) => { setQuery(event.target.value); setSearchOpen(true) }} onFocus={() => setSearchOpen(true)} aria-label={t.searchLabel} placeholder={t.searchPlaceholder} />
+          <input ref={searchInputRef} type="search" value={query} onChange={(event) => { setQuery(event.target.value); setSearchOpen(true) }} onFocus={() => setSearchOpen(true)} aria-label={t.searchLabel} aria-expanded={searchOpen} aria-controls="search-results" autoComplete="off" placeholder={t.searchPlaceholder} />
           {searchOpen && <button className="icon-button small" onClick={() => { setSearchOpen(false); setQuery('') }} aria-label={t.closeSearch}><Icon name="close" /></button>}
         </div>
         {searchOpen && (
-          <div className="search-results" role="listbox" aria-label={t.searchResults}>
-            <p className="result-count">{results.length ? t.resultCount(results.length) : t.noResults}</p>
+          <div className="search-results" id="search-results" aria-label={t.searchResults}>
+            <p className="result-count" aria-live="polite">{results.length ? t.resultCount(results.length) : t.noResults}</p>
             {results.map((building) => {
               const copy = getBuildingCopy(locale, building.id, building.name)
               return (
-                <button key={building.id} role="option" aria-selected={building.id === selectedId} onClick={() => chooseBuilding(building, true)}>
+                <button key={building.id} className={building.id === selectedId ? 'selected' : ''} aria-current={building.id === selectedId ? 'true' : undefined} onClick={() => chooseBuilding(building, true)}>
                   <span><strong>{copy.name}</strong><small>{copy.architectCredit}</small></span>
                   <Icon name="arrow" />
                 </button>
@@ -833,7 +971,7 @@ function App() {
             })}
           </div>
         )}
-      </section>
+      </search>
 
       <button className={`locate-button ${locating ? 'loading' : ''}`} onClick={locate} disabled={locating} aria-label={t.locate}>
         <Icon name="locate" /><span>{locating ? t.locating : t.locate}</span>
@@ -843,14 +981,14 @@ function App() {
       {selected && variant === 'a' && !expanded && <PreviewCard building={selected} locale={locale} t={t} onDetails={() => setExpanded(true)} onClose={() => setSelectedId(null)} />}
       {selected && variant === 'a' && expanded && (
         <aside className="detail-panel panel-a" aria-label={t.detailLabel(getBuildingCopy(locale, selected.id, selected.name).name)}>
-          <DetailContent building={selected} locale={locale} t={t} onClose={() => setExpanded(false)} />
+          <DetailContent building={selected} locale={locale} t={t} onClose={() => setExpanded(false)} backRef={detailBackRef} />
         </aside>
       )}
       {selected && variant === 'b' && (
         <aside className={`bottom-sheet ${expanded ? 'expanded' : ''}`} aria-label={(expanded ? t.detailLabel : t.sheetPreviewLabel)(getBuildingCopy(locale, selected.id, selected.name).name)}>
-          <button className="sheet-handle" onClick={() => setExpanded(!expanded)} aria-label={expanded ? t.collapseDetails : t.expandDetails}><span /></button>
+          <button ref={sheetHandleRef} className="sheet-handle" onClick={() => setExpanded(!expanded)} aria-label={expanded ? t.collapseDetails : t.expandDetails} aria-expanded={expanded}><span /></button>
           {expanded
-            ? <DetailContent building={selected} locale={locale} t={t} onClose={() => setExpanded(false)} sheet />
+            ? <DetailContent building={selected} locale={locale} t={t} onClose={() => { setExpanded(false); window.requestAnimationFrame(() => sheetHandleRef.current?.focus()) }} backRef={detailBackRef} sheet />
             : <PreviewCard building={selected} locale={locale} t={t} onDetails={() => setExpanded(true)} onClose={() => setSelectedId(null)} sheet />}
         </aside>
       )}
@@ -867,7 +1005,10 @@ function PreviewCard({ building, locale, t, onDetails, onClose, sheet = false }:
   return (
     <section className={sheet ? 'sheet-preview' : 'preview-card'} aria-label={t.previewLabel(copy.name)}>
       <button className="icon-button close-preview" onClick={onClose} aria-label={t.clearSelection}><Icon name="close" /></button>
-      <p className="eyebrow">{t.types[building.buildingType]}</p>
+      <div className="preview-meta">
+        <p className="eyebrow">{t.types[building.buildingType]}</p>
+        <span className="record-index">SGM / {String(buildings.indexOf(building) + 1).padStart(2, '0')}</span>
+      </div>
       <h1>{copy.name}</h1>
       <p className="architects">{copy.architectCredit}</p>
       <button className="primary-button" onClick={onDetails}>{t.viewDetails} <Icon name="arrow" /></button>
@@ -875,14 +1016,14 @@ function PreviewCard({ building, locale, t, onDetails, onClose, sheet = false }:
   )
 }
 
-function DetailContent({ building, locale, t, onClose, sheet = false }: LocalizedProps & { onClose: () => void; sheet?: boolean }) {
+function DetailContent({ building, locale, t, onClose, backRef, sheet = false }: LocalizedProps & { onClose: () => void; backRef: RefObject<HTMLButtonElement | null>; sheet?: boolean }) {
   const copy = getBuildingCopy(locale, building.id, building.name)
   const mapsQuery = encodeURIComponent(`${building.coordinates[1]},${building.coordinates[0]}`)
   const searchQuery = encodeURIComponent(`${copy.name} Singapore architecture`)
   return (
     <div className="detail-content">
       <div className="detail-heading">
-        <button className="back-button" onClick={onClose}>{sheet ? t.collapse : t.backToMap}</button>
+        <button ref={backRef} className="back-button" onClick={onClose}>{sheet ? t.collapse : t.backToMap}</button>
         <span className="record-index">SGM / {String(buildings.indexOf(building) + 1).padStart(2, '0')}</span>
       </div>
       <div className="image-placeholder" aria-label={t.photoNotPublished}>
