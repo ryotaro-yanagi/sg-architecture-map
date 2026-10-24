@@ -128,6 +128,10 @@ const applyMapPalette = (map: MapLibreMap, palette: MapPalette) => {
   const layers = map.getStyle().layers ?? []
   layers.forEach((layer) => {
     const id = layer.id
+    if (layer.type === 'symbol' && id.startsWith('poi_')) {
+      map.setLayoutProperty(id, 'visibility', 'none')
+      return
+    }
     if (layer.type === 'line' && /^(road|bridge|tunnel)_/.test(id)) {
       const color = id.includes('casing')
         ? palette.roadCasing
