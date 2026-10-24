@@ -439,9 +439,8 @@ function App() {
       .addTo(map)
     selectedMarkerRef.current = marker
 
-    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     image.animate([{ opacity: 0 }, { opacity: 1 }], {
-      duration: reducedMotion ? 120 : 180, easing: 'ease-out', fill: 'both',
+      duration: 280, easing: 'ease-out', fill: 'both',
     })
     return () => {
       marker.remove()
