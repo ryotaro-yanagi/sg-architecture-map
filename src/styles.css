@@ -51,7 +51,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
 }
 
 .app, .map { position: relative; width: 100%; height: 100%; }
-.map { position: absolute; inset: 0; background: var(--paper); }
+.map { position: absolute; inset: 0; z-index: 0; background: var(--paper); }
 .maplibregl-canvas:focus-visible { outline: 3px solid var(--focus-ring); outline-offset: -4px; }
 .maplibregl-ctrl-bottom-left { bottom: 4px; left: 6px; }
 .maplibregl-ctrl-bottom-right { bottom: 84px; right: 10px; }
