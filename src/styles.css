@@ -26,6 +26,29 @@
   --vs-divider-width: 1px;
 }
 
+.color-system-living {
+  --paper: #f7f7f7;
+  --paper-strong: #ffffff;
+  --ink: #242424;
+  --muted: #666666;
+  --line: #d8d8d8;
+  --accent: #242424;
+  --focus-ring: #247a55;
+  --system-soft: #f0f0f0;
+  --living-green: #35946b;
+  --living-pink: #f48f94;
+  --living-yellow: #f4d65b;
+  --living-orange: #ff965c;
+}
+
+.color-system-living .map { background: var(--paper); }
+.color-system-living .preview-card,
+.color-system-living .detail-panel { background: var(--paper-strong); }
+.color-system-living .search-results button.selected {
+  background: color-mix(in srgb, var(--living-green) 16%, var(--paper-strong));
+  box-shadow: inset 3px 0 0 var(--living-green);
+}
+
 .app.locale-ja {
   --font-ui: 'LINE Seed JP', 'Hiragino Sans', 'Yu Gothic', 'YuGothic', 'Noto Sans JP', system-ui, -apple-system, sans-serif;
   --font-display: var(--font-ui);
