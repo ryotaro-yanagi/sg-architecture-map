@@ -47,10 +47,14 @@
   --vs-divider-width: 1px;
 }
 
-.typography-test.font-a { --font-ui: 'Hanken Grotesk', sans-serif; --font-display: 'Hanken Grotesk', sans-serif; }
+.typography-test.font-a { --font-ui: 'Hanken Grotesk', 'Hiragino Sans', 'Yu Gothic', system-ui, -apple-system, sans-serif; --font-display: 'Hanken Grotesk', 'Hiragino Sans', 'Yu Gothic', system-ui, -apple-system, sans-serif; }
 .typography-test.font-b { --font-ui: 'Atkinson Hyperlegible Next', sans-serif; --font-display: 'Atkinson Hyperlegible Next', sans-serif; }
 .typography-test.font-c { --font-ui: 'DM Sans', sans-serif; --font-display: 'Newsreader', serif; }
 .typography-test { font-family: var(--font-ui); }
+.app.locale-ja {
+  --font-ui: 'LINE Seed JP', 'Hiragino Sans', 'Yu Gothic', 'YuGothic', 'Noto Sans JP', system-ui, -apple-system, sans-serif;
+  --font-display: var(--font-ui);
+}
 
 .visual-cartographic {
   --paper: #fafaf7; --paper-strong: #fafaf7; --ink: #24342e; --muted: #52655c; --line: #c8d0c8; --accent: #285c50;
@@ -238,6 +242,10 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
 .maplibregl-ctrl-attrib { font-size: 10px; opacity: .8; }
 .maplibregl-ctrl-group { border-radius: 14px !important; overflow: hidden; box-shadow: 0 4px 16px rgba(40,39,36,.13) !important; }
 .maplibregl-ctrl-group button { width: var(--control-min); height: var(--control-min); }
+.map-navigation { position: absolute; z-index: 8; right: 10px; bottom: 84px; display: grid; overflow: hidden; color: var(--ink); background: var(--paper-strong); border: 1px solid var(--line); border-radius: 5px; box-shadow: none; }
+.map-navigation button { width: var(--control-min); height: var(--control-min); display: grid; place-items: center; padding: 0; color: currentColor; background: transparent; border: 0; cursor: pointer; }
+.map-navigation button + button { border-top: 1px solid var(--line); }
+.map-navigation svg { width: 20px; height: 20px; }
 
 .topbar { position: absolute; z-index: 10; top: max(14px, env(safe-area-inset-top)); left: 14px; right: 14px; display: flex; justify-content: space-between; align-items: flex-start; pointer-events: none; }
 .brand { pointer-events: auto; width: 50px; height: 50px; display: grid; place-items: center; padding: 5px; color: var(--paper-strong); background: var(--ink); border: 1px solid var(--ink); border-radius: 4px; box-shadow: none; cursor: pointer; }
@@ -267,14 +275,14 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
 
 .search-shell { position: absolute; z-index: 12; top: max(80px, calc(env(safe-area-inset-top) + 68px)); left: 14px; right: 14px; max-width: 420px; }
 .search-input-wrap { min-height: 50px; display: flex; align-items: center; gap: var(--space-3); padding: 0 4px 0 13px; background: var(--paper-strong); border: 1px solid var(--line); border-radius: 4px; box-shadow: none; }
-.search-input-wrap > svg { width: 19px; flex: 0 0 19px; color: var(--muted); }
+.search-input-wrap > svg { width: 20px; height: 20px; flex: 0 0 20px; color: var(--muted); }
 .search-input-wrap input { min-width: 0; flex: 1; border: 0; outline: 0; background: transparent; color: var(--ink); font-size: 14px; }
 .search-input-wrap input::-webkit-search-cancel-button { display: none; }
 .search-input-wrap input::placeholder { color: #77736c; }
 .icon-button { display: grid; place-items: center; width: var(--control-min); height: var(--control-min); padding: 0; border: 1px solid var(--line); border-radius: 50%; background: var(--paper-strong); cursor: pointer; }
-.icon-button svg { width: 18px; }
+.icon-button svg { width: 20px; height: 20px; }
 .icon-button.small { width: var(--control-min); height: var(--control-min); border: 0; background: transparent; }
-.icon-button.small svg { width: 16px; }
+.icon-button.small svg { width: 16px; height: 16px; }
 .search-results { max-height: min(390px, calc(100vh - 165px)); margin-top: 7px; padding: 8px; overflow: auto; background: var(--paper-strong); border: 1px solid var(--line); border-radius: 18px; box-shadow: var(--shadow); }
 .result-count { margin: 7px 10px 5px; color: var(--muted); font-size: 11px; }
 .search-results button { width: 100%; min-height: 52px; display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 10px; text-align: left; color: var(--ink); background: transparent; border: 0; border-top: 1px solid var(--line); cursor: pointer; }
@@ -283,20 +291,22 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
 .search-results button span { display: grid; gap: 3px; }
 .search-results strong { font: 500 16px/1.2 var(--font-display); }
 .search-results small { color: var(--muted); font-size: 11px; }
-.search-results svg { width: 18px; flex: 0 0 18px; }
+.search-results svg { width: 20px; height: 20px; flex: 0 0 20px; }
 
 .locate-button { position: absolute; z-index: 8; right: 14px; bottom: max(98px, calc(env(safe-area-inset-bottom) + 88px)); display: flex; align-items: center; gap: 8px; min-height: var(--control-min); padding: 0 14px; color: var(--ink); background: var(--paper-strong); border: 1px solid var(--line); border-radius: 4px; box-shadow: none; cursor: pointer; transition: transform .2s; }
 .locate-button:hover { transform: translateY(-2px); }
 .locate-button:disabled { opacity: .7; cursor: wait; }
-.locate-button svg { width: 18px; }
+.locate-button svg { width: 20px; height: 20px; }
 .locate-button span { font-size: 12px; font-weight: 600; }
 .data-note { position: absolute; z-index: 6; right: 15px; bottom: max(70px, calc(env(safe-area-inset-bottom) + 60px)); max-width: calc(100% - 30px); color: #4f514d; font-size: 12px; line-height: 1.35; letter-spacing: .02em; text-shadow: 0 1px 2px #fff; }
 .variant-b.has-selection:not(.details-expanded) .locate-button { bottom: calc(var(--sheet-collapsed-height) + 22px); }
 .variant-b.has-selection:not(.details-expanded) .data-note { bottom: calc(var(--sheet-collapsed-height) + 76px); }
-.variant-b.has-selection:not(.details-expanded) .maplibregl-ctrl-bottom-right { bottom: calc(var(--sheet-collapsed-height) + 82px); }
+.variant-b.has-selection:not(.details-expanded) .maplibregl-ctrl-bottom-right,
+.variant-b.has-selection:not(.details-expanded) .map-navigation { bottom: calc(var(--sheet-collapsed-height) + 82px); }
 .details-expanded .locate-button,
 .details-expanded .data-note,
 .details-expanded .maplibregl-ctrl-bottom-right,
+.details-expanded .map-navigation,
 .details-expanded .search-shell { visibility: hidden; }
 .details-expanded .experiment-switch { display: none; }
 .user-location-marker { width: 17px; height: 17px; background: #3e7e91; border: 3px solid #fff; border-radius: 50%; box-shadow: 0 0 0 5px rgba(62,126,145,.22), 0 2px 6px rgba(0,0,0,.25); }
@@ -309,12 +319,13 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
 .preview-card h1, .sheet-preview h1, .detail-content h1 { margin: 0; padding-right: 34px; font: 500 clamp(25px, 7vw, 38px)/.98 var(--font-display); letter-spacing: -.025em; }
 .architects { margin: 9px 40px 18px 0; color: var(--muted); font-size: 12px; line-height: 1.4; }
 .primary-button { min-height: 48px; display: inline-flex; justify-content: center; align-items: center; gap: 12px; padding: 0 16px; color: #fff; background: var(--ink); border: 0; border-radius: 13px; font-size: 12px; font-weight: 600; text-decoration: none; cursor: pointer; }
-.primary-button svg { width: 17px; }
+.primary-button svg { width: 20px; height: 20px; }
 
 .detail-panel { position: absolute; z-index: 14; inset: 0; overflow-y: auto; background: var(--paper); animation: slide-in .32s ease-out; }
 .detail-content { width: 100%; max-width: 68ch; min-height: 100%; margin-inline: auto; padding: max(18px, env(safe-area-inset-top)) 18px max(30px, calc(env(safe-area-inset-bottom) + 20px)); overflow-wrap: anywhere; }
 .detail-heading { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
-.back-button { min-height: var(--control-min); padding: 0 14px; border: 1px solid var(--line); border-radius: 12px; background: transparent; color: var(--ink); font-size: 12px; cursor: pointer; }
+.back-button { min-height: var(--control-min); display: inline-flex; align-items: center; gap: 8px; padding: 0 14px; border: 1px solid var(--line); border-radius: 12px; background: transparent; color: var(--ink); font-size: 12px; cursor: pointer; }
+.back-button svg { width: 16px; height: 16px; flex: 0 0 16px; }
 .record-index { color: var(--muted); font-size: 10px; letter-spacing: .12em; }
 .image-placeholder { aspect-ratio: 16/9; display: grid; place-content: center; justify-items: center; gap: 7px; margin-bottom: 24px; color: var(--muted); background: var(--system-soft); border-radius: 18px; text-align: center; }
 .image-placeholder span { font-size: 10px; font-weight: 600; letter-spacing: .16em; }
@@ -328,7 +339,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
 .actions { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); }
 .actions a { min-height: 48px; display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 0 14px; color: var(--ink); border: 1px solid var(--line); border-radius: 13px; font-size: 12px; font-weight: 600; text-decoration: none; }
 .actions a.primary-button { grid-column: 1/-1; color: #fff; border: 0; }
-.actions svg, .sources svg { width: 15px; }
+.actions svg { width: 20px; height: 20px; flex: 0 0 20px; }
+.sources svg { width: 16px; height: 16px; flex: 0 0 16px; }
 .sources { display: grid; gap: 0; margin-top: 28px; padding-top: 13px; border-top: 1px solid var(--line); }
 .sources p { margin: 0 0 5px; color: var(--muted); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; }
 .sources a { min-height: var(--control-min); display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 9px 0; color: var(--ink); border-bottom: 1px solid var(--line); font-size: 12px; line-height: 1.4; text-decoration: underline; text-underline-offset: .18em; }
@@ -419,6 +431,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
 .typography-test.type-scale-large .notice { font-size: 16px; line-height: 20px; letter-spacing: 0; }
 .typography-test.type-scale-large .eyebrow,
 .typography-test.type-scale-large .sources p { letter-spacing: 0; }
+.typography-test.type-scale-large .bottom-sheet.expanded .verification-note { line-height: 22px; }
 .typography-test.type-scale-large { --sheet-collapsed-height: min(286px, 43dvh); }
 .typography-test.type-scale-large .facts div { grid-template-columns: 92px 1fr; }
 .typography-test.type-scale-govuk .brand-title,
@@ -458,13 +471,13 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
 .axis-shape-square .brand-mark { border-radius: 0; }
 .axis-shape-round .brand-mark { border-radius: 50%; }
 .axis-shape-square .icon-button,
-.axis-shape-square .notice,
-.axis-shape-square .experiment-switch,
-.axis-shape-square .experiment-toggle { border-radius: 5px; }
+.axis-shape-square .notice { border-radius: 5px; }
 .axis-shape-round .icon-button { border-radius: 50%; }
 .axis-shape-round .notice { border-radius: 17px; }
 .axis-shape-square .maplibregl-ctrl-group { border-radius: 5px !important; }
+.axis-shape-square .map-navigation { border-radius: 5px; }
 .axis-shape-round .maplibregl-ctrl-group { border-radius: 18px !important; }
+.axis-shape-round .map-navigation { border-radius: 18px; }
 
 .axis-type-light {
   --vs-title-weight: 500;
@@ -540,12 +553,14 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
   --sheet-collapsed-height: min(336px, 50dvh);
 }
 .axis-spacing-compact .facts div { padding: 10px 0; }
+.axis-spacing-compact .bottom-sheet.expanded .detail-content { --vs-section-space: 20px; }
 .axis-spacing-spacious .facts div { padding: 17px 0; }
 .axis-spacing-compact .actions { gap: 6px; }
 .axis-spacing-spacious .actions { gap: 12px; }
 .axis-spacing-compact .search-results button { padding: 9px 8px; }
 .axis-spacing-spacious .search-results button { padding: 16px 13px; }
 
+/* System Lab is development tooling; keep its geometry outside the Square/Round comparison. */
 .experiment-switch { border-radius: 8px; }
 .experiment-toggle { min-width: 210px; border-radius: 7px; }
 .experiment-toggle strong { font-size: 9px; }
@@ -577,7 +592,11 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
 .axis-shape-square.axis-surface-flat .primary-button,
 .axis-shape-square.axis-surface-flat .back-button,
 .axis-shape-square.axis-surface-flat .actions a { border-radius: 3px; }
+.axis-shape-square.axis-surface-flat .actions a:not(.primary-button) {
+  border-color: color-mix(in srgb, var(--ink) 40%, transparent);
+}
 .map-mode-satellite .maplibregl-ctrl-group,
+.map-mode-satellite .map-navigation,
 .map-mode-satellite .maplibregl-ctrl-attrib { background: color-mix(in srgb, var(--paper-strong) 90%, transparent); }
 .map-mode-satellite .data-note { padding: 4px 7px; background: color-mix(in srgb, var(--paper-strong) 86%, transparent); text-shadow: none; }
 
@@ -616,13 +635,17 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
   .panel-a { inset: 0 0 0 auto; width: min(470px, 42vw); box-shadow: -14px 0 45px rgba(45,42,36,.16); }
   .detail-content { padding: 24px 28px 38px; }
   .bottom-sheet { left: 50%; right: auto; width: min(660px, calc(100% - 44px)); transform: translateX(-50%); }
+  .axis-shape-square.axis-surface-flat .bottom-sheet { left: 50%; right: auto; width: min(660px, calc(100% - 44px)); }
   .bottom-sheet.expanded { height: min(760px, calc(100% - 40px)); }
   .bottom-sheet .detail-content { padding-left: 34px; padding-right: 34px; }
   .locate-button { right: 22px; bottom: 98px; }
   .data-note { right: 24px; bottom: 75px; }
-  .maplibregl-ctrl-bottom-right { bottom: 152px; right: 14px; }
-  .variant-b .maplibregl-ctrl-bottom-right { bottom: 250px; }
-  .variant-b.has-selection:not(.details-expanded) .maplibregl-ctrl-bottom-right { bottom: calc(var(--sheet-collapsed-height) + 24px); }
+  .maplibregl-ctrl-bottom-right,
+  .map-navigation { right: 14px; bottom: 152px; }
+  .variant-b .maplibregl-ctrl-bottom-right,
+  .variant-b .map-navigation { bottom: 250px; }
+  .variant-b.has-selection:not(.details-expanded) .maplibregl-ctrl-bottom-right,
+  .variant-b.has-selection:not(.details-expanded) .map-navigation { bottom: calc(var(--sheet-collapsed-height) + 24px); }
   .variant-b.has-selection:not(.details-expanded) .locate-button { bottom: calc(var(--sheet-collapsed-height) + 24px); }
   .variant-b.has-selection:not(.details-expanded) .data-note { bottom: calc(var(--sheet-collapsed-height) + 78px); }
 }

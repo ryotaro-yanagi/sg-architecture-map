@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { ArrowLeft, ArrowRight, ArrowSquareOut, CaretDown, Crosshair, MagnifyingGlass, Minus, NavigationArrow, Plus, X } from '@phosphor-icons/react'
 import * as maplibregl from 'maplibre-gl'
 import type { GeoJSONSource, Map as MapLibreMap } from 'maplibre-gl'
 import data from './data/buildings.json'
@@ -17,7 +18,6 @@ type VisualLabChoice = 'baseline' | 'signal' | 'tile' | 'orbit'
 type ShapeAxis = 'square' | 'round'
 type MapColorAxis = 'neutral' | 'colored'
 type TypographyAxis = 'light' | 'bold'
-type PinAxis = 'minimal' | 'symbolic'
 type SurfaceAxis = 'flat' | 'layered'
 type SpacingAxis = 'compact' | 'spacious'
 type ColorSystem = 'civic' | 'graphic' | 'archive'
@@ -180,10 +180,6 @@ const visualAxisChoices = {
     label: 'TYPOGRAPHY',
     values: { light: 'Light', bold: 'Bold' } satisfies Record<TypographyAxis, string>,
   },
-  pin: {
-    label: 'MAP PIN',
-    values: { minimal: 'Minimal', symbolic: 'Symbolic' } satisfies Record<PinAxis, string>,
-  },
   surface: {
     label: 'SURFACE',
     values: { flat: 'Flat', layered: 'Layered' } satisfies Record<SurfaceAxis, string>,
@@ -282,102 +278,6 @@ const getInitialVisualLabChoice = (): VisualLabChoice => {
   return getRequestedVisualLab()
 }
 
-const createMarkerImage = (choice: Exclude<VisualLabChoice, 'baseline'>, selected: boolean): ImageData => {
-  const canvas = document.createElement('canvas')
-  canvas.width = 64
-  canvas.height = 64
-  const context = canvas.getContext('2d')!
-  const palette = labMapChoices[choice].pin
-  context.lineJoin = 'round'
-  context.lineCap = 'round'
-
-  if (choice === 'signal') {
-    context.beginPath()
-    context.moveTo(32, 5)
-    context.lineTo(57, 32)
-    context.lineTo(32, 59)
-    context.lineTo(7, 32)
-    context.closePath()
-    context.fillStyle = selected ? palette.selected : palette.default
-    context.fill()
-    context.lineWidth = 5
-    context.strokeStyle = palette.stroke
-    context.stroke()
-    context.beginPath()
-    context.arc(32, 32, selected ? 8 : 6, 0, Math.PI * 2)
-    context.fillStyle = '#fffaf0'
-    context.fill()
-  } else if (choice === 'tile') {
-    context.save()
-    context.translate(32, 32)
-    context.rotate(Math.PI / 4)
-    context.beginPath()
-    context.roundRect(-20, -20, 40, 40, 7)
-    context.fillStyle = selected ? palette.selected : palette.default
-    context.fill()
-    context.lineWidth = 5
-    context.strokeStyle = palette.stroke
-    context.stroke()
-    context.restore()
-    context.fillStyle = selected ? palette.stroke : '#f8f4e9'
-    context.fillRect(28, 27, 8, 16)
-  } else {
-    context.beginPath()
-    context.arc(31, 33, 20, 0, Math.PI * 2)
-    context.fillStyle = '#f8faef'
-    context.fill()
-    context.lineWidth = selected ? 8 : 6
-    context.strokeStyle = selected ? palette.selected : palette.default
-    context.stroke()
-    context.beginPath()
-    context.arc(selected ? 31 : 42, selected ? 33 : 22, selected ? 7 : 5, 0, Math.PI * 2)
-    context.fillStyle = selected ? palette.default : palette.selected
-    context.fill()
-  }
-
-  return context.getImageData(0, 0, 64, 64)
-}
-
-const addLabMarkerImages = (map: MapLibreMap) => {
-  ;(['signal', 'tile', 'orbit'] as const).forEach((choice) => {
-    ;([false, true] as const).forEach((selected) => {
-      const id = `sgm-${choice}-${selected ? 'selected' : 'default'}`
-      if (!map.hasImage(id)) map.addImage(id, createMarkerImage(choice, selected), { pixelRatio: 2 })
-    })
-  })
-}
-
-const createAxisMarkerImage = (mapColor: MapColorAxis, selected: boolean): ImageData => {
-  const canvas = document.createElement('canvas')
-  canvas.width = 64
-  canvas.height = 64
-  const context = canvas.getContext('2d')!
-  const pin = axisMapChoices[mapColor].pin
-  context.save()
-  context.translate(32, 32)
-  context.rotate(Math.PI / 4)
-  context.beginPath()
-  context.roundRect(-20, -20, 40, 40, 5)
-  context.fillStyle = selected ? pin.selected : pin.default
-  context.fill()
-  context.lineWidth = 5
-  context.strokeStyle = pin.stroke
-  context.stroke()
-  context.restore()
-  context.fillStyle = selected ? pin.stroke : '#f9faf6'
-  context.fillRect(28, 27, 8, 17)
-  return context.getImageData(0, 0, 64, 64)
-}
-
-const addAxisMarkerImages = (map: MapLibreMap) => {
-  ;(['neutral', 'colored'] as const).forEach((mapColor) => {
-    ;([false, true] as const).forEach((selected) => {
-      const id = `sgm-axis-${mapColor}-${selected ? 'selected' : 'default'}`
-      if (!map.hasImage(id)) map.addImage(id, createAxisMarkerImage(mapColor, selected), { pixelRatio: 2 })
-    })
-  })
-}
-
 const setPaint = (map: MapLibreMap, layerId: string, property: string, value: unknown) => {
   if (map.getLayer(layerId)) map.setPaintProperty(layerId, property as never, value as never)
 }
@@ -431,77 +331,22 @@ const applyAxisMapTheme = (map: MapLibreMap, choice: MapColorAxis) => {
   applyMapPalette(map, axisMapChoices[choice])
 }
 
-const applyAxisPinTheme = (map: MapLibreMap, pinChoice: PinAxis, mapColor: MapColorAxis) => {
+const applySoftHaloTheme = (map: MapLibreMap, mapColor: MapColorAxis) => {
   if (!map.getLayer('building-points')) return
   const pin = axisMapChoices[mapColor].pin
-  map.setPaintProperty('building-halo', 'circle-color', pin.halo)
-  map.setPaintProperty('building-halo', 'circle-radius', ['case', ['get', 'selected'], pin.selectedRadius + 6, pin.radius + 4])
-  map.setPaintProperty('building-halo', 'circle-opacity', ['case', ['get', 'selected'], .88, .62])
+  map.setPaintProperty('building-halo', 'circle-color', ['case', ['get', 'selected'], pin.selected, pin.default])
   map.setPaintProperty('building-labels', 'text-color', pin.stroke)
   map.setPaintProperty('building-labels', 'text-halo-color', pin.halo)
-
-  if (pinChoice === 'minimal') {
-    map.setPaintProperty('building-symbols', 'icon-opacity', 0)
-    map.setPaintProperty('building-points', 'circle-opacity', 1)
-    map.setPaintProperty('building-points', 'circle-stroke-opacity', 1)
-    map.setPaintProperty('building-points', 'circle-color', ['case', ['get', 'selected'], pin.selected, pin.default])
-    map.setPaintProperty('building-points', 'circle-stroke-color', pin.stroke)
-    map.setPaintProperty('building-points', 'circle-radius', ['case', ['get', 'selected'], pin.selectedRadius, pin.radius])
-    return
-  }
-
-  map.setPaintProperty('building-points', 'circle-opacity', 0)
-  map.setPaintProperty('building-points', 'circle-stroke-opacity', 0)
-  map.setPaintProperty('building-symbols', 'icon-opacity', 1)
-  map.setLayoutProperty('building-symbols', 'icon-image', ['case', ['get', 'selected'], `sgm-axis-${mapColor}-selected`, `sgm-axis-${mapColor}-default`])
+  map.setPaintProperty('building-points', 'circle-color', ['case', ['get', 'selected'], pin.selected, pin.default])
 }
 
-const applyMapMode = (map: MapLibreMap, mode: MapMode, pinChoice: PinAxis) => {
+const applyMapMode = (map: MapLibreMap, mode: MapMode) => {
   if (map.getLayer('sgm-satellite')) map.setLayoutProperty('sgm-satellite', 'visibility', mode === 'satellite' ? 'visible' : 'none')
   ;(map.getStyle().layers ?? []).forEach((layer) => {
     if (layer.type === 'symbol' && layer.id.startsWith('poi_')) {
       setPaint(map, layer.id, 'icon-opacity', mode === 'mono' ? .12 : mode === 'satellite' ? 0 : .72)
     }
   })
-  if (mode !== 'satellite' || pinChoice !== 'minimal' || !map.getLayer('building-points')) return
-  map.setPaintProperty('building-halo', 'circle-color', 'rgba(255,255,255,.96)')
-  map.setPaintProperty('building-halo', 'circle-opacity', ['case', ['get', 'selected'], .96, .82])
-  map.setPaintProperty('building-points', 'circle-color', ['case', ['get', 'selected'], '#ff6b45', '#f7f4e9'])
-  map.setPaintProperty('building-points', 'circle-stroke-color', '#10231e')
-  map.setPaintProperty('building-labels', 'text-color', '#f8f6ef')
-  map.setPaintProperty('building-labels', 'text-halo-color', '#10231e')
-  map.setPaintProperty('building-labels', 'text-halo-width', 3)
-}
-
-const applyPinTheme = (map: MapLibreMap, choice: VisualChoice, mapChoice: MapChoice, labChoice: VisualLabChoice = 'baseline') => {
-  if (!map.getLayer('building-points')) return
-  if (labChoice !== 'baseline') {
-    const pin = labMapChoices[labChoice].pin
-    map.setPaintProperty('building-halo', 'circle-color', pin.halo)
-    map.setPaintProperty('building-halo', 'circle-radius', ['case', ['get', 'selected'], pin.selectedRadius + 8, pin.radius + 5])
-    map.setPaintProperty('building-halo', 'circle-opacity', ['case', ['get', 'selected'], .9, .58])
-    map.setPaintProperty('building-points', 'circle-opacity', 0)
-    map.setPaintProperty('building-points', 'circle-stroke-opacity', 0)
-    map.setPaintProperty('building-symbols', 'icon-opacity', 1)
-    map.setLayoutProperty('building-symbols', 'icon-image', ['case', ['get', 'selected'], `sgm-${labChoice}-selected`, `sgm-${labChoice}-default`])
-    map.setPaintProperty('building-labels', 'text-color', pin.stroke)
-    map.setPaintProperty('building-labels', 'text-halo-color', pin.halo)
-    return
-  }
-  const pin = choice === 'civic'
-    ? mapChoices[mapChoice].pin
-    : { ...visualChoices[choice].pin, radius: 6, selectedRadius: 8 }
-  map.setPaintProperty('building-symbols', 'icon-opacity', 0)
-  map.setPaintProperty('building-points', 'circle-opacity', 1)
-  map.setPaintProperty('building-points', 'circle-stroke-opacity', 1)
-  map.setPaintProperty('building-halo', 'circle-opacity', 1)
-  map.setPaintProperty('building-halo', 'circle-color', pin.halo)
-  map.setPaintProperty('building-points', 'circle-color', ['case', ['get', 'selected'], pin.selected, pin.default])
-  map.setPaintProperty('building-points', 'circle-stroke-color', pin.stroke)
-  map.setPaintProperty('building-labels', 'text-color', pin.stroke)
-  map.setPaintProperty('building-labels', 'text-halo-color', pin.halo)
-  map.setPaintProperty('building-points', 'circle-radius', ['case', ['get', 'selected'], pin.selectedRadius, pin.radius])
-  map.setPaintProperty('building-halo', 'circle-radius', ['case', ['get', 'selected'], pin.selectedRadius + 5, pin.radius + 4])
 }
 
 const applyTypeScaleToMap = (map: MapLibreMap, choice: TypeScaleChoice) => {
@@ -536,17 +381,6 @@ const featureCollection = (selectedId: string | null, locale: Locale): GeoJSON.F
   })),
 })
 
-const Icon = ({ name }: { name: 'search' | 'locate' | 'arrow' | 'close' | 'external' }) => {
-  const paths = {
-    search: <><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></>,
-    locate: <><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></>,
-    arrow: <><path d="M5 12h14M14 7l5 5-5 5"/></>,
-    close: <><path d="m6 6 12 12M18 6 6 18"/></>,
-    external: <><path d="M14 5h5v5M19 5l-8 8"/><path d="M17 13v5a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1h5"/></>,
-  }
-  return <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">{paths[name]}</svg>
-}
-
 const BrandMark = ({ choice }: { choice: IdentityChoice }) => {
   const drawings = {
     plot: <><path d="M7 7h10v10H7z"/><circle cx="17" cy="7" r="2.25" fill="currentColor" stroke="none"/><path d="M4 20h16"/></>,
@@ -563,12 +397,10 @@ function App() {
   const requestedSelectedId = useMemo(getRequestedSelectedId, [])
   const mapContainer = useRef<HTMLDivElement>(null)
   const mapRef = useRef<MapLibreMap | null>(null)
-  const visualChoiceRef = useRef<VisualChoice>('civic')
   const mapChoiceRef = useRef<MapChoice>('m1')
   const typeScaleChoiceRef = useRef<TypeScaleChoice>('sgm')
   const visualLabChoiceRef = useRef<VisualLabChoice>('baseline')
   const mapColorAxisRef = useRef<MapColorAxis>(getAxisValue('mapColor', ['neutral', 'colored'], 'neutral'))
-  const pinAxisRef = useRef<PinAxis>(getAxisValue('pin', ['minimal', 'symbolic'], 'minimal'))
   const variantRef = useRef<Variant>('b')
   const userMarkerRef = useRef<maplibregl.Marker | null>(null)
   const detailBackRef = useRef<HTMLButtonElement>(null)
@@ -594,7 +426,6 @@ function App() {
   const [shapeAxis, setShapeAxis] = useState<ShapeAxis>(() => getAxisValue('shape', ['square', 'round'], 'square'))
   const [mapColorAxis, setMapColorAxis] = useState<MapColorAxis>(() => mapColorAxisRef.current)
   const [typographyAxis, setTypographyAxis] = useState<TypographyAxis>(() => getAxisValue('weight', ['light', 'bold'], 'light'))
-  const [pinAxis, setPinAxis] = useState<PinAxis>(() => pinAxisRef.current)
   const [surfaceAxis, setSurfaceAxis] = useState<SurfaceAxis>(() => getAxisValue('surface', ['flat', 'layered'], 'flat'))
   const [spacingAxis, setSpacingAxis] = useState<SpacingAxis>(() => getAxisValue('spacing', ['compact', 'spacious'], 'compact'))
   const [colorSystem, setColorSystem] = useState<ColorSystem>(() => getAxisValue('color', ['civic', 'graphic', 'archive'], 'archive'))
@@ -626,15 +457,19 @@ function App() {
   }, [expanded, selectedId])
 
   useEffect(() => {
-    if (locale !== 'en') return
-    const url = new URL(window.location.href)
-    url.searchParams.set('font', fontChoice)
-    window.history.replaceState({}, '', url)
+    if (locale === 'en') {
+      const url = new URL(window.location.href)
+      url.searchParams.set('font', fontChoice)
+      window.history.replaceState({}, '', url)
+    }
     setFontsReady(false)
-    const checks = fontChoices[fontChoice].checks
+    const checks = locale === 'ja'
+      ? ['400 16px "LINE Seed JP"', '700 16px "LINE Seed JP"']
+      : fontChoices[fontChoice].checks
+    const sample = locale === 'ja' ? '建築かなカナABC123' : undefined
     const fontSet = document.fonts
     const loading = typeof fontSet.load === 'function'
-      ? Promise.all(checks.map((font) => fontSet.load(font)))
+      ? Promise.all(checks.map((font) => fontSet.load(font, sample)))
       : fontSet.ready
     void loading.then(() => {
       setFontsReady(checks.every((font) => document.fonts.check(font)))
@@ -657,10 +492,10 @@ function App() {
       locale: t.mapControls,
     })
 
-    map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'bottom-right')
     map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-left')
 
     map.on('load', () => {
+      const markerTransition = { duration: motionDuration(150) }
       map.addSource('buildings', { type: 'geojson', data: featureCollection(selectedId, locale) })
       map.addSource('sgm-satellite', {
         type: 'raster',
@@ -668,24 +503,31 @@ function App() {
         tileSize: 256,
         attribution: 'Imagery &copy; Esri and contributors',
       })
-      addLabMarkerImages(map)
-      addAxisMarkerImages(map)
       map.addLayer({
         id: 'building-hit-targets', type: 'circle', source: 'buildings',
+        layout: { 'circle-sort-key': ['case', ['get', 'selected'], 1, 0] },
         paint: { 'circle-radius': 22, 'circle-opacity': 0 },
       })
       map.addLayer({
         id: 'building-halo', type: 'circle', source: 'buildings',
-        paint: { 'circle-radius': ['case', ['get', 'selected'], 13, 10], 'circle-color': 'rgba(255,255,255,.72)', 'circle-blur': 0.45 },
+        layout: { 'circle-sort-key': ['case', ['get', 'selected'], 1, 0] },
+        paint: {
+          'circle-radius': ['case', ['get', 'selected'], 24, 18],
+          'circle-radius-transition': markerTransition,
+          'circle-color': '#32423c',
+          'circle-opacity': ['case', ['get', 'selected'], .28, .18],
+          'circle-opacity-transition': markerTransition,
+          'circle-blur': .72,
+        },
       })
       map.addLayer({
         id: 'building-points', type: 'circle', source: 'buildings',
-        paint: { 'circle-radius': ['case', ['get', 'selected'], 8, 6], 'circle-color': ['case', ['get', 'selected'], '#ef6f51', '#f7f1e7'], 'circle-stroke-color': '#282724', 'circle-stroke-width': 1.7 },
-      })
-      map.addLayer({
-        id: 'building-symbols', type: 'symbol', source: 'buildings',
-        layout: { 'icon-image': 'sgm-signal-default', 'icon-size': 1, 'icon-allow-overlap': true, 'icon-ignore-placement': true },
-        paint: { 'icon-opacity': 0 },
+        layout: { 'circle-sort-key': ['case', ['get', 'selected'], 1, 0] },
+        paint: {
+          'circle-radius': ['case', ['get', 'selected'], 9, 6],
+          'circle-radius-transition': markerTransition,
+          'circle-color': ['case', ['get', 'selected'], '#c85f3f', '#32423c'],
+        },
       })
       map.addLayer({
         id: 'building-labels', type: 'symbol', source: 'buildings', minzoom: 13.2,
@@ -698,25 +540,28 @@ function App() {
         paint: { 'raster-saturation': -.22, 'raster-contrast': .08, 'raster-brightness-max': .9, 'raster-fade-duration': 180 },
       }, 'building-hit-targets')
       applyMapTheme(map, mapChoiceRef.current, visualLabChoiceRef.current)
-      applyPinTheme(map, visualChoiceRef.current, mapChoiceRef.current, visualLabChoiceRef.current)
       applyTypeScaleToMap(map, locale === 'en' ? typeScaleChoiceRef.current : 'current')
       applyAxisMapTheme(map, mapColorAxisRef.current)
-      applyAxisPinTheme(map, pinAxisRef.current, mapColorAxisRef.current)
-      applyMapMode(map, mapMode, pinAxisRef.current)
+      applySoftHaloTheme(map, mapColorAxisRef.current)
+      applyMapMode(map, mapMode)
       const deepLinkedBuilding = buildings.find((building) => building.id === requestedSelectedId)
       if (deepLinkedBuilding && !restoredState) {
         window.requestAnimationFrame(() => revealBuilding(map, deepLinkedBuilding.coordinates, variantRef.current))
       }
 
       map.on('click', (event) => {
-        const features = map.queryRenderedFeatures(event.point, { layers: ['building-hit-targets', 'building-symbols', 'building-points'] })
-        const id = features[0]?.properties?.id as string | undefined
-        if (id) {
-          setSelectedId(id)
+        const nearest = buildings
+          .map((building) => {
+            const point = map.project(building.coordinates)
+            return { building, distance: Math.hypot(point.x - event.point.x, point.y - event.point.y) }
+          })
+          .filter(({ distance }) => distance <= 22)
+          .sort((a, b) => a.distance - b.distance)[0]?.building
+        if (nearest) {
+          setSelectedId(nearest.id)
           setExpanded(false)
           setSearchOpen(false)
-          const building = buildings.find((candidate) => candidate.id === id)
-          if (building) window.requestAnimationFrame(() => revealBuilding(map, building.coordinates, variantRef.current))
+          window.requestAnimationFrame(() => revealBuilding(map, nearest.coordinates, variantRef.current))
         }
       })
       map.on('mouseenter', 'building-hit-targets', () => { map.getCanvas().style.cursor = 'pointer' })
@@ -744,20 +589,9 @@ function App() {
     const map = mapRef.current
     if (map?.isStyleLoaded()) {
       applyAxisMapTheme(map, mapColorAxis)
-      applyAxisPinTheme(map, pinAxisRef.current, mapColorAxis)
+      applySoftHaloTheme(map, mapColorAxis)
     }
   }, [mapColorAxis])
-
-  useEffect(() => {
-    pinAxisRef.current = pinAxis
-    const url = new URL(window.location.href)
-    url.searchParams.set('pin', pinAxis)
-    window.history.replaceState({}, '', url)
-    if (mapRef.current?.isStyleLoaded()) {
-      applyAxisPinTheme(mapRef.current, pinAxis, mapColorAxisRef.current)
-      applyMapMode(mapRef.current, mapMode, pinAxis)
-    }
-  }, [mapMode, pinAxis])
 
   useEffect(() => {
     const url = new URL(window.location.href)
@@ -800,8 +634,8 @@ function App() {
     const map = mapRef.current
     if (!map?.isStyleLoaded()) return
     applyAxisMapTheme(map, derivedMapColor)
-    applyAxisPinTheme(map, pinAxisRef.current, derivedMapColor)
-    applyMapMode(map, mapMode, pinAxisRef.current)
+    applySoftHaloTheme(map, derivedMapColor)
+    applyMapMode(map, mapMode)
   }, [mapMode])
 
   useEffect(() => {
@@ -890,19 +724,17 @@ function App() {
     { key: 'mapMode', meta: visualAxisChoices.mapMode, current: mapMode, select: (value: string) => setMapMode(value as MapMode) },
     { key: 'shape', meta: visualAxisChoices.shape, current: shapeAxis, select: (value: string) => setShapeAxis(value as ShapeAxis) },
     { key: 'typography', meta: visualAxisChoices.typography, current: typographyAxis, select: (value: string) => setTypographyAxis(value as TypographyAxis) },
-    { key: 'pin', meta: visualAxisChoices.pin, current: pinAxis, select: (value: string) => setPinAxis(value as PinAxis) },
     { key: 'surface', meta: visualAxisChoices.surface, current: surfaceAxis, select: (value: string) => setSurfaceAxis(value as SurfaceAxis) },
     { key: 'spacing', meta: visualAxisChoices.spacing, current: spacingAxis, select: (value: string) => setSpacingAxis(value as SpacingAxis) },
   ]
 
   return (
     <main
-      className={`app variant-${variant} ${selected ? 'has-selection' : ''} ${expanded ? 'details-expanded' : ''} visual-study visual-${visualChoice} map-${mapChoice} lab-${visualLabChoice} type-scale-${typeScaleChoice} type-scale-large typography-test font-${fontChoice} color-system-${colorSystem} identity-${identityChoice} map-mode-${mapMode} axis-shape-${shapeAxis} axis-map-${mapColorAxis} axis-type-${typographyAxis} axis-pin-${pinAxis} axis-surface-${surfaceAxis} axis-spacing-${spacingAxis}`}
+      className={`app locale-${locale} variant-${variant} ${selected ? 'has-selection' : ''} ${expanded ? 'details-expanded' : ''} visual-study visual-${visualChoice} map-${mapChoice} lab-${visualLabChoice} type-scale-${typeScaleChoice} type-scale-large typography-test font-${fontChoice} color-system-${colorSystem} identity-${identityChoice} map-mode-${mapMode} axis-shape-${shapeAxis} axis-map-${mapColorAxis} axis-type-${typographyAxis} axis-surface-${surfaceAxis} axis-spacing-${spacingAxis}`}
       data-font-ready={fontsReady}
       data-shape={shapeAxis}
       data-map-color={mapColorAxis}
       data-typography={typographyAxis}
-      data-pin={pinAxis}
       data-surface={surfaceAxis}
       data-spacing={spacingAxis}
     >
@@ -919,8 +751,8 @@ function App() {
             <button className={variant === 'b' ? 'active' : ''} onClick={() => setVariant('b')} aria-pressed={variant === 'b'}>B</button>
           </div>
           <nav className="language-switch" aria-label={t.languageSwitcher}>
-            <a className={locale === 'en' ? 'active' : ''} href={localeHref('en', { ui: variant, shape: shapeAxis, mapColor: mapColorAxis, mapMode, color: colorSystem, identity: identityChoice, weight: typographyAxis, pin: pinAxis, surface: surfaceAxis, spacing: spacingAxis, selected: selectedId ?? '', sheet: expanded ? 'expanded' : 'compact' })} hrefLang="en" aria-current={locale === 'en' ? 'page' : undefined} onClick={switchLanguage}>EN</a>
-            <a className={locale === 'ja' ? 'active' : ''} href={localeHref('ja', { ui: variant, shape: shapeAxis, mapColor: mapColorAxis, mapMode, color: colorSystem, identity: identityChoice, weight: typographyAxis, pin: pinAxis, surface: surfaceAxis, spacing: spacingAxis, selected: selectedId ?? '', sheet: expanded ? 'expanded' : 'compact' })} hrefLang="ja" aria-current={locale === 'ja' ? 'page' : undefined} onClick={switchLanguage}>JP</a>
+            <a className={locale === 'en' ? 'active' : ''} href={localeHref('en', { ui: variant, shape: shapeAxis, mapColor: mapColorAxis, mapMode, color: colorSystem, identity: identityChoice, weight: typographyAxis, surface: surfaceAxis, spacing: spacingAxis, selected: selectedId ?? '', sheet: expanded ? 'expanded' : 'compact' })} hrefLang="en" aria-current={locale === 'en' ? 'page' : undefined} onClick={switchLanguage}>EN</a>
+            <a className={locale === 'ja' ? 'active' : ''} href={localeHref('ja', { ui: variant, shape: shapeAxis, mapColor: mapColorAxis, mapMode, color: colorSystem, identity: identityChoice, weight: typographyAxis, surface: surfaceAxis, spacing: spacingAxis, selected: selectedId ?? '', sheet: expanded ? 'expanded' : 'compact' })} hrefLang="ja" aria-current={locale === 'ja' ? 'page' : undefined} onClick={switchLanguage}>JP</a>
           </nav>
         </div>
       </header>
@@ -953,9 +785,9 @@ function App() {
 
       <search className={`search-shell ${searchOpen ? 'open' : ''}`}>
         <div className="search-input-wrap">
-          <Icon name="search" />
+          <MagnifyingGlass aria-hidden="true" size={20} weight="regular" />
           <input ref={searchInputRef} type="search" value={query} onChange={(event) => { setQuery(event.target.value); setSearchOpen(true) }} onFocus={() => setSearchOpen(true)} aria-label={t.searchLabel} aria-expanded={searchOpen} aria-controls="search-results" autoComplete="off" placeholder={t.searchPlaceholder} />
-          {searchOpen && <button className="icon-button small" onClick={() => { setSearchOpen(false); setQuery('') }} aria-label={t.closeSearch}><Icon name="close" /></button>}
+          {searchOpen && <button className="icon-button small" onClick={() => { setSearchOpen(false); setQuery('') }} aria-label={t.closeSearch}><X aria-hidden="true" size={16} weight="regular" /></button>}
         </div>
         {searchOpen && (
           <div className="search-results" id="search-results" aria-label={t.searchResults}>
@@ -965,7 +797,7 @@ function App() {
               return (
                 <button key={building.id} className={building.id === selectedId ? 'selected' : ''} aria-current={building.id === selectedId ? 'true' : undefined} onClick={() => chooseBuilding(building, true)}>
                   <span><strong>{copy.name}</strong><small>{copy.architectCredit}</small></span>
-                  <Icon name="arrow" />
+                  <ArrowRight aria-hidden="true" size={20} weight="regular" />
                 </button>
               )
             })}
@@ -973,8 +805,16 @@ function App() {
         )}
       </search>
 
+      <div className="map-navigation" role="group" aria-label={locale === 'ja' ? '地図の拡大縮小' : 'Map zoom controls'}>
+        <button type="button" onClick={() => mapRef.current?.zoomIn({ duration: motionDuration(150) })} aria-label={t.mapControls['NavigationControl.ZoomIn'] ?? 'Zoom in'}>
+          <Plus aria-hidden="true" size={20} weight="regular" />
+        </button>
+        <button type="button" onClick={() => mapRef.current?.zoomOut({ duration: motionDuration(150) })} aria-label={t.mapControls['NavigationControl.ZoomOut'] ?? 'Zoom out'}>
+          <Minus aria-hidden="true" size={20} weight="regular" />
+        </button>
+      </div>
       <button className={`locate-button ${locating ? 'loading' : ''}`} onClick={locate} disabled={locating} aria-label={t.locate}>
-        <Icon name="locate" /><span>{locating ? t.locating : t.locate}</span>
+        <Crosshair aria-hidden="true" size={20} weight="regular" /><span>{locating ? t.locating : t.locate}</span>
       </button>
       <div className="data-note">{t.dataNote}</div>
 
@@ -1004,14 +844,14 @@ function PreviewCard({ building, locale, t, onDetails, onClose, sheet = false }:
   const copy = getBuildingCopy(locale, building.id, building.name)
   return (
     <section className={sheet ? 'sheet-preview' : 'preview-card'} aria-label={t.previewLabel(copy.name)}>
-      <button className="icon-button close-preview" onClick={onClose} aria-label={t.clearSelection}><Icon name="close" /></button>
+      <button className="icon-button close-preview" onClick={onClose} aria-label={t.clearSelection}><X aria-hidden="true" size={20} weight="regular" /></button>
       <div className="preview-meta">
         <p className="eyebrow">{t.types[building.buildingType]}</p>
         <span className="record-index">SGM / {String(buildings.indexOf(building) + 1).padStart(2, '0')}</span>
       </div>
       <h1>{copy.name}</h1>
       <p className="architects">{copy.architectCredit}</p>
-      <button className="primary-button" onClick={onDetails}>{t.viewDetails} <Icon name="arrow" /></button>
+      <button className="primary-button" onClick={onDetails}>{t.viewDetails} <ArrowRight aria-hidden="true" size={20} weight="regular" /></button>
     </section>
   )
 }
@@ -1023,7 +863,10 @@ function DetailContent({ building, locale, t, onClose, backRef, sheet = false }:
   return (
     <div className="detail-content">
       <div className="detail-heading">
-        <button ref={backRef} className="back-button" onClick={onClose}>{sheet ? t.collapse : t.backToMap}</button>
+        <button ref={backRef} className="back-button" onClick={onClose}>
+          {sheet ? <CaretDown aria-hidden="true" size={16} weight="regular" /> : <ArrowLeft aria-hidden="true" size={16} weight="regular" />}
+          {sheet ? t.collapse : t.backToMap}
+        </button>
         <span className="record-index">SGM / {String(buildings.indexOf(building) + 1).padStart(2, '0')}</span>
       </div>
       <div className="image-placeholder" aria-label={t.photoNotPublished}>
@@ -1040,14 +883,14 @@ function DetailContent({ building, locale, t, onClose, backRef, sheet = false }:
       </dl>
       <p className="verification-note">{t.verificationNote}</p>
       <div className="actions">
-        <a className="primary-button" href={`https://www.google.com/maps/search/?api=1&query=${mapsQuery}`} target="_blank" rel="noreferrer">Google Maps <Icon name="external" /></a>
-        <a href={`https://www.google.com/search?q=${searchQuery}`} target="_blank" rel="noreferrer">{t.googleSearch} <Icon name="external" /></a>
-        <a href={`https://www.google.com/search?tbm=isch&q=${searchQuery}`} target="_blank" rel="noreferrer">{t.imageSearch} <Icon name="external" /></a>
+        <a className="primary-button" href={`https://www.google.com/maps/search/?api=1&query=${mapsQuery}`} target="_blank" rel="noreferrer">Google Maps <NavigationArrow aria-hidden="true" size={20} weight="regular" /></a>
+        <a href={`https://www.google.com/search?q=${searchQuery}`} target="_blank" rel="noreferrer">{t.googleSearch} <ArrowSquareOut aria-hidden="true" size={20} weight="regular" /></a>
+        <a href={`https://www.google.com/search?tbm=isch&q=${searchQuery}`} target="_blank" rel="noreferrer">{t.imageSearch} <ArrowSquareOut aria-hidden="true" size={20} weight="regular" /></a>
       </div>
       <div className="sources">
         <p>{t.sources}</p>
-        <a href={building.officialSource} target="_blank" rel="noreferrer">{t.officialProject} <Icon name="external" /></a>
-        <a href={building.coordinateSource} target="_blank" rel="noreferrer">{t.coordinateSource} <Icon name="external" /></a>
+        <a href={building.officialSource} target="_blank" rel="noreferrer">{t.officialProject} <ArrowSquareOut aria-hidden="true" size={16} weight="regular" /></a>
+        <a href={building.coordinateSource} target="_blank" rel="noreferrer">{t.coordinateSource} <ArrowSquareOut aria-hidden="true" size={16} weight="regular" /></a>
       </div>
     </div>
   )
