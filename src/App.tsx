@@ -432,20 +432,24 @@ function App() {
     element.style.width = '44px'
     element.style.height = '52px'
     element.style.pointerEvents = 'none'
-    const createImage = (svg: string, width: number, height: number) => {
-      const image = document.createElement('img')
-      image.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`
-      image.alt = ''
-      image.width = width
-      image.height = height
+    element.style.zIndex = '20'
+    element.style.isolation = 'isolate'
+    const createImage = (svg: string, width: number, height: number, zIndex: number) => {
+      // Render our own generated SVG inline: no asynchronous <img> decoding
+      // between adding the marker and starting its opacity animation.
+      const image = new DOMParser().parseFromString(svg, 'image/svg+xml').documentElement as unknown as SVGSVGElement
+      image.setAttribute('width', String(width))
+      image.setAttribute('height', String(height))
+      image.setAttribute('aria-hidden', 'true')
       image.style.position = 'absolute'
       image.style.bottom = '0'
       image.style.left = `${(44 - width) / 2}px`
       image.style.display = 'block'
+      image.style.zIndex = String(zIndex)
       return image
     }
     const normal = map.getZoom() >= markerSwitchZoom
-      ? createImage(createBuildingPinSvg(24, 29, 1.5, 11), 24, 29)
+      ? createImage(createBuildingPinSvg(24, 29, 1.5, 11), 24, 29, 1)
       : document.createElement('span')
     if (normal instanceof HTMLSpanElement) {
       normal.style.position = 'absolute'
@@ -457,8 +461,9 @@ function App() {
       normal.style.borderRadius = '50%'
       normal.style.background = markerFill
       normal.style.boxSizing = 'border-box'
+      normal.style.zIndex = '1'
     }
-    const selected = createImage(createBuildingPinSvg(44, 52, 2, 20), 44, 52)
+    const selected = createImage(createBuildingPinSvg(44, 52, 2, 20), 44, 52, 2)
     element.append(normal, selected)
     const marker = new maplibregl.Marker({ element, anchor: 'bottom' })
       .setLngLat(building.coordinates)
