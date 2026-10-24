@@ -385,11 +385,13 @@ function App() {
       return
     }
 
+    map.setPaintProperty('building-pin-selected', 'icon-opacity-transition', { duration: 0 })
     map.setPaintProperty('building-pin-selected', 'icon-opacity', 0)
     let secondFrame = 0
     const firstFrame = window.requestAnimationFrame(() => {
       secondFrame = window.requestAnimationFrame(() => {
         if (map.getLayer('building-pin-selected')) {
+          map.setPaintProperty('building-pin-selected', 'icon-opacity-transition', { duration: 160 })
           map.setPaintProperty('building-pin-selected', 'icon-opacity', 1)
         }
       })
