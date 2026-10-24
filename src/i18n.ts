@@ -9,7 +9,6 @@ export type Translation = {
   mapLabel: string
   mapControls: Record<string, string>
   resetMap: string
-  uiSwitcher: string
   languageSwitcher: string
   searchLabel: string
   searchPlaceholder: string
@@ -28,10 +27,6 @@ export type Translation = {
   viewDetails: string
   previewLabel: (name: string) => string
   detailLabel: (name: string) => string
-  sheetPreviewLabel: (name: string) => string
-  collapseDetails: string
-  expandDetails: string
-  collapse: string
   backToMap: string
   photoNotPublished: string
   photoOverlay: string
@@ -55,7 +50,6 @@ export const translations: Record<Locale, Translation> = {
     mapLabel: 'Singapore architecture map',
     mapControls: {},
     resetMap: 'Return to the Singapore overview',
-    uiSwitcher: 'Switch interaction pattern',
     languageSwitcher: 'Switch language',
     searchLabel: 'Search by building or architect',
     searchPlaceholder: 'Search buildings or architects',
@@ -74,10 +68,6 @@ export const translations: Record<Locale, Translation> = {
     viewDetails: 'View details',
     previewLabel: (name) => `${name} preview`,
     detailLabel: (name) => `${name} details`,
-    sheetPreviewLabel: (name) => `${name} preview`,
-    collapseDetails: 'Collapse details',
-    expandDetails: 'Expand details',
-    collapse: 'Collapse',
     backToMap: 'Back to map',
     photoNotPublished: 'Photo not published',
     photoOverlay: 'PHOTO · NOT ADDED',
@@ -109,7 +99,6 @@ export const translations: Record<Locale, Translation> = {
       'NavigationControl.ZoomOut': '縮小',
     },
     resetMap: 'シンガポール全体へ戻る',
-    uiSwitcher: '操作方式を切り替える',
     languageSwitcher: '言語を切り替える',
     searchLabel: '建築名または設計者で検索',
     searchPlaceholder: '建築名・設計者を検索',
@@ -128,10 +117,6 @@ export const translations: Record<Locale, Translation> = {
     viewDetails: '詳しく見る',
     previewLabel: (name) => `${name}のプレビュー`,
     detailLabel: (name) => `${name}の詳細`,
-    sheetPreviewLabel: (name) => `${name}のプレビュー`,
-    collapseDetails: '詳細をたたむ',
-    expandDetails: '詳細を開く',
-    collapse: 'たたむ',
     backToMap: '地図へ戻る',
     photoNotPublished: '写真は未掲載',
     photoOverlay: '写真 · 未掲載',
@@ -186,8 +171,10 @@ export const localeHref = (locale: Locale, updates: Record<string, string> = {})
   const basePath = window.location.pathname
     .replace(/\/(en|ja)\/?(?:index\.html)?$/, '/')
     .replace(/\/index\.html$/, '/')
-  const search = new URLSearchParams(window.location.search)
-  Object.entries(updates).forEach(([key, value]) => search.set(key, value))
+  const search = new URLSearchParams()
+  Object.entries(updates).forEach(([key, value]) => {
+    if (value) search.set(key, value)
+  })
   const query = search.toString()
   return `${basePath}${locale}/${query ? `?${query}` : ''}${window.location.hash}`
 }
