@@ -8,6 +8,8 @@ import type { RefObject } from 'react'
 import type { Locale, Translation } from './i18n'
 
 type Coordinates = [number, number]
+type ColorSystem = 'archive' | 'living'
+type MapColor = 'colored' | 'light'
 type Building = {
   id: string
   name: string
@@ -81,14 +83,28 @@ type MapPalette = {
   pin: { default: string; selected: string; stroke: string; halo: string }
 }
 
-const productionMapPalette: MapPalette = {
-  background: '#eef0e8', residential: '#e8ebe4', park: '#c9dfca', wood: '#bfd7c2', grass: '#d9e7d3',
-  water: '#bedde6', waterway: '#67a7b7', roadMinor: '#fffdf6', roadMajor: '#f8edd2', roadMotorway: '#f0d8a9', roadCasing: '#aebdb4',
-  building: '#ddd8cc', buildingOutline: '#bbb7ab', label: '#203b33', labelSecondary: '#526860', labelWater: '#216b7c', labelHalo: '#fafbf5', poiOpacity: .68,
-  pin: { default: '#17697c', selected: '#e5653f', stroke: '#183c3b', halo: 'rgba(250,251,245,.92)' },
+const mapPalettes: Record<MapColor, MapPalette> = {
+  colored: {
+    background: '#eef0e8', residential: '#e8ebe4', park: '#c9dfca', wood: '#bfd7c2', grass: '#d9e7d3',
+    water: '#bedde6', waterway: '#67a7b7', roadMinor: '#fffdf6', roadMajor: '#f8edd2', roadMotorway: '#f0d8a9', roadCasing: '#aebdb4',
+    building: '#ddd8cc', buildingOutline: '#bbb7ab', label: '#203b33', labelSecondary: '#526860', labelWater: '#216b7c', labelHalo: '#fafbf5', poiOpacity: .68,
+    pin: { default: '#17697c', selected: '#e5653f', stroke: '#183c3b', halo: 'rgba(250,251,245,.92)' },
+  },
+  light: {
+    background: '#f5f6f5', residential: '#f1f3f2', park: '#dce9dd', wood: '#d3e4d5', grass: '#e6eee6',
+    water: '#c8e4eb', waterway: '#83b8c4', roadMinor: '#ffffff', roadMajor: '#fafbfa', roadMotorway: '#f2f4f3', roadCasing: '#cbd0cd',
+    building: '#e3e5e4', buildingOutline: '#c8ccca', label: '#414744', labelSecondary: '#6b726e', labelWater: '#3f7885', labelHalo: '#ffffff', poiOpacity: .58,
+    pin: { default: '#17697c', selected: '#e5653f', stroke: '#183c3b', halo: 'rgba(250,251,245,.92)' },
+  },
 }
 
-const legacyComparisonParams = ['ui', 'font', 'visual', 'map', 'scale', 'preset', 'lab', 'shape', 'weight', 'pin', 'surface', 'spacing', 'identity', 'mapMode', 'color', 'mapColor']
+const livingMarker = { default: '#35946b', selected: '#ff965c' }
+const legacyComparisonParams = ['ui', 'font', 'visual', 'map', 'scale', 'preset', 'lab', 'shape', 'weight', 'pin', 'surface', 'spacing', 'identity', 'mapMode']
+
+const getQueryChoice = <T extends string>(key: string, allowed: readonly T[], fallback: T): T => {
+  const value = new URLSearchParams(window.location.search).get(key) as T | null
+  return value && allowed.includes(value) ? value : fallback
+}
 
 const setPaint = (map: MapLibreMap, layerId: string, property: string, value: unknown) => {
   if (map.getLayer(layerId)) map.setPaintProperty(layerId, property as never, value as never)
@@ -157,15 +173,16 @@ const applyMapPalette = (map: MapLibreMap, palette: MapPalette) => {
   })
 }
 
-const applyProductionMapTheme = (map: MapLibreMap) => {
-  const palette = productionMapPalette
+const applyProductionMapTheme = (map: MapLibreMap, mapColor: MapColor, colorSystem: ColorSystem) => {
+  const palette = mapPalettes[mapColor]
   applyMapPalette(map, palette)
   if (!map.getLayer('building-points')) return
+  const marker = colorSystem === 'living' ? livingMarker : palette.pin
+  map.setPaintProperty('building-halo', 'circle-color', ['case', ['get', 'selected'], marker.selected, marker.default])
   const { pin } = palette
-  map.setPaintProperty('building-halo', 'circle-color', ['case', ['get', 'selected'], pin.selected, pin.default])
   map.setPaintProperty('building-labels', 'text-color', pin.stroke)
   map.setPaintProperty('building-labels', 'text-halo-color', pin.halo)
-  map.setPaintProperty('building-points', 'circle-color', ['case', ['get', 'selected'], pin.selected, pin.default])
+  map.setPaintProperty('building-points', 'circle-color', ['case', ['get', 'selected'], marker.selected, marker.default])
 }
 
 const applyProductionTypeScaleToMap = (map: MapLibreMap, locale: Locale) => {
@@ -207,6 +224,8 @@ function App() {
   const t = translations[locale]
   const restoredState = useMemo(readRestoredMapState, [])
   const requestedSelectedId = useMemo(getRequestedSelectedId, [])
+  const colorSystem = useMemo(() => getQueryChoice<ColorSystem>('color', ['archive', 'living'], 'archive'), [])
+  const mapColor = useMemo(() => getQueryChoice<MapColor>('mapColor', ['colored', 'light'], 'colored'), [])
   const mapContainer = useRef<HTMLDivElement>(null)
   const mapRef = useRef<MapLibreMap | null>(null)
   const userMarkerRef = useRef<maplibregl.Marker | null>(null)
@@ -296,7 +315,7 @@ function App() {
         layout: { 'text-field': ['get', 'name'], 'text-size': 12, 'text-offset': [0, 1.45], 'text-anchor': 'top', 'text-variable-anchor': ['top', 'bottom', 'left', 'right'], 'text-radial-offset': 0.75 },
         paint: { 'text-color': '#282724', 'text-halo-color': '#f8f4ec', 'text-halo-width': 2 },
       })
-      applyProductionMapTheme(map)
+      applyProductionMapTheme(map, mapColor, colorSystem)
       applyProductionTypeScaleToMap(map, locale)
       const deepLinkedBuilding = buildings.find((building) => building.id === requestedSelectedId)
       if (deepLinkedBuilding && !restoredState) {
@@ -328,7 +347,7 @@ function App() {
       map.remove()
       mapRef.current = null
     }
-  }, [locale, restoredState])
+  }, [colorSystem, locale, mapColor, restoredState])
 
   useEffect(() => {
     const source = mapRef.current?.getSource('buildings') as GeoJSONSource | undefined
@@ -411,7 +430,7 @@ function App() {
   }
 
   return (
-    <main className={`app locale-${locale} ${expanded ? 'details-expanded' : ''}`}>
+    <main className={`app locale-${locale} color-system-${colorSystem} map-color-${mapColor} ${expanded ? 'details-expanded' : ''}`}>
       <div ref={mapContainer} className="map" role="region" aria-label={t.mapLabel} />
 
       <header className="topbar">
@@ -420,8 +439,8 @@ function App() {
         </button>
         <div className="top-controls">
           <nav className="language-switch" aria-label={t.languageSwitcher}>
-            <a className={locale === 'en' ? 'active' : ''} href={localeHref('en', { selected: selectedId ?? '', sheet: expanded ? 'expanded' : 'compact' })} hrefLang="en" aria-current={locale === 'en' ? 'page' : undefined} onClick={switchLanguage}>EN</a>
-            <a className={locale === 'ja' ? 'active' : ''} href={localeHref('ja', { selected: selectedId ?? '', sheet: expanded ? 'expanded' : 'compact' })} hrefLang="ja" aria-current={locale === 'ja' ? 'page' : undefined} onClick={switchLanguage}>JP</a>
+            <a className={locale === 'en' ? 'active' : ''} href={localeHref('en', { color: colorSystem, mapColor, selected: selectedId ?? '', sheet: expanded ? 'expanded' : 'compact' })} hrefLang="en" aria-current={locale === 'en' ? 'page' : undefined} onClick={switchLanguage}>EN</a>
+            <a className={locale === 'ja' ? 'active' : ''} href={localeHref('ja', { color: colorSystem, mapColor, selected: selectedId ?? '', sheet: expanded ? 'expanded' : 'compact' })} hrefLang="ja" aria-current={locale === 'ja' ? 'page' : undefined} onClick={switchLanguage}>JP</a>
           </nav>
         </div>
       </header>
