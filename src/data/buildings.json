@@ -186,6 +186,123 @@
       "photo": null,
       "publicAccess": "unverified",
       "editorialStatus": "needs_review"
+    },
+    {
+      "id": "SGM-0102",
+      "name": "Oasia Hotel Downtown",
+      "architects": [
+        "WOHA"
+      ],
+      "architectCredit": "WOHA",
+      "buildingType": "hospitality",
+      "completionYear": 2016,
+      "address": "100 Peck Seah Street, Singapore 079333",
+      "coordinates": [
+        103.84434,
+        1.27588
+      ],
+      "coordinatePrecision": "representative_point_approximate",
+      "coordinateSource": "https://mapcarta.com/W393100847",
+      "officialSource": "https://woha.net/project/oasia-hotel-downtown/",
+      "yearSource": "https://woha.net/project/oasia-hotel-downtown/",
+      "pdaAwardYear": 2018,
+      "pdaAwardSource": "https://pda.designsingapore.org/award-recipients/2018/oasia-hotel-downtown/",
+      "photo": null,
+      "publicAccess": "unverified",
+      "editorialStatus": "needs_review"
+    },
+    {
+      "id": "SGM-0103",
+      "name": "School of the Arts (SOTA)",
+      "architects": [
+        "WOHA"
+      ],
+      "architectCredit": "WOHA",
+      "buildingType": "education",
+      "completionYear": 2010,
+      "address": "1 Zubir Said Drive, Singapore 227968",
+      "coordinates": [
+        103.84872,
+        1.29936
+      ],
+      "coordinatePrecision": "representative_point_approximate",
+      "coordinateSource": "https://mapcarta.com/W107937797",
+      "officialSource": "https://woha.net/project/school-of-the-arts-singapore/",
+      "yearSource": "https://woha.net/project/school-of-the-arts-singapore/",
+      "pdaAwardYear": 2011,
+      "pdaAwardSource": "https://pda.designsingapore.org/award-recipients/2011/school-of-the-arts/",
+      "photo": null,
+      "publicAccess": "unverified",
+      "editorialStatus": "needs_review"
+    },
+    {
+      "id": "SGM-0107",
+      "name": "VivoCity",
+      "architects": [
+        "Toyo Ito & Associates"
+      ],
+      "architectCredit": "Toyo Ito & Associates",
+      "buildingType": "retail",
+      "completionYear": 2006,
+      "address": "1 HarbourFront Walk, Singapore 098585",
+      "coordinates": [
+        103.822338,
+        1.264482
+      ],
+      "coordinatePrecision": "representative_point_approximate",
+      "coordinateSource": "https://mapletreepact.com/Asset-Portfolio/Property.aspx?currentProperty=%2FAll-Properties%2FMPACT%2FSingapore%2FVivoCity",
+      "officialSource": "https://www.toyo-ito.co.jp/WWW/Project_Descript/2005-/2005-p_09/2005-p_09_en.html",
+      "yearSource": "https://www.vivocity.com.sg/about-us",
+      "photo": null,
+      "publicAccess": "unverified",
+      "editorialStatus": "needs_review"
+    },
+    {
+      "id": "SGM-0108",
+      "name": "CapitaGreen",
+      "architects": [
+        "Toyo Ito & Associates"
+      ],
+      "architectCredit": "Toyo Ito & Associates",
+      "buildingType": "office",
+      "completionYear": 2014,
+      "address": "138 Market Street, Singapore 048946",
+      "coordinates": [
+        103.85002,
+        1.28188
+      ],
+      "coordinatePrecision": "representative_point_approximate",
+      "coordinateSource": "https://mapcarta.com/W393100853",
+      "officialSource": "https://www.toyo-ito.co.jp/WWW/Project_Descript/2010-/2010-p_14/2010-p_14_en.html",
+      "yearSource": "https://www.toyo-ito.co.jp/WWW/Project_Descript/2010-/2010-p_14/2010-p_14_en.html",
+      "photo": null,
+      "publicAccess": "unverified",
+      "editorialStatus": "needs_review"
+    },
+    {
+      "id": "SGM-0109",
+      "name": "National Gallery Singapore",
+      "architects": [
+        "studioMilou Singapore",
+        "CPG Consultants"
+      ],
+      "architectCredit": "studioMilou Singapore · CPG Consultants",
+      "buildingType": "civic_cultural",
+      "completionYear": 2015,
+      "address": "1 St Andrew’s Road, Singapore 178957",
+      "coordinates": [
+        103.85147,
+        1.29026
+      ],
+      "coordinatePrecision": "representative_point_approximate",
+      "coordinateSource": "https://mapcarta.com/N4759240362",
+      "officialSource": "https://www.studiomilou.sg/projects/the-national-gallery-singapore/",
+      "yearSource": "https://cpgcorp.com.sg/project/national-gallery-singapore/",
+      "pdaAwardYear": 2015,
+      "pdaAwardSource": "https://pda.designsingapore.org/award-recipients/2015/national-gallery-singapore/",
+      "photo": null,
+      "publicAccess": "unverified",
+      "editorialStatus": "needs_review"
     }
   ]
 }

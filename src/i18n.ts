@@ -22,7 +22,7 @@ export type Translation = {
   locationSuccess: string
   locationFailure: string
   currentLocation: string
-  dataNote: string
+  dataNote: (count: number) => string
   clearSelection: string
   viewDetails: string
   previewLabel: (name: string) => string
@@ -63,7 +63,7 @@ export const translations: Record<Locale, Translation> = {
     locationSuccess: 'Your location is now shown on the map.',
     locationFailure: 'We could not access your location. You can continue using the map without it.',
     currentLocation: 'Current location',
-    dataNote: '8 places · approximate coordinates',
+    dataNote: (count) => `${count} places · approximate coordinates`,
     clearSelection: 'Clear selection',
     viewDetails: 'View details',
     previewLabel: (name) => `${name} preview`,
@@ -89,6 +89,8 @@ export const translations: Record<Locale, Translation> = {
       retail: 'Retail',
       community: 'Community',
       hospitality: 'Hospitality',
+      education: 'Education',
+      office: 'Office',
     },
   },
   ja: {
@@ -113,7 +115,7 @@ export const translations: Record<Locale, Translation> = {
     locationSuccess: '現在地を地図に表示しました。',
     locationFailure: '現在地を取得できませんでした。許可しなくても地図は使えます。',
     currentLocation: '現在地',
-    dataNote: '8件 · 座標は暫定',
+    dataNote: (count) => `${count}件 · 座標は暫定`,
     clearSelection: '選択を解除',
     viewDetails: '詳しく見る',
     previewLabel: (name) => `${name}のプレビュー`,
@@ -139,6 +141,8 @@ export const translations: Record<Locale, Translation> = {
       retail: '商業',
       community: 'コミュニティ',
       hospitality: '宿泊',
+      education: '教育',
+      office: '業務',
     },
   },
 }
@@ -153,6 +157,11 @@ const buildingCopy: Record<Locale, Record<string, BuildingCopy>> = {
     'dpa-our-tampines-hub': { name: 'Our Tampines Hub', architectCredit: 'DP Architects, DP Design, DP Green' },
     'dpa-golden-mile-complex': { name: 'Golden Mile Complex', architectCredit: 'DP Architects (historic authorship and current project phase require detailed differentiation)' },
     'SGM-0098': { name: '21 Carpenter', architectCredit: 'WOHA' },
+    'SGM-0102': { name: 'Oasia Hotel Downtown', architectCredit: 'WOHA' },
+    'SGM-0103': { name: 'School of the Arts (SOTA)', architectCredit: 'WOHA' },
+    'SGM-0107': { name: 'VivoCity', architectCredit: 'Toyo Ito & Associates' },
+    'SGM-0108': { name: 'CapitaGreen', architectCredit: 'Toyo Ito & Associates' },
+    'SGM-0109': { name: 'National Gallery Singapore', architectCredit: 'studioMilou Singapore · CPG Consultants' },
   },
   ja: {
     'dpa-esplanade': { name: 'Esplanade – Theatres on the Bay', architectCredit: 'DP Architects、Michael Wilford & Partners（英国）による協働' },
@@ -163,6 +172,11 @@ const buildingCopy: Record<Locale, Record<string, BuildingCopy>> = {
     'dpa-our-tampines-hub': { name: 'Our Tampines Hub', architectCredit: 'DP Architects、DP Design、DP Green' },
     'dpa-golden-mile-complex': { name: 'Golden Mile Complex', architectCredit: 'DP Architects（歴史的設計者と現在のプロジェクト段階は要精査）' },
     'SGM-0098': { name: '21 Carpenter', architectCredit: 'WOHA' },
+    'SGM-0102': { name: 'Oasia Hotel Downtown', architectCredit: 'WOHA' },
+    'SGM-0103': { name: 'School of the Arts (SOTA)', architectCredit: 'WOHA' },
+    'SGM-0107': { name: 'VivoCity', architectCredit: '伊東豊雄建築設計事務所' },
+    'SGM-0108': { name: 'CapitaGreen', architectCredit: '伊東豊雄建築設計事務所' },
+    'SGM-0109': { name: 'National Gallery Singapore', architectCredit: 'studioMilou Singapore · CPG Consultants' },
   },
 }
 

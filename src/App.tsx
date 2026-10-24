@@ -489,7 +489,7 @@ function App() {
           <Crosshair aria-hidden="true" size={20} weight="regular" />
         </button>
       </div>
-      <div className="data-note">{t.dataNote}</div>
+      <div className="data-note">{t.dataNote(buildings.length)}</div>
 
       {selected && !expanded && <PreviewCard building={selected} locale={locale} t={t} onDetails={() => setExpanded(true)} onClose={() => setSelectedId(null)} />}
       {selected && expanded && (
