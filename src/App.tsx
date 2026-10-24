@@ -41,11 +41,39 @@ const mapStateKey = 'sgm-language-map-state'
 const motionDuration = (duration: number) =>
   window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : duration
 
+// Preserve the user's camera when selecting a building. Only pan when the
+// selected pin would overlap the visible UI or approach the viewport edge.
 const revealBuilding = (map: MapLibreMap | null, coordinates: Coordinates) => {
   if (!map) return
-  const wide = window.matchMedia('(min-width: 720px)').matches
-  const offset: [number, number] = wide ? [210, 0] : [0, -76]
-  map.flyTo({ center: coordinates, zoom: Math.max(map.getZoom(), 14), offset, duration: motionDuration(700) })
+  const canvas = map.getCanvas()
+  const bounds = canvas.getBoundingClientRect()
+  const point = map.project(coordinates)
+  const pinHalfWidth = 22
+  const pinHeight = 52
+  const margin = 16
+  const search = document.querySelector<HTMLElement>('.search-shell')
+  const searchBounds = search?.getBoundingClientRect()
+  const top = searchBounds && searchBounds.bottom > bounds.top && searchBounds.top < bounds.bottom
+    ? searchBounds.bottom - bounds.top + margin
+    : 24
+  const left = pinHalfWidth + margin
+  const right = bounds.width - pinHalfWidth - margin
+  let bottom = bounds.height - margin
+  const card = document.querySelector<HTMLElement>('.preview-card')
+  const cardBounds = card?.getBoundingClientRect()
+  // On desktop the card occupies only the lower-left portion of the map.
+  if (cardBounds && point.x + bounds.left >= cardBounds.left - pinHalfWidth - margin
+    && point.x + bounds.left <= cardBounds.right + pinHalfWidth + margin) {
+    bottom = Math.min(bottom, cardBounds.top - bounds.top - margin)
+  }
+  const safeTop = Math.min(top + pinHeight, bottom)
+  const targetX = Math.max(left, Math.min(right, point.x))
+  const targetY = Math.max(safeTop, Math.min(bottom, point.y))
+  const dx = targetX - point.x
+  const dy = targetY - point.y
+  if (Math.abs(dx) < 1 && Math.abs(dy) < 1) return
+  const distance = Math.hypot(dx, dy)
+  map.panBy([dx, dy], { duration: motionDuration(Math.min(600, Math.max(220, distance * 0.8))), easing: t => 1 - (1 - t) ** 3 })
 }
 
 const getRequestedSelectedId = (): string | null => {
@@ -437,7 +465,7 @@ function App() {
     setSelectedId(building.id)
     setExpanded(false)
     setSearchOpen(false)
-    if (focusMap) revealBuilding(mapRef.current, building.coordinates)
+    if (focusMap) window.requestAnimationFrame(() => revealBuilding(mapRef.current, building.coordinates))
   }
 
   const goHome = () => {
@@ -471,7 +499,8 @@ function App() {
         element.className = 'user-location-marker'
         element.setAttribute('aria-label', t.currentLocation)
         userMarkerRef.current = new maplibregl.Marker({ element }).setLngLat(location).addTo(mapRef.current!)
-        revealBuilding(mapRef.current, location)
+        const wide = window.matchMedia('(min-width: 720px)').matches
+        mapRef.current?.flyTo({ center: location, zoom: Math.max(mapRef.current.getZoom(), 14), offset: wide ? [210, 0] : [0, -76], duration: motionDuration(700) })
         setLocating(false)
         setNotice(t.locationSuccess)
       },
