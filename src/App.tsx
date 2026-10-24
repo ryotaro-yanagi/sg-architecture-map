@@ -82,8 +82,9 @@ const revealBuilding = (map: MapLibreMap | null, coordinates: Coordinates) => {
   const center = map.unproject([bounds.width / 2 + dx, bounds.height / 2 + dy])
   map.easeTo({
     center,
-    duration: motionDuration(Math.min(1100, Math.max(520, distance * 1.5))),
+    duration: Math.min(1100, Math.max(520, distance * 1.5)),
     easing: t => t * t * (3 - 2 * t),
+    essential: true,
   })
 }
 
@@ -438,11 +439,10 @@ function App() {
       .addTo(map)
     selectedMarkerRef.current = marker
 
-    if (motionDuration(160) > 0) {
-      image.animate([{ opacity: 0 }, { opacity: 1 }], {
-        duration: 180, easing: 'ease-out', fill: 'both',
-      })
-    }
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    image.animate([{ opacity: 0 }, { opacity: 1 }], {
+      duration: reducedMotion ? 120 : 180, easing: 'ease-out', fill: 'both',
+    })
     return () => {
       marker.remove()
       if (selectedMarkerRef.current === marker) selectedMarkerRef.current = null
