@@ -82,9 +82,8 @@ const revealBuilding = (map: MapLibreMap | null, coordinates: Coordinates) => {
   const center = map.unproject([bounds.width / 2 + dx, bounds.height / 2 + dy])
   map.easeTo({
     center,
-    duration: Math.min(1100, Math.max(520, distance * 1.5)),
+    duration: motionDuration(Math.min(1100, Math.max(520, distance * 1.5))),
     easing: t => t * t * (3 - 2 * t),
-    essential: true,
   })
 }
 
@@ -332,7 +331,6 @@ function App() {
     map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-left')
 
     map.on('load', async () => {
-      const markerTransition = { duration: motionDuration(160) }
       const [normalPin, selectedPin] = await Promise.all([
         loadSvgMarker(createBuildingPinSvg(24, 29, 1.5, 11)),
         loadSvgMarker(createBuildingPinSvg(44, 52, 2, 20)),
