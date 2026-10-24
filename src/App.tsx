@@ -8,8 +8,6 @@ import type { RefObject } from 'react'
 import type { Locale, Translation } from './i18n'
 
 type Coordinates = [number, number]
-type ColorSystem = 'archive' | 'living'
-type MapColor = 'colored' | 'light'
 type Building = {
   id: string
   name: string
@@ -80,31 +78,40 @@ type MapPalette = {
   labelWater: string
   labelHalo: string
   poiOpacity: number
-  pin: { default: string; selected: string; stroke: string; halo: string }
 }
 
-const mapPalettes: Record<MapColor, MapPalette> = {
-  colored: {
-    background: '#eef0e8', residential: '#e8ebe4', park: '#c9dfca', wood: '#bfd7c2', grass: '#d9e7d3',
-    water: '#bedde6', waterway: '#67a7b7', roadMinor: '#fffdf6', roadMajor: '#f8edd2', roadMotorway: '#f0d8a9', roadCasing: '#aebdb4',
-    building: '#ddd8cc', buildingOutline: '#bbb7ab', label: '#203b33', labelSecondary: '#526860', labelWater: '#216b7c', labelHalo: '#fafbf5', poiOpacity: .68,
-    pin: { default: '#17697c', selected: '#e5653f', stroke: '#183c3b', halo: 'rgba(250,251,245,.92)' },
-  },
-  light: {
-    background: '#f5f6f5', residential: '#f1f3f2', park: '#dce9dd', wood: '#d3e4d5', grass: '#e6eee6',
-    water: '#c8e4eb', waterway: '#83b8c4', roadMinor: '#ffffff', roadMajor: '#fafbfa', roadMotorway: '#f2f4f3', roadCasing: '#cbd0cd',
-    building: '#e3e5e4', buildingOutline: '#c8ccca', label: '#414744', labelSecondary: '#6b726e', labelWater: '#3f7885', labelHalo: '#ffffff', poiOpacity: .58,
-    pin: { default: '#17697c', selected: '#e5653f', stroke: '#183c3b', halo: 'rgba(250,251,245,.92)' },
-  },
+const productionMapPalette: MapPalette = {
+  background: '#f5f6f5', residential: '#f1f3f2', park: '#dce9dd', wood: '#d3e4d5', grass: '#e6eee6',
+  water: '#c8e4eb', waterway: '#83b8c4', roadMinor: '#ffffff', roadMajor: '#fafbfa', roadMotorway: '#f2f4f3', roadCasing: '#cbd0cd',
+  building: '#e3e5e4', buildingOutline: '#c8ccca', label: '#414744', labelSecondary: '#6b726e', labelWater: '#3f7885', labelHalo: '#ffffff', poiOpacity: .58,
 }
-
-const livingMarker = { default: '#35946b', selected: '#ff965c' }
-const legacyComparisonParams = ['ui', 'font', 'visual', 'map', 'scale', 'preset', 'lab', 'shape', 'weight', 'pin', 'surface', 'spacing', 'identity', 'mapMode']
-
-const getQueryChoice = <T extends string>(key: string, allowed: readonly T[], fallback: T): T => {
-  const value = new URLSearchParams(window.location.search).get(key) as T | null
-  return value && allowed.includes(value) ? value : fallback
+const markerFill = '#35946b'
+const markerStroke = '#242424'
+const markerIcon = '#ffffff'
+const phosphorBuildingFillPath = 'M232,224H208V32h8a8,8,0,0,0,0-16H40a8,8,0,0,0,0,16h8V224H24a8,8,0,0,0,0,16H232a8,8,0,0,0,0-16ZM88,56h24a8,8,0,0,1,0,16H88a8,8,0,0,1,0-16Zm0,40h24a8,8,0,0,1,0,16H88a8,8,0,0,1,0-16Zm-8,48a8,8,0,0,1,8-8h24a8,8,0,0,1,0,16H88A8,8,0,0,1,80,144Zm72,80H104V184h48Zm16-72H144a8,8,0,0,1,0-16h24a8,8,0,0,1,0,16Zm0-40H144a8,8,0,0,1,0-16h24a8,8,0,0,1,0,16Zm0-40H144a8,8,0,0,1,0-16h24a8,8,0,0,1,0,16Z'
+const createBuildingPinSvg = (width: number, height: number, strokeWidth: number, iconSize: number) => {
+  const cx = width / 2
+  const iconX = (width - iconSize) / 2
+  const iconY = width <= 24 ? 5 : 9
+  const path = [
+    `M ${cx} ${height - strokeWidth / 2}`,
+    `C ${cx - width * .08} ${height * .89}, ${width * .12} ${height * .67}, ${width * .12} ${height * .42}`,
+    `C ${width * .12} ${height * .18}, ${width * .29} ${strokeWidth}, ${cx} ${strokeWidth}`,
+    `C ${width * .71} ${strokeWidth}, ${width * .88} ${height * .18}, ${width * .88} ${height * .42}`,
+    `C ${width * .88} ${height * .67}, ${cx + width * .08} ${height * .89}, ${cx} ${height - strokeWidth / 2} Z`,
+  ].join(' ')
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
+    <path d="${path}" fill="${markerFill}" stroke="${markerStroke}" stroke-width="${strokeWidth}" stroke-linejoin="round"/>
+    <svg x="${iconX}" y="${iconY}" width="${iconSize}" height="${iconSize}" viewBox="0 0 256 256" fill="${markerIcon}"><path d="${phosphorBuildingFillPath}"/></svg>
+  </svg>`
 }
+const loadSvgMarker = (svg: string) => new Promise<HTMLImageElement>((resolve, reject) => {
+  const image = new Image()
+  image.onload = () => resolve(image)
+  image.onerror = () => reject(new Error('Failed to load marker SVG'))
+  image.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`
+})
+const legacyComparisonParams = ['ui', 'font', 'visual', 'map', 'scale', 'preset', 'lab', 'shape', 'weight', 'pin', 'surface', 'spacing', 'identity', 'mapMode', 'color', 'mapColor']
 
 const setPaint = (map: MapLibreMap, layerId: string, property: string, value: unknown) => {
   if (map.getLayer(layerId)) map.setPaintProperty(layerId, property as never, value as never)
@@ -173,16 +180,11 @@ const applyMapPalette = (map: MapLibreMap, palette: MapPalette) => {
   })
 }
 
-const applyProductionMapTheme = (map: MapLibreMap, mapColor: MapColor, colorSystem: ColorSystem) => {
-  const palette = mapPalettes[mapColor]
-  applyMapPalette(map, palette)
-  if (!map.getLayer('building-points')) return
-  const marker = colorSystem === 'living' ? livingMarker : palette.pin
-  map.setPaintProperty('building-halo', 'circle-color', ['case', ['get', 'selected'], marker.selected, marker.default])
-  const { pin } = palette
-  map.setPaintProperty('building-labels', 'text-color', pin.stroke)
-  map.setPaintProperty('building-labels', 'text-halo-color', pin.halo)
-  map.setPaintProperty('building-points', 'circle-color', ['case', ['get', 'selected'], marker.selected, marker.default])
+const applyProductionMapTheme = (map: MapLibreMap) => {
+  applyMapPalette(map, productionMapPalette)
+  if (!map.getLayer('building-labels')) return
+  map.setPaintProperty('building-labels', 'text-color', markerStroke)
+  map.setPaintProperty('building-labels', 'text-halo-color', productionMapPalette.labelHalo)
 }
 
 const applyProductionTypeScaleToMap = (map: MapLibreMap, locale: Locale) => {
@@ -224,8 +226,6 @@ function App() {
   const t = translations[locale]
   const restoredState = useMemo(readRestoredMapState, [])
   const requestedSelectedId = useMemo(getRequestedSelectedId, [])
-  const colorSystem = useMemo(() => getQueryChoice<ColorSystem>('color', ['archive', 'living'], 'archive'), [])
-  const mapColor = useMemo(() => getQueryChoice<MapColor>('mapColor', ['colored', 'light'], 'colored'), [])
   const mapContainer = useRef<HTMLDivElement>(null)
   const mapRef = useRef<MapLibreMap | null>(null)
   const userMarkerRef = useRef<maplibregl.Marker | null>(null)
@@ -281,8 +281,14 @@ function App() {
 
     map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-left')
 
-    map.on('load', () => {
-      const markerTransition = { duration: motionDuration(150) }
+    map.on('load', async () => {
+      const markerTransition = { duration: motionDuration(160) }
+      const [normalPin, selectedPin] = await Promise.all([
+        loadSvgMarker(createBuildingPinSvg(24, 29, 1.5, 11)),
+        loadSvgMarker(createBuildingPinSvg(44, 52, 2, 20)),
+      ])
+      map.addImage('building-pin-normal', normalPin, { pixelRatio: 1 })
+      map.addImage('building-pin-selected', selectedPin, { pixelRatio: 1 })
       map.addSource('buildings', { type: 'geojson', data: featureCollection(selectedId, locale) })
       map.addLayer({
         id: 'building-hit-targets', type: 'circle', source: 'buildings',
@@ -290,32 +296,33 @@ function App() {
         paint: { 'circle-radius': 22, 'circle-opacity': 0 },
       })
       map.addLayer({
-        id: 'building-halo', type: 'circle', source: 'buildings',
+        id: 'building-dots', type: 'circle', source: 'buildings',
         layout: { 'circle-sort-key': ['case', ['get', 'selected'], 1, 0] },
         paint: {
-          'circle-radius': ['case', ['get', 'selected'], 24, 18],
-          'circle-radius-transition': markerTransition,
-          'circle-color': '#32423c',
-          'circle-opacity': ['case', ['get', 'selected'], .28, .18],
+          'circle-radius': 4,
+          'circle-color': markerFill,
+          'circle-opacity': ['case', ['get', 'selected'], 0, ['interpolate', ['linear'], ['zoom'], 14, 1, 15.2, 0]],
           'circle-opacity-transition': markerTransition,
-          'circle-blur': .72,
         },
       })
       map.addLayer({
-        id: 'building-points', type: 'circle', source: 'buildings',
-        layout: { 'circle-sort-key': ['case', ['get', 'selected'], 1, 0] },
-        paint: {
-          'circle-radius': ['case', ['get', 'selected'], 9, 6],
-          'circle-radius-transition': markerTransition,
-          'circle-color': ['case', ['get', 'selected'], '#c85f3f', '#32423c'],
-        },
+        id: 'building-pins', type: 'symbol', source: 'buildings',
+        filter: ['==', ['get', 'selected'], false],
+        layout: { 'icon-image': 'building-pin-normal', 'icon-anchor': 'bottom', 'icon-overlap': 'always', 'icon-ignore-placement': true },
+        paint: { 'icon-opacity': ['interpolate', ['linear'], ['zoom'], 13.5, 0, 14.5, 1], 'icon-opacity-transition': markerTransition },
+      })
+      map.addLayer({
+        id: 'building-pin-selected', type: 'symbol', source: 'buildings',
+        filter: ['==', ['get', 'selected'], true],
+        layout: { 'icon-image': 'building-pin-selected', 'icon-anchor': 'bottom', 'icon-overlap': 'always', 'icon-ignore-placement': true },
+        paint: { 'icon-opacity': 1, 'icon-opacity-transition': markerTransition },
       })
       map.addLayer({
         id: 'building-labels', type: 'symbol', source: 'buildings', minzoom: 13.2,
         layout: { 'text-field': ['get', 'name'], 'text-size': 12, 'text-offset': [0, 1.45], 'text-anchor': 'top', 'text-variable-anchor': ['top', 'bottom', 'left', 'right'], 'text-radial-offset': 0.75 },
         paint: { 'text-color': '#282724', 'text-halo-color': '#f8f4ec', 'text-halo-width': 2 },
       })
-      applyProductionMapTheme(map, mapColor, colorSystem)
+      applyProductionMapTheme(map)
       applyProductionTypeScaleToMap(map, locale)
       const deepLinkedBuilding = buildings.find((building) => building.id === requestedSelectedId)
       if (deepLinkedBuilding && !restoredState) {
@@ -347,7 +354,7 @@ function App() {
       map.remove()
       mapRef.current = null
     }
-  }, [colorSystem, locale, mapColor, restoredState])
+  }, [locale, restoredState])
 
   useEffect(() => {
     const source = mapRef.current?.getSource('buildings') as GeoJSONSource | undefined
@@ -430,7 +437,7 @@ function App() {
   }
 
   return (
-    <main className={`app locale-${locale} color-system-${colorSystem} map-color-${mapColor} ${expanded ? 'details-expanded' : ''}`}>
+    <main className={`app locale-${locale} ${expanded ? 'details-expanded' : ''}`}>
       <div ref={mapContainer} className="map" role="region" aria-label={t.mapLabel} />
 
       <header className="topbar">
@@ -439,8 +446,8 @@ function App() {
         </button>
         <div className="top-controls">
           <nav className="language-switch" aria-label={t.languageSwitcher}>
-            <a className={locale === 'en' ? 'active' : ''} href={localeHref('en', { color: colorSystem, mapColor, selected: selectedId ?? '', sheet: expanded ? 'expanded' : 'compact' })} hrefLang="en" aria-current={locale === 'en' ? 'page' : undefined} onClick={switchLanguage}>EN</a>
-            <a className={locale === 'ja' ? 'active' : ''} href={localeHref('ja', { color: colorSystem, mapColor, selected: selectedId ?? '', sheet: expanded ? 'expanded' : 'compact' })} hrefLang="ja" aria-current={locale === 'ja' ? 'page' : undefined} onClick={switchLanguage}>JP</a>
+            <a className={locale === 'en' ? 'active' : ''} href={localeHref('en', { selected: selectedId ?? '', sheet: expanded ? 'expanded' : 'compact' })} hrefLang="en" aria-current={locale === 'en' ? 'page' : undefined} onClick={switchLanguage}>EN</a>
+            <a className={locale === 'ja' ? 'active' : ''} href={localeHref('ja', { selected: selectedId ?? '', sheet: expanded ? 'expanded' : 'compact' })} hrefLang="ja" aria-current={locale === 'ja' ? 'page' : undefined} onClick={switchLanguage}>JP</a>
           </nav>
         </div>
       </header>

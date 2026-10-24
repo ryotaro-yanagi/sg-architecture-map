@@ -2,17 +2,21 @@
   --font-ui: 'Hanken Grotesk', 'Hiragino Sans', 'Yu Gothic', system-ui, -apple-system, sans-serif;
   --font-display: var(--font-ui);
   font-family: var(--font-ui);
-  color: #17221c;
-  background: #d9ded8;
+  color: #242424;
+  background: #f7f7f7;
   font-synthesis: none;
-  --paper: #ecefe8;
-  --paper-strong: #f5f7f1;
-  --ink: #17221c;
-  --muted: #58655d;
-  --line: rgba(23, 34, 28, .25);
-  --accent: #356b52;
-  --focus-ring: #a84e22;
-  --system-soft: #dfe6dc;
+  --paper: #f7f7f7;
+  --paper-strong: #ffffff;
+  --ink: #242424;
+  --muted: #666666;
+  --line: #d8d8d8;
+  --accent: #242424;
+  --focus-ring: #247a55;
+  --system-soft: #f0f0f0;
+  --living-green: #35946b;
+  --living-pink: #f48f94;
+  --living-yellow: #f4d65b;
+  --living-orange: #ff965c;
   --space-3: 12px;
   --control-min: 44px;
   --vs-body-size: 16px;
@@ -26,25 +30,7 @@
   --vs-divider-width: 1px;
 }
 
-.color-system-living {
-  --paper: #f7f7f7;
-  --paper-strong: #ffffff;
-  --ink: #242424;
-  --muted: #666666;
-  --line: #d8d8d8;
-  --accent: #242424;
-  --focus-ring: #247a55;
-  --system-soft: #f0f0f0;
-  --living-green: #35946b;
-  --living-pink: #f48f94;
-  --living-yellow: #f4d65b;
-  --living-orange: #ff965c;
-}
-
-.color-system-living .map { background: var(--paper); }
-.color-system-living .preview-card,
-.color-system-living .detail-panel { background: var(--paper-strong); }
-.color-system-living .search-results button.selected {
+.search-results button.selected {
   background: color-mix(in srgb, var(--living-green) 16%, var(--paper-strong));
   box-shadow: inset 3px 0 0 var(--living-green);
 }
@@ -65,7 +51,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
 }
 
 .app, .map { position: relative; width: 100%; height: 100%; }
-.map { position: absolute; inset: 0; background: #d9ded8; }
+.map { position: absolute; inset: 0; background: var(--paper); }
 .maplibregl-canvas:focus-visible { outline: 3px solid var(--focus-ring); outline-offset: -4px; }
 .maplibregl-ctrl-bottom-left { bottom: 4px; left: 6px; }
 .maplibregl-ctrl-bottom-right { bottom: 84px; right: 10px; }
