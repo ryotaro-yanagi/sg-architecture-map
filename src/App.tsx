@@ -68,17 +68,23 @@ const revealBuilding = (map: MapLibreMap | null, coordinates: Coordinates) => {
     bottom = Math.min(bottom, cardBounds.top - bounds.top - margin)
   }
   const safeTop = Math.min(Math.max(top + pinHeight, bounds.height * 0.22), bottom)
-  const targetX = Math.max(left, Math.min(right, point.x))
-  const targetY = Math.max(safeTop, Math.min(bottom, point.y))
-  const dx = targetX - point.x
-  const dy = targetY - point.y
-  if (Math.abs(dx) < 1 && Math.abs(dy) < 1) return
+  // If the pin falls outside the comfort zone, move it toward the usable
+  // center, not merely to the nearest edge of the zone.
+  const outside = point.x < left || point.x > right || point.y < safeTop || point.y > bottom
+  if (!outside) return
+  const targetX = bounds.width / 2
+  const targetY = Math.max(safeTop, Math.min(bottom, (safeTop + bottom) / 2))
+  const dx = point.x - targetX
+  const dy = point.y - targetY
   const distance = Math.hypot(dx, dy)
-  // panBy moves the *camera* in the given direction, so the projected
-  // building moves in the opposite direction; invert the desired pixel delta.
-  map.panBy([-dx, -dy], {
-    duration: motionDuration(Math.min(750, Math.max(380, distance * 1.2))),
-    easing: t => t < 0.5 ? 4 * t ** 3 : 1 - (-2 * t + 2) ** 3 / 2,
+  // The new center is the geographic point currently under the displaced
+  // viewport center. This preserves zoom, bearing, and pitch.
+  const center = map.unproject([bounds.width / 2 + dx, bounds.height / 2 + dy])
+  map.easeTo({
+    center,
+    duration: Math.min(1100, Math.max(520, distance * 1.5)),
+    easing: t => t * t * (3 - 2 * t),
+    essential: true,
   })
 }
 
@@ -272,6 +278,7 @@ function App() {
   const mapContainer = useRef<HTMLDivElement>(null)
   const mapRef = useRef<MapLibreMap | null>(null)
   const userMarkerRef = useRef<maplibregl.Marker | null>(null)
+  const selectedMarkerRef = useRef<maplibregl.Marker | null>(null)
   const detailBackRef = useRef<HTMLButtonElement>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
   const [selectedId, setSelectedId] = useState<string | null>(requestedSelectedId ?? restoredState?.selectedId ?? null)
@@ -359,7 +366,7 @@ function App() {
         id: 'building-pin-selected', type: 'symbol', source: 'buildings',
         filter: ['==', ['get', 'selected'], true],
         layout: { 'icon-image': 'building-pin-selected', 'icon-anchor': 'bottom', 'icon-overlap': 'always', 'icon-ignore-placement': true },
-        paint: { 'icon-opacity': 1, 'icon-opacity-transition': markerTransition },
+        paint: { 'icon-opacity': 0 },
       })
       map.addLayer({
         id: 'building-labels', type: 'symbol', source: 'buildings', minzoom: 13.2,
@@ -399,6 +406,7 @@ function App() {
     mapRef.current = map
     return () => {
       userMarkerRef.current?.remove()
+      selectedMarkerRef.current?.remove()
       map.remove()
       mapRef.current = null
     }
@@ -407,34 +415,39 @@ function App() {
   useEffect(() => {
     const map = mapRef.current
     const source = map?.getSource('buildings') as GeoJSONSource | undefined
-    if (!map || !source) return
+    source?.setData(featureCollection(selectedId, locale))
 
-    const layer = 'building-pin-selected'
-    const shouldAnimate = Boolean(selectedId) && motionDuration(160) > 0 && Boolean(map.getLayer(layer))
-    if (shouldAnimate) {
-      map.setPaintProperty(layer, 'icon-opacity-transition', { duration: 0 })
-      map.setPaintProperty(layer, 'icon-opacity', 0)
-    }
-    source.setData(featureCollection(selectedId, locale))
-    if (!shouldAnimate) {
-      if (map.getLayer(layer)) map.setPaintProperty(layer, 'icon-opacity', 1)
-      return
-    }
+    selectedMarkerRef.current?.remove()
+    selectedMarkerRef.current = null
+    const building = buildings.find(item => item.id === selectedId)
+    if (!map || !building) return
 
-    // Wait until MapLibre has committed the new selected feature to the render,
-    // instead of racing asynchronous GeoJSON updates with two arbitrary frames.
-    let frame = 0
-    const showSelected = () => {
-      frame = window.requestAnimationFrame(() => {
-        if (!map.getLayer(layer)) return
-        map.setPaintProperty(layer, 'icon-opacity-transition', { duration: 160 })
-        map.setPaintProperty(layer, 'icon-opacity', 1)
+    // A dedicated DOM marker avoids MapLibre symbol placement and GeoJSON
+    // worker timing affecting the selected marker's entrance animation.
+    const element = document.createElement('div')
+    element.style.width = '44px'
+    element.style.height = '52px'
+    element.style.pointerEvents = 'none'
+    const image = document.createElement('img')
+    image.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(createBuildingPinSvg(44, 52, 2, 20))}`
+    image.alt = ''
+    image.width = 44
+    image.height = 52
+    image.style.display = 'block'
+    element.appendChild(image)
+    const marker = new maplibregl.Marker({ element, anchor: 'bottom' })
+      .setLngLat(building.coordinates)
+      .addTo(map)
+    selectedMarkerRef.current = marker
+
+    if (motionDuration(160) > 0) {
+      image.animate([{ opacity: 0 }, { opacity: 1 }], {
+        duration: 180, easing: 'ease-out', fill: 'both',
       })
     }
-    map.once('idle', showSelected)
     return () => {
-      map.off('idle', showSelected)
-      window.cancelAnimationFrame(frame)
+      marker.remove()
+      if (selectedMarkerRef.current === marker) selectedMarkerRef.current = null
     }
   }, [locale, selectedId])
 
