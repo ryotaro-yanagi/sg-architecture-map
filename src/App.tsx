@@ -128,8 +128,8 @@ const applyMapPalette = (map: MapLibreMap, palette: MapPalette) => {
   setPaint(map, 'water', 'fill-color', palette.water)
   ;['waterway_tunnel', 'waterway_river', 'waterway_other'].forEach((id) => setPaint(map, id, 'line-color', palette.waterway))
   setPaint(map, 'building', 'fill-color', palette.building)
-  setPaint(map, 'building', 'fill-outline-color', palette.buildingOutline)
-  setPaint(map, 'building-3d', 'fill-extrusion-color', palette.building)
+  setPaint(map, 'building', 'fill-outline-color', palette.building)
+  if (map.getLayer('building-3d')) map.setLayoutProperty('building-3d', 'visibility', 'none')
 
   // Keep line-based water labels subordinate to district names.
   if (map.getLayer('waterway_line_label')) map.setLayoutProperty('waterway_line_label', 'text-size', 12)
@@ -141,6 +141,10 @@ const applyMapPalette = (map: MapLibreMap, palette: MapPalette) => {
   const layers = map.getStyle().layers ?? []
   layers.forEach((layer) => {
     const id = layer.id
+    if (layer.type === 'line' && /^(road|bridge|tunnel)_.*_casing$/.test(id)) {
+      map.setLayoutProperty(id, 'visibility', 'none')
+      return
+    }
     // Navigation-only symbols are not needed on an architecture discovery map.
     if (layer.type === 'symbol' && (
       id === 'road_one_way_arrow' ||
