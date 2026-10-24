@@ -521,8 +521,14 @@ function PreviewCard({ building, locale, t, onDetails, onClose }: LocalizedProps
         <span className="record-index">SGM / {String(buildings.indexOf(building) + 1).padStart(2, '0')}</span>
       </div>
       <h1>{copy.name}</h1>
-      <p className="architects">{copy.architectCredit}</p>
-      <button className="primary-button" onClick={onDetails}>{t.viewDetails} <ArrowRight aria-hidden="true" size={20} weight="regular" /></button>
+      <p className="architects">
+        <span>{copy.architectCredit}</span>
+        {building.completionYear && <span className="preview-year">{building.completionYear}</span>}
+      </p>
+      <button className="preview-details" onClick={onDetails}>
+        <span>{t.viewDetails}</span>
+        <ArrowRight aria-hidden="true" size={20} weight="regular" />
+      </button>
     </section>
   )
 }
@@ -540,24 +546,36 @@ function DetailContent({ building, locale, t, onClose, backRef }: LocalizedProps
         </button>
         <span className="record-index">SGM / {String(buildings.indexOf(building) + 1).padStart(2, '0')}</span>
       </div>
-      <div className="image-placeholder" aria-label={t.photoNotPublished}>
-        <span>{t.photoOverlay}</span>
-        <small>{t.photoPlaceholder}</small>
-      </div>
-      <p className="eyebrow">{t.types[building.buildingType]}</p>
-      <h1>{copy.name}</h1>
+
+      <header className="detail-intro">
+        <p className="eyebrow">{t.types[building.buildingType]}</p>
+        <h1>{copy.name}</h1>
+        <p className="detail-architects">{copy.architectCredit}</p>
+        <p className="detail-year">{building.completionYear ?? t.unverified}</p>
+      </header>
+
       <dl className="facts">
-        <div><dt>{t.design}</dt><dd>{copy.architectCredit}</dd></div>
-        <div><dt>{t.completion}</dt><dd>{building.completionYear ?? t.unverified}</dd></div>
         <div><dt>{t.type}</dt><dd>{t.types[building.buildingType]}</dd></div>
         <div><dt>{t.address}</dt><dd>{building.address}</dd></div>
       </dl>
+
       <p className="verification-note">{t.verificationNote}</p>
-      <div className="actions">
-        <a className="primary-button" href={`https://www.google.com/maps/search/?api=1&query=${mapsQuery}`} target="_blank" rel="noreferrer">Google Maps <NavigationArrow aria-hidden="true" size={20} weight="regular" /></a>
-        <a href={`https://www.google.com/search?q=${searchQuery}`} target="_blank" rel="noreferrer">{t.googleSearch} <ArrowSquareOut aria-hidden="true" size={20} weight="regular" /></a>
-        <a href={`https://www.google.com/search?tbm=isch&q=${searchQuery}`} target="_blank" rel="noreferrer">{t.imageSearch} <ArrowSquareOut aria-hidden="true" size={20} weight="regular" /></a>
-      </div>
+
+      <nav className="actions" aria-label={locale === 'ja' ? '建築を調べる' : 'Explore this building'}>
+        <a className="map-action" href={`https://www.google.com/maps/search/?api=1&query=${mapsQuery}`} target="_blank" rel="noreferrer">
+          <span>Google Maps</span>
+          <NavigationArrow aria-hidden="true" size={20} weight="regular" />
+        </a>
+        <a href={`https://www.google.com/search?q=${searchQuery}`} target="_blank" rel="noreferrer">
+          <span>{t.googleSearch}</span>
+          <ArrowSquareOut aria-hidden="true" size={20} weight="regular" />
+        </a>
+        <a href={`https://www.google.com/search?tbm=isch&q=${searchQuery}`} target="_blank" rel="noreferrer">
+          <span>{t.imageSearch}</span>
+          <ArrowSquareOut aria-hidden="true" size={20} weight="regular" />
+        </a>
+      </nav>
+
       <div className="sources">
         <p>{t.sources}</p>
         <a href={building.officialSource} target="_blank" rel="noreferrer">{t.officialProject} <ArrowSquareOut aria-hidden="true" size={16} weight="regular" /></a>
