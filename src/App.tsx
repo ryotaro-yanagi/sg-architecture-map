@@ -125,6 +125,10 @@ const applyMapPalette = (map: MapLibreMap, palette: MapPalette) => {
   setPaint(map, 'building', 'fill-outline-color', palette.buildingOutline)
   setPaint(map, 'building-3d', 'fill-extrusion-color', palette.building)
 
+  // Keep line-based water labels subordinate to district names.
+  if (map.getLayer('waterway_line_label')) map.setLayoutProperty('waterway_line_label', 'text-size', 12)
+  if (map.getLayer('water_name_line_label')) map.setLayoutProperty('water_name_line_label', 'text-size', 13)
+
   // Let district names lead until the viewer zooms closer to street level.
   if (map.getLayer('highway-name-minor')) map.setLayerZoomRange('highway-name-minor', 15.5, 24)
 
