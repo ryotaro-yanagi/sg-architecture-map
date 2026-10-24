@@ -303,6 +303,102 @@
       "photo": null,
       "publicAccess": "unverified",
       "editorialStatus": "needs_review"
+    },
+    {
+      "id": "SGM-0089",
+      "name": "Republic Polytechnic",
+      "architects": [
+        "Maki & Associates",
+        "DP Architects"
+      ],
+      "architectCredit": "Maki & Associates · DP Architects",
+      "buildingType": "education",
+      "completionYear": null,
+      "address": "9 Woodlands Avenue 9, Singapore 738964",
+      "coordinates": [
+        103.78523,
+        1.44475
+      ],
+      "coordinatePrecision": "area_representative_point_approximate",
+      "coordinateSource": "https://mapcarta.com/W154172900",
+      "officialSource": "https://www.maki-and-associates.co.jp/projects/RPS?lang=en",
+      "yearSource": "https://www.maki-and-associates.co.jp/projects/RPS?lang=en",
+      "yearConflictSource": "https://pda.designsingapore.org/award-recipients/2009/republic-polytechnic/",
+      "pdaAwardYear": 2009,
+      "pdaAwardSource": "https://pda.designsingapore.org/award-recipients/2009/republic-polytechnic/",
+      "photo": null,
+      "publicAccess": "unverified",
+      "editorialStatus": "needs_review"
+    },
+    {
+      "id": "SGM-0092",
+      "name": "One Raffles Place Tower One",
+      "architects": [
+        "Kenzo Tange Associates"
+      ],
+      "architectCredit": "Kenzo Tange Associates",
+      "buildingType": "office",
+      "completionYear": 1986,
+      "address": "1 Raffles Place, Singapore 048616",
+      "coordinates": [
+        103.851064,
+        1.284258
+      ],
+      "coordinatePrecision": "area_representative_point_approximate",
+      "coordinateSource": "https://www.wikidata.org/wiki/Q333305",
+      "officialSource": "https://www.tangeweb.com/works/works_no-69/",
+      "yearSource": "https://www.tangeweb.com/works/works_no-69/",
+      "photo": null,
+      "publicAccess": "unverified",
+      "editorialStatus": "needs_review"
+    },
+    {
+      "id": "SGM-0093",
+      "name": "Singapore Indoor Stadium",
+      "architects": [
+        "Kenzo Tange Associates",
+        "RSP Architects Planners & Engineers"
+      ],
+      "architectCredit": "Kenzo Tange Associates · RSP Architects Planners & Engineers",
+      "buildingType": "sports",
+      "completionYear": 1989,
+      "address": "2 Stadium Walk, Singapore 397691",
+      "coordinates": [
+        103.87442,
+        1.30084
+      ],
+      "coordinatePrecision": "representative_point_approximate",
+      "coordinateSource": "https://mapcarta.com/W172472785",
+      "officialSource": "https://www.tangeweb.com/works/works_no-89/",
+      "yearSource": "https://www.activesgcircle.gov.sg/read/in-memoriam-former-chairman-of-sport-singapore-dr-tan-eng-liang",
+      "photo": null,
+      "publicAccess": "unverified",
+      "editorialStatus": "needs_review"
+    },
+    {
+      "id": "SGM-0104",
+      "name": "Jewel Changi Airport",
+      "architects": [
+        "Safdie Architects",
+        "RSP Architects Planners & Engineers"
+      ],
+      "architectCredit": "Safdie Architects · RSP Architects",
+      "buildingType": "mixed_use",
+      "completionYear": 2019,
+      "address": "78 Airport Boulevard, Singapore 819666",
+      "coordinates": [
+        103.98968,
+        1.36022
+      ],
+      "coordinatePrecision": "representative_point_approximate",
+      "coordinateSource": "https://mapcarta.com/W744520551",
+      "officialSource": "https://www.safdiearchitects.com/projects/jewel-changi-airport",
+      "yearSource": "https://www.safdiearchitects.com/projects/jewel-changi-airport",
+      "pdaAwardYear": 2020,
+      "pdaAwardSource": "https://pda.designsingapore.org/award-recipients/2020/jewel-changi-airport/",
+      "photo": null,
+      "publicAccess": "unverified",
+      "editorialStatus": "needs_review"
     }
   ]
 }

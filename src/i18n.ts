@@ -91,6 +91,7 @@ export const translations: Record<Locale, Translation> = {
       hospitality: 'Hospitality',
       education: 'Education',
       office: 'Office',
+      sports: 'Sports & entertainment',
     },
   },
   ja: {
@@ -143,6 +144,7 @@ export const translations: Record<Locale, Translation> = {
       hospitality: '宿泊',
       education: '教育',
       office: '業務',
+      sports: 'スポーツ・興行',
     },
   },
 }
@@ -162,6 +164,10 @@ const buildingCopy: Record<Locale, Record<string, BuildingCopy>> = {
     'SGM-0107': { name: 'VivoCity', architectCredit: 'Toyo Ito & Associates' },
     'SGM-0108': { name: 'CapitaGreen', architectCredit: 'Toyo Ito & Associates' },
     'SGM-0109': { name: 'National Gallery Singapore', architectCredit: 'studioMilou Singapore · CPG Consultants' },
+    'SGM-0089': { name: 'Republic Polytechnic', architectCredit: 'Maki & Associates · DP Architects' },
+    'SGM-0092': { name: 'One Raffles Place Tower One', architectCredit: 'Kenzo Tange Associates' },
+    'SGM-0093': { name: 'Singapore Indoor Stadium', architectCredit: 'Kenzo Tange Associates · RSP Architects' },
+    'SGM-0104': { name: 'Jewel Changi Airport', architectCredit: 'Safdie Architects · RSP Architects' },
   },
   ja: {
     'dpa-esplanade': { name: 'Esplanade – Theatres on the Bay', architectCredit: 'DP Architects、Michael Wilford & Partners（英国）による協働' },
@@ -177,6 +183,10 @@ const buildingCopy: Record<Locale, Record<string, BuildingCopy>> = {
     'SGM-0107': { name: 'VivoCity', architectCredit: '伊東豊雄建築設計事務所' },
     'SGM-0108': { name: 'CapitaGreen', architectCredit: '伊東豊雄建築設計事務所' },
     'SGM-0109': { name: 'National Gallery Singapore', architectCredit: 'studioMilou Singapore · CPG Consultants' },
+    'SGM-0089': { name: 'Republic Polytechnic', architectCredit: '槇総合計画事務所 · DP Architects' },
+    'SGM-0092': { name: 'One Raffles Place Tower One', architectCredit: '丹下健三建築都市設計' },
+    'SGM-0093': { name: 'Singapore Indoor Stadium', architectCredit: '丹下健三建築都市設計 · RSP Architects' },
+    'SGM-0104': { name: 'Jewel Changi Airport', architectCredit: 'Safdie Architects · RSP Architects' },
   },
 }
 
