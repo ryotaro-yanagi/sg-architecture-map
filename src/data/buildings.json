@@ -399,6 +399,162 @@
       "photo": null,
       "publicAccess": "unverified",
       "editorialStatus": "needs_review"
+    },
+    {
+      "id": "SGM-0090",
+      "name": "Wee Cho Yaw Plaza",
+      "aliases": [
+        "Gaia",
+        "NBS Gaia",
+        "Academic Building South"
+      ],
+      "architects": [
+        "Toyo Ito & Associates",
+        "RSP Architects Planners & Engineers"
+      ],
+      "architectCredit": "Toyo Ito & Associates · RSP Architects",
+      "buildingType": "education",
+      "completionYear": 2023,
+      "address": "91 Nanyang Avenue, Singapore 639956",
+      "coordinates": [
+        103.68366,
+        1.34114
+      ],
+      "coordinatePrecision": "nearby_bus_stop_approximate",
+      "coordinateSource": "https://mapcarta.com/N410467804",
+      "officialSource": "https://www.ntu.edu.sg/life-at-ntu/museum/campus-art-trail",
+      "yearSource": "https://www.ntu.edu.sg/research/research-at-ntu/detail/gaia-the-largest-wooden-building-in-asia-launched",
+      "namingSource": "https://www.ntu.edu.sg/business/about-us/history-and-milestones",
+      "photo": null,
+      "publicAccess": "unverified",
+      "editorialStatus": "needs_review"
+    },
+    {
+      "id": "SGM-0091",
+      "name": "The Wave (NTU)",
+      "aliases": [
+        "The Wave",
+        "NTU Sports Hall"
+      ],
+      "architects": [
+        "Toyo Ito & Associates"
+      ],
+      "architectCredit": "Toyo Ito & Associates",
+      "buildingType": "sports",
+      "completionYear": null,
+      "address": "110 Nanyang Crescent, Singapore 636956",
+      "coordinates": [
+        103.6893967,
+        1.3490784
+      ],
+      "coordinatePrecision": "representative_point_approximate",
+      "coordinateSource": "https://sg.near-place.com/the-wave-sports-hall-110-nanyang-crescent",
+      "officialSource": "https://www.ntu.edu.sg/life-at-ntu/museum/campus-art-trail",
+      "yearNote": "NTU Campus Art Trail lists 2016; NTU describes 2017 launch. Completion year not confirmed.",
+      "photo": null,
+      "publicAccess": "unverified",
+      "editorialStatus": "needs_review"
+    },
+    {
+      "id": "SGM-0095",
+      "name": "Kampung Admiralty",
+      "architects": [
+        "WOHA"
+      ],
+      "architectCredit": "WOHA",
+      "buildingType": "mixed_use",
+      "completionYear": null,
+      "address": "676 Woodlands Drive 71, Singapore 730676",
+      "coordinates": [
+        103.80071,
+        1.43975
+      ],
+      "coordinatePrecision": "representative_point_approximate",
+      "coordinateSource": "https://mapcarta.com/W505212759",
+      "officialSource": "https://woha.net/project/kampung-admiralty/",
+      "yearNote": "WOHA lists August 2018 completion; President's Design Award mentions 2017 completion. Do not choose a year until reconciled.",
+      "pdaAwardYear": 2020,
+      "pdaAwardSource": "https://pda.designsingapore.org/award-recipients/2020/kampung-admiralty/",
+      "photo": null,
+      "publicAccess": "unverified",
+      "editorialStatus": "needs_review"
+    },
+    {
+      "id": "SGM-0096",
+      "name": "SkyVille @ Dawson",
+      "architects": [
+        "WOHA"
+      ],
+      "architectCredit": "WOHA",
+      "buildingType": "residential",
+      "completionYear": 2015,
+      "address": "85–88 Dawson Road, Singapore",
+      "coordinates": [
+        103.810032,
+        1.295818
+      ],
+      "coordinatePrecision": "site_representative_point_approximate",
+      "coordinateSource": "https://archi.ru/projects/world/9800/kompleks-skyville%40dawson",
+      "officialSource": "https://woha.net/project/skyville-dawson/",
+      "yearSource": "https://woha.net/project/skyville-dawson/",
+      "pdaAwardYear": 2016,
+      "pdaAwardSource": "https://pda.designsingapore.org/award-recipients/2016/skyville-at-dawson/",
+      "photo": null,
+      "publicAccess": "unverified",
+      "editorialStatus": "needs_review"
+    },
+    {
+      "id": "SGM-0097",
+      "name": "Enabling Village",
+      "architects": [
+        "WOHA"
+      ],
+      "architectCredit": "WOHA",
+      "buildingType": "community",
+      "completionYear": 2016,
+      "address": "20 Lengkok Bahru, Singapore 159053",
+      "coordinates": [
+        103.81466,
+        1.28639
+      ],
+      "coordinatePrecision": "site_representative_point_approximate",
+      "coordinateSource": "https://mapcarta.com/W172100588",
+      "officialSource": "https://woha.net/project/enabling-village/",
+      "yearSource": "https://woha.net/project/enabling-village/",
+      "yearNote": "Original village opened in 2015; WOHA lists completion June 2016. Vista extension opened in 2025 and is not this building record.",
+      "pdaAwardYear": 2016,
+      "pdaAwardSource": "https://pda.designsingapore.org/award-recipients/2016/enabling-village/",
+      "photo": null,
+      "publicAccess": "unverified",
+      "editorialStatus": "needs_review"
+    },
+    {
+      "id": "SGM-0126",
+      "name": "Mediacorp Campus",
+      "aliases": [
+        "Singapore MediaCorp"
+      ],
+      "architects": [
+        "Maki & Associates",
+        "DP Architects"
+      ],
+      "architectCredit": "Maki & Associates · DP Architects",
+      "buildingType": "mixed_use",
+      "completionYear": 2015,
+      "address": "1 Stars Avenue, Singapore 138507",
+      "coordinates": [
+        103.7923,
+        1.29541
+      ],
+      "coordinatePrecision": "site_representative_point_approximate",
+      "coordinateSource": "https://mapcarta.com/W352920078",
+      "officialSource": "https://www.maki-and-associates.co.jp/projects/SMC?lang=en",
+      "yearSource": "https://www.maki-and-associates.co.jp/projects/SMC?lang=en",
+      "pdaAwardYear": 2018,
+      "pdaAwardSource": "https://pda.designsingapore.org/award-recipients/2018/mediacorp-campus/",
+      "photo": null,
+      "publicAccess": "unverified",
+      "editorialStatus": "needs_review"
     }
   ]
 }
