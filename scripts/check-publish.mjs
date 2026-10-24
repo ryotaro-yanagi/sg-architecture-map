@@ -9,7 +9,7 @@ const assert = (condition, message) => {
 }
 
 assert(data.status === 'test-data-only', 'Dataset must remain marked test-data-only.')
-assert(data.buildings?.length === 7, 'Prototype 01 must contain exactly seven buildings.')
+assert(Array.isArray(data.buildings) && data.buildings.length >= 7, 'Prototype must preserve the original seven or more buildings.')
 
 for (const building of data.buildings ?? []) {
   const label = building.id || '(missing id)'
@@ -41,4 +41,4 @@ if (failures.length) {
   process.exit(1)
 }
 
-console.log('Publication checks passed: locale entries, 7 test records, approximate coordinates, HTTPS sources, no photos, no debug statements.')
+console.log(`Publication checks passed: locale entries, ${data.buildings.length} test records, approximate coordinates, HTTPS sources, no photos, no debug statements.`)

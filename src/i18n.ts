@@ -63,7 +63,7 @@ export const translations: Record<Locale, Translation> = {
     locationSuccess: 'Your location is now shown on the map.',
     locationFailure: 'We could not access your location. You can continue using the map without it.',
     currentLocation: 'Current location',
-    dataNote: '7 places · approximate coordinates',
+    dataNote: '8 places · approximate coordinates',
     clearSelection: 'Clear selection',
     viewDetails: 'View details',
     previewLabel: (name) => `${name} preview`,
@@ -81,13 +81,14 @@ export const translations: Record<Locale, Translation> = {
     googleSearch: 'Google Search',
     imageSearch: 'Image Search',
     sources: 'Sources',
-    officialProject: 'DP Architects official project',
+    officialProject: 'Architect’s official project',
     coordinateSource: 'Coordinate source',
     types: {
       civic_cultural: 'Civic & cultural',
       mixed_use: 'Mixed use',
       retail: 'Retail',
       community: 'Community',
+      hospitality: 'Hospitality',
     },
   },
   ja: {
@@ -112,7 +113,7 @@ export const translations: Record<Locale, Translation> = {
     locationSuccess: '現在地を地図に表示しました。',
     locationFailure: '現在地を取得できませんでした。許可しなくても地図は使えます。',
     currentLocation: '現在地',
-    dataNote: '7件 · 座標は暫定',
+    dataNote: '8件 · 座標は暫定',
     clearSelection: '選択を解除',
     viewDetails: '詳しく見る',
     previewLabel: (name) => `${name}のプレビュー`,
@@ -130,13 +131,14 @@ export const translations: Record<Locale, Translation> = {
     googleSearch: 'Google検索',
     imageSearch: '画像検索',
     sources: '出典',
-    officialProject: 'DP Architects 公式プロジェクト',
+    officialProject: '設計者公式プロジェクト',
     coordinateSource: '座標情報',
     types: {
       civic_cultural: '文化・公共',
       mixed_use: '複合用途',
       retail: '商業',
       community: 'コミュニティ',
+      hospitality: '宿泊',
     },
   },
 }
@@ -150,6 +152,7 @@ const buildingCopy: Record<Locale, Record<string, BuildingCopy>> = {
     'dpa-peoples-park-complex': { name: 'People’s Park Complex', architectCredit: 'Design Partnership Architects & Planners and DP Architects (in continuation of Design Partnership)' },
     'dpa-our-tampines-hub': { name: 'Our Tampines Hub', architectCredit: 'DP Architects, DP Design, DP Green' },
     'dpa-golden-mile-complex': { name: 'Golden Mile Complex', architectCredit: 'DP Architects (historic authorship and current project phase require detailed differentiation)' },
+    'SGM-0098': { name: '21 Carpenter', architectCredit: 'WOHA' },
   },
   ja: {
     'dpa-esplanade': { name: 'Esplanade – Theatres on the Bay', architectCredit: 'DP Architects、Michael Wilford & Partners（英国）による協働' },
@@ -159,6 +162,7 @@ const buildingCopy: Record<Locale, Record<string, BuildingCopy>> = {
     'dpa-peoples-park-complex': { name: 'People’s Park Complex', architectCredit: 'Design Partnership Architects & PlannersおよびDP Architects（Design Partnershipの継続）' },
     'dpa-our-tampines-hub': { name: 'Our Tampines Hub', architectCredit: 'DP Architects、DP Design、DP Green' },
     'dpa-golden-mile-complex': { name: 'Golden Mile Complex', architectCredit: 'DP Architects（歴史的設計者と現在のプロジェクト段階は要精査）' },
+    'SGM-0098': { name: '21 Carpenter', architectCredit: 'WOHA' },
   },
 }
 
