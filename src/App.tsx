@@ -127,6 +127,8 @@ const applyMapPalette = (map: MapLibreMap, palette: MapPalette) => {
   ;['landuse_pitch', 'landuse_track', 'landuse_cemetery', 'landuse_hospital', 'landuse_school'].forEach((id) => setPaint(map, id, 'fill-color', palette.grass))
   setPaint(map, 'water', 'fill-color', palette.water)
   ;['waterway_tunnel', 'waterway_river', 'waterway_other'].forEach((id) => setPaint(map, id, 'line-color', palette.waterway))
+  // Liberty's 2D buildings otherwise stop at z14 when 3D buildings begin.
+  if (map.getLayer('building')) map.setLayerZoomRange('building', 13, 24)
   setPaint(map, 'building', 'fill-color', palette.building)
   setPaint(map, 'building', 'fill-outline-color', palette.building)
   if (map.getLayer('building-3d')) map.setLayoutProperty('building-3d', 'visibility', 'none')
