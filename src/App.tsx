@@ -371,8 +371,36 @@ function App() {
   }, [locale, restoredState])
 
   useEffect(() => {
-    const source = mapRef.current?.getSource('buildings') as GeoJSONSource | undefined
-    source?.setData(featureCollection(selectedId, locale))
+    const map = mapRef.current
+    const source = map?.getSource('buildings') as GeoJSONSource | undefined
+    if (!map || !source) return
+
+    source.setData(featureCollection(selectedId, locale))
+    if (!selectedId || !map.getLayer('building-pin-selected')) return
+
+    // The normal marker disappears with the source update; the larger marker
+    // arrives independently, without scaling or changing the map coordinate.
+    if (motionDuration(160) === 0) {
+      map.setPaintProperty('building-pin-selected', 'icon-opacity', 1)
+      return
+    }
+
+    map.setPaintProperty('building-pin-selected', 'icon-opacity', 0)
+    let secondFrame = 0
+    const firstFrame = window.requestAnimationFrame(() => {
+      secondFrame = window.requestAnimationFrame(() => {
+        if (map.getLayer('building-pin-selected')) {
+          map.setPaintProperty('building-pin-selected', 'icon-opacity', 1)
+        }
+      })
+    })
+    return () => {
+      window.cancelAnimationFrame(firstFrame)
+      window.cancelAnimationFrame(secondFrame)
+      if (map.getLayer('building-pin-selected')) {
+        map.setPaintProperty('building-pin-selected', 'icon-opacity', 1)
+      }
+    }
   }, [locale, selectedId])
 
   useEffect(() => {
