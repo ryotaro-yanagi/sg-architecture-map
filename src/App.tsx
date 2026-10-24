@@ -297,11 +297,13 @@ function App() {
       })
       map.addLayer({
         id: 'building-dots', type: 'circle', source: 'buildings',
-        layout: { 'circle-sort-key': ['case', ['get', 'selected'], 1, 0] },
+        filter: ['==', ['get', 'selected'], false],
         paint: {
           'circle-radius': 4,
           'circle-color': markerFill,
-          'circle-opacity': ['case', ['get', 'selected'], 0, ['interpolate', ['linear'], ['zoom'], 14, 1, 15.2, 0]],
+          'circle-stroke-color': '#ffffff',
+          'circle-stroke-width': 1,
+          'circle-opacity': ['interpolate', ['linear'], ['zoom'], 14, 1, 15.2, 0],
           'circle-opacity-transition': markerTransition,
         },
       })
