@@ -421,26 +421,51 @@ function App() {
     const building = buildings.find(item => item.id === selectedId)
     if (!map || !building) return
 
-    // A dedicated DOM marker avoids MapLibre symbol placement and GeoJSON
-    // worker timing affecting the selected marker's entrance animation.
+    // Animate the two visual priorities independently. The normal map symbol
+    // is filtered out on selection, so this temporary copy fades out in its
+    // place while the selected pin responds immediately.
     const element = document.createElement('div')
     element.style.width = '44px'
     element.style.height = '52px'
     element.style.pointerEvents = 'none'
-    const image = document.createElement('img')
-    image.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(createBuildingPinSvg(44, 52, 2, 20))}`
-    image.alt = ''
-    image.width = 44
-    image.height = 52
-    image.style.display = 'block'
-    element.appendChild(image)
+    const createImage = (svg: string, width: number, height: number) => {
+      const image = document.createElement('img')
+      image.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`
+      image.alt = ''
+      image.width = width
+      image.height = height
+      image.style.position = 'absolute'
+      image.style.bottom = '0'
+      image.style.left = `${(44 - width) / 2}px`
+      image.style.display = 'block'
+      return image
+    }
+    const normal = map.getZoom() >= markerSwitchZoom
+      ? createImage(createBuildingPinSvg(24, 29, 1.5, 11), 24, 29)
+      : document.createElement('span')
+    if (normal instanceof HTMLSpanElement) {
+      normal.style.position = 'absolute'
+      normal.style.width = '8px'
+      normal.style.height = '8px'
+      normal.style.left = '18px'
+      normal.style.bottom = '0'
+      normal.style.border = '1px solid #ffffff'
+      normal.style.borderRadius = '50%'
+      normal.style.background = markerFill
+      normal.style.boxSizing = 'border-box'
+    }
+    const selected = createImage(createBuildingPinSvg(44, 52, 2, 20), 44, 52)
+    element.append(normal, selected)
     const marker = new maplibregl.Marker({ element, anchor: 'bottom' })
       .setLngLat(building.coordinates)
       .addTo(map)
     selectedMarkerRef.current = marker
 
-    image.animate([{ opacity: 0 }, { opacity: 1 }], {
-      duration: 280, easing: 'ease-out', fill: 'both',
+    normal.animate([{ opacity: 1 }, { opacity: 0 }], {
+      duration: 300, easing: 'ease-out', fill: 'forwards',
+    })
+    selected.animate([{ opacity: 0 }, { opacity: 1 }], {
+      duration: 100, easing: 'ease-out', fill: 'forwards',
     })
     return () => {
       marker.remove()
