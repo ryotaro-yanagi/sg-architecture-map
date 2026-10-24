@@ -50,15 +50,16 @@ const revealBuilding = (map: MapLibreMap | null, coordinates: Coordinates) => {
   const point = map.project(coordinates)
   const pinHalfWidth = 22
   const pinHeight = 52
-  const margin = 16
+  const margin = 24
   const search = document.querySelector<HTMLElement>('.search-shell')
   const searchBounds = search?.getBoundingClientRect()
   const top = searchBounds && searchBounds.bottom > bounds.top && searchBounds.top < bounds.bottom
     ? searchBounds.bottom - bounds.top + margin
     : 24
-  const left = pinHalfWidth + margin
-  const right = bounds.width - pinHalfWidth - margin
-  let bottom = bounds.height - margin
+  // Wider comfort zone: do not park a selected pin against the edge.
+  const left = Math.max(pinHalfWidth + margin, bounds.width * 0.22)
+  const right = Math.min(bounds.width - pinHalfWidth - margin, bounds.width * 0.78)
+  let bottom = Math.min(bounds.height - margin, bounds.height * 0.76)
   const card = document.querySelector<HTMLElement>('.preview-card')
   const cardBounds = card?.getBoundingClientRect()
   // On desktop the card occupies only the lower-left portion of the map.
@@ -66,14 +67,19 @@ const revealBuilding = (map: MapLibreMap | null, coordinates: Coordinates) => {
     && point.x + bounds.left <= cardBounds.right + pinHalfWidth + margin) {
     bottom = Math.min(bottom, cardBounds.top - bounds.top - margin)
   }
-  const safeTop = Math.min(top + pinHeight, bottom)
+  const safeTop = Math.min(Math.max(top + pinHeight, bounds.height * 0.22), bottom)
   const targetX = Math.max(left, Math.min(right, point.x))
   const targetY = Math.max(safeTop, Math.min(bottom, point.y))
   const dx = targetX - point.x
   const dy = targetY - point.y
   if (Math.abs(dx) < 1 && Math.abs(dy) < 1) return
   const distance = Math.hypot(dx, dy)
-  map.panBy([dx, dy], { duration: motionDuration(Math.min(600, Math.max(220, distance * 0.8))), easing: t => 1 - (1 - t) ** 3 })
+  // panBy moves the *camera* in the given direction, so the projected
+  // building moves in the opposite direction; invert the desired pixel delta.
+  map.panBy([-dx, -dy], {
+    duration: motionDuration(Math.min(750, Math.max(380, distance * 1.2))),
+    easing: t => t < 0.5 ? 4 * t ** 3 : 1 - (-2 * t + 2) ** 3 / 2,
+  })
 }
 
 const getRequestedSelectedId = (): string | null => {
@@ -403,33 +409,32 @@ function App() {
     const source = map?.getSource('buildings') as GeoJSONSource | undefined
     if (!map || !source) return
 
+    const layer = 'building-pin-selected'
+    const shouldAnimate = Boolean(selectedId) && motionDuration(160) > 0 && Boolean(map.getLayer(layer))
+    if (shouldAnimate) {
+      map.setPaintProperty(layer, 'icon-opacity-transition', { duration: 0 })
+      map.setPaintProperty(layer, 'icon-opacity', 0)
+    }
     source.setData(featureCollection(selectedId, locale))
-    if (!selectedId || !map.getLayer('building-pin-selected')) return
-
-    // The normal marker disappears with the source update; the larger marker
-    // arrives independently, without scaling or changing the map coordinate.
-    if (motionDuration(160) === 0) {
-      map.setPaintProperty('building-pin-selected', 'icon-opacity', 1)
+    if (!shouldAnimate) {
+      if (map.getLayer(layer)) map.setPaintProperty(layer, 'icon-opacity', 1)
       return
     }
 
-    map.setPaintProperty('building-pin-selected', 'icon-opacity-transition', { duration: 0 })
-    map.setPaintProperty('building-pin-selected', 'icon-opacity', 0)
-    let secondFrame = 0
-    const firstFrame = window.requestAnimationFrame(() => {
-      secondFrame = window.requestAnimationFrame(() => {
-        if (map.getLayer('building-pin-selected')) {
-          map.setPaintProperty('building-pin-selected', 'icon-opacity-transition', { duration: 160 })
-          map.setPaintProperty('building-pin-selected', 'icon-opacity', 1)
-        }
+    // Wait until MapLibre has committed the new selected feature to the render,
+    // instead of racing asynchronous GeoJSON updates with two arbitrary frames.
+    let frame = 0
+    const showSelected = () => {
+      frame = window.requestAnimationFrame(() => {
+        if (!map.getLayer(layer)) return
+        map.setPaintProperty(layer, 'icon-opacity-transition', { duration: 160 })
+        map.setPaintProperty(layer, 'icon-opacity', 1)
       })
-    })
+    }
+    map.once('idle', showSelected)
     return () => {
-      window.cancelAnimationFrame(firstFrame)
-      window.cancelAnimationFrame(secondFrame)
-      if (map.getLayer('building-pin-selected')) {
-        map.setPaintProperty('building-pin-selected', 'icon-opacity', 1)
-      }
+      map.off('idle', showSelected)
+      window.cancelAnimationFrame(frame)
     }
   }, [locale, selectedId])
 
