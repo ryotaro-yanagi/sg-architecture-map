@@ -128,6 +128,17 @@ const applyMapPalette = (map: MapLibreMap, palette: MapPalette) => {
   const layers = map.getStyle().layers ?? []
   layers.forEach((layer) => {
     const id = layer.id
+    // Navigation-only symbols are not needed on an architecture discovery map.
+    if (layer.type === 'symbol' && (
+      id === 'road_one_way_arrow' ||
+      id === 'road_one_way_arrow_opposite' ||
+      id === 'highway-shield-non-us' ||
+      id === 'highway-shield-us-interstate' ||
+      id === 'road_shield_us'
+    )) {
+      map.setLayoutProperty(id, 'visibility', 'none')
+      return
+    }
     if (layer.type === 'symbol' && id.startsWith('poi_')) {
       map.setLayoutProperty(id, 'visibility', 'none')
       return
