@@ -87,6 +87,9 @@ const productionMapPalette: MapPalette = {
 }
 const markerFill = '#35946b'
 const markerStroke = '#242424'
+const markerOutline = '#ffffff'
+const markerPixelRatio = 3
+const markerSwitchZoom = 14.5
 const markerIcon = '#ffffff'
 const phosphorBuildingFillPath = 'M232,224H208V32h8a8,8,0,0,0,0-16H40a8,8,0,0,0,0,16h8V224H24a8,8,0,0,0,0,16H232a8,8,0,0,0,0-16ZM88,56h24a8,8,0,0,1,0,16H88a8,8,0,0,1,0-16Zm0,40h24a8,8,0,0,1,0,16H88a8,8,0,0,1,0-16Zm-8,48a8,8,0,0,1,8-8h24a8,8,0,0,1,0,16H88A8,8,0,0,1,80,144Zm72,80H104V184h48Zm16-72H144a8,8,0,0,1,0-16h24a8,8,0,0,1,0,16Zm0-40H144a8,8,0,0,1,0-16h24a8,8,0,0,1,0,16Zm0-40H144a8,8,0,0,1,0-16h24a8,8,0,0,1,0,16Z'
 const createBuildingPinSvg = (width: number, height: number, strokeWidth: number, iconSize: number) => {
@@ -100,8 +103,8 @@ const createBuildingPinSvg = (width: number, height: number, strokeWidth: number
     `C ${width * .71} ${strokeWidth}, ${width * .88} ${height * .18}, ${width * .88} ${height * .42}`,
     `C ${width * .88} ${height * .67}, ${cx + width * .08} ${height * .89}, ${cx} ${height - strokeWidth / 2} Z`,
   ].join(' ')
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
-    <path d="${path}" fill="${markerFill}" stroke="${markerStroke}" stroke-width="${strokeWidth}" stroke-linejoin="round"/>
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width * markerPixelRatio}" height="${height * markerPixelRatio}" viewBox="0 0 ${width} ${height}">
+    <path d="${path}" fill="${markerFill}" stroke="${markerOutline}" stroke-width="${strokeWidth}" stroke-linejoin="round"/>
     <svg x="${iconX}" y="${iconY}" width="${iconSize}" height="${iconSize}" viewBox="0 0 256 256" fill="${markerIcon}"><path d="${phosphorBuildingFillPath}"/></svg>
   </svg>`
 }
@@ -293,8 +296,8 @@ function App() {
         loadSvgMarker(createBuildingPinSvg(24, 29, 1.5, 11)),
         loadSvgMarker(createBuildingPinSvg(44, 52, 2, 20)),
       ])
-      map.addImage('building-pin-normal', normalPin, { pixelRatio: 1 })
-      map.addImage('building-pin-selected', selectedPin, { pixelRatio: 1 })
+      map.addImage('building-pin-normal', normalPin, { pixelRatio: markerPixelRatio })
+      map.addImage('building-pin-selected', selectedPin, { pixelRatio: markerPixelRatio })
       map.addSource('buildings', { type: 'geojson', data: featureCollection(selectedId, locale) })
       map.addLayer({
         id: 'building-hit-targets', type: 'circle', source: 'buildings',
@@ -302,22 +305,21 @@ function App() {
         paint: { 'circle-radius': 22, 'circle-opacity': 0 },
       })
       map.addLayer({
-        id: 'building-dots', type: 'circle', source: 'buildings',
+        id: 'building-dots', type: 'circle', source: 'buildings', maxzoom: markerSwitchZoom,
         filter: ['==', ['get', 'selected'], false],
         paint: {
           'circle-radius': 4,
           'circle-color': markerFill,
           'circle-stroke-color': '#ffffff',
           'circle-stroke-width': 1,
-          'circle-opacity': ['interpolate', ['linear'], ['zoom'], 14, 1, 15.2, 0],
-          'circle-opacity-transition': markerTransition,
+          'circle-opacity': 1,
         },
       })
       map.addLayer({
-        id: 'building-pins', type: 'symbol', source: 'buildings',
+        id: 'building-pins', type: 'symbol', source: 'buildings', minzoom: markerSwitchZoom,
         filter: ['==', ['get', 'selected'], false],
         layout: { 'icon-image': 'building-pin-normal', 'icon-anchor': 'bottom', 'icon-overlap': 'always', 'icon-ignore-placement': true },
-        paint: { 'icon-opacity': ['interpolate', ['linear'], ['zoom'], 13.5, 0, 14.5, 1], 'icon-opacity-transition': markerTransition },
+        paint: { 'icon-opacity': 1 },
       })
       map.addLayer({
         id: 'building-pin-selected', type: 'symbol', source: 'buildings',
@@ -350,6 +352,10 @@ function App() {
           setExpanded(false)
           setSearchOpen(false)
           window.requestAnimationFrame(() => revealBuilding(map, nearest.coordinates))
+        } else {
+          setSelectedId(null)
+          setExpanded(false)
+          setSearchOpen(false)
         }
       })
       map.on('mouseenter', 'building-hit-targets', () => { map.getCanvas().style.cursor = 'pointer' })
