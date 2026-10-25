@@ -6,9 +6,10 @@ import data from './data/buildings.json'
 import { getBuildingCopy, getLocaleFromPath, localeHref, translations } from './i18n'
 import type { RefObject } from 'react'
 import type { Locale, Translation } from './i18n'
+import { parseWeatherPayloads } from './weather'
+import type { WeatherState } from './weather'
 
 type Coordinates = [number, number]
-type WeatherState = { temperature: number | null; condition: string | null }
 const weatherPortalUrl = 'https://www.weather.gov.sg/'
 const weatherTemperatureUrl = 'https://api-open.data.gov.sg/v2/real-time/api/air-temperature'
 const weatherForecastUrl = 'https://api-open.data.gov.sg/v2/real-time/api/twenty-four-hr-forecast'
@@ -322,25 +323,10 @@ function App() {
           fetch(weatherForecastUrl),
         ])
         if (!temperatureResponse.ok || !forecastResponse.ok) throw new Error('Weather request failed')
-        const temperatureJson = await temperatureResponse.json()
-        const forecastJson = await forecastResponse.json()
-        const temperatureReadings = temperatureJson?.data?.readings?.[0]?.data ?? temperatureJson?.data?.readings ?? []
-        const values = Array.isArray(temperatureReadings)
-          ? temperatureReadings.map((reading: { value?: number }) => Number(reading?.value)).filter((value: number) => Number.isFinite(value)).sort((x: number, y: number) => x - y)
-          : []
-        const median = values.length
-          ? values.length % 2
-            ? values[Math.floor(values.length / 2)]
-            : (values[values.length / 2 - 1] + values[values.length / 2]) / 2
-          : null
-        const forecastRecord = forecastJson?.data?.records?.[0] ?? forecastJson?.data?.items?.[0] ?? forecastJson?.data
-        const forecastValue = forecastRecord?.general?.forecast ?? forecastRecord?.general?.condition ?? forecastRecord?.forecast ?? null
-        const condition = typeof forecastValue === 'string'
-          ? forecastValue
-          : typeof forecastValue?.text === 'string'
-            ? forecastValue.text
-            : null
-        if (!cancelled) setWeather({ temperature: median === null ? null : Math.round(median), condition })
+        const temperatureJson: unknown = await temperatureResponse.json()
+        const forecastJson: unknown = await forecastResponse.json()
+        const nextWeather = parseWeatherPayloads(temperatureJson, forecastJson)
+        if (!cancelled) setWeather(nextWeather)
       } catch {
         if (!cancelled) setWeather({ temperature: null, condition: null })
       }

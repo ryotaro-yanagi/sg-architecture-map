@@ -36,6 +36,9 @@ jobs:
       - name: Check publication data
         run: npm run check:publish
 
+      - name: Test weather parsing
+        run: npm run test:weather
+
       - name: Build
         run: npm run build
 
