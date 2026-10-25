@@ -43,8 +43,11 @@ const defaultCenter: Coordinates = [103.879, 1.315]
 const defaultZoom = 11.35
 const mapStateKey = 'sgm-language-map-state'
 
+const prefersReducedMotion = () =>
+  window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
 const motionDuration = (duration: number) =>
-  window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : duration
+  prefersReducedMotion() ? 0 : duration
 
 // Preserve the user's camera when selecting a building. Only pan when the
 // selected pin would overlap the visible UI or approach the viewport edge.
@@ -85,11 +88,15 @@ const revealBuilding = (map: MapLibreMap | null, coordinates: Coordinates) => {
   // The new center is the geographic point currently under the displaced
   // viewport center. This preserves zoom, bearing, and pitch.
   const center = map.unproject([bounds.width / 2 + dx, bounds.height / 2 + dy])
+  if (prefersReducedMotion()) {
+    map.jumpTo({ center })
+    return
+  }
   map.easeTo({
     center,
     duration: Math.min(1100, Math.max(520, distance * 1.5)),
     easing: t => t * t * (3 - 2 * t),
-    essential: true,
+    essential: false,
   })
 }
 
@@ -509,12 +516,17 @@ function App() {
       .addTo(map)
     selectedMarkerRef.current = marker
 
-    normal.animate([{ opacity: 1 }, { opacity: 0 }], {
-      duration: 300, easing: 'ease-out', fill: 'forwards',
-    })
-    selected.animate([{ opacity: 0 }, { opacity: 1 }], {
-      duration: 100, easing: 'ease-out', fill: 'forwards',
-    })
+    if (prefersReducedMotion()) {
+      normal.style.opacity = '0'
+      selected.style.opacity = '1'
+    } else {
+      normal.animate([{ opacity: 1 }, { opacity: 0 }], {
+        duration: 300, easing: 'ease-out', fill: 'forwards',
+      })
+      selected.animate([{ opacity: 0 }, { opacity: 1 }], {
+        duration: 100, easing: 'ease-out', fill: 'forwards',
+      })
+    }
     return () => {
       marker.remove()
       if (selectedMarkerRef.current === marker) selectedMarkerRef.current = null

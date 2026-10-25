@@ -193,7 +193,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .place-sheet, .sheet-compact, .sheet-expanded { transition: none; animation: none; }
-
-  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
+  html { scroll-behavior: auto; }
+  .place-sheet { transition: none; animation: none; }
+  .sheet-compact, .sheet-expanded { transition: opacity 80ms linear; }
+  .notice { animation: none; }
 }
