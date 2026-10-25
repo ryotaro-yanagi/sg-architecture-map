@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { ArrowLeft, ArrowRight, ArrowSquareOut, Crosshair, MagnifyingGlass, Minus, NavigationArrow, Plus, X } from '@phosphor-icons/react'
+import { ArrowLeft, ArrowRight, ArrowSquareOut, CaretDown, Check, Cloud, CloudRain, CloudSun, Crosshair, Lightning, MagnifyingGlass, NavigationArrow, Sun, X } from '@phosphor-icons/react'
 import * as maplibregl from 'maplibre-gl'
 import type { GeoJSONSource, Map as MapLibreMap } from 'maplibre-gl'
 import data from './data/buildings.json'
@@ -8,6 +8,11 @@ import type { RefObject } from 'react'
 import type { Locale, Translation } from './i18n'
 
 type Coordinates = [number, number]
+type WeatherState = { temperature: number | null; condition: string | null }
+const weatherPortalUrl = 'https://www.weather.gov.sg/'
+const weatherTemperatureUrl = 'https://api-open.data.gov.sg/v2/real-time/api/air-temperature'
+const weatherForecastUrl = 'https://api-open.data.gov.sg/v2/real-time/api/twenty-four-hr-forecast'
+
 type Building = {
   id: string
   name: string
@@ -287,6 +292,8 @@ function App() {
   const [searchOpen, setSearchOpen] = useState(false)
   const [locating, setLocating] = useState(false)
   const [notice, setNotice] = useState<string | null>(null)
+  const [languageOpen, setLanguageOpen] = useState(false)
+  const [weather, setWeather] = useState<WeatherState>({ temperature: null, condition: null })
 
   const selected = buildings.find((building) => building.id === selectedId) ?? null
   const results = useMemo(() => {
@@ -297,6 +304,38 @@ function App() {
       return `${copy.name} ${copy.architectCredit} ${building.architects.join(' ')}`.toLocaleLowerCase(locale).includes(normalized)
     })
   }, [locale, query])
+
+  useEffect(() => {
+    let cancelled = false
+    const loadWeather = async () => {
+      try {
+        const [temperatureResponse, forecastResponse] = await Promise.all([
+          fetch(weatherTemperatureUrl),
+          fetch(weatherForecastUrl),
+        ])
+        if (!temperatureResponse.ok || !forecastResponse.ok) throw new Error('Weather request failed')
+        const temperatureJson = await temperatureResponse.json()
+        const forecastJson = await forecastResponse.json()
+        const temperatureReadings = temperatureJson?.data?.readings?.[0]?.data ?? temperatureJson?.data?.readings ?? []
+        const values = Array.isArray(temperatureReadings)
+          ? temperatureReadings.map((reading: { value?: number }) => Number(reading?.value)).filter((value: number) => Number.isFinite(value)).sort((x: number, y: number) => x - y)
+          : []
+        const median = values.length
+          ? values.length % 2
+            ? values[Math.floor(values.length / 2)]
+            : (values[values.length / 2 - 1] + values[values.length / 2]) / 2
+          : null
+        const forecastRecord = forecastJson?.data?.records?.[0] ?? forecastJson?.data?.items?.[0] ?? forecastJson?.data
+        const condition = forecastRecord?.general?.forecast ?? forecastRecord?.general?.condition ?? forecastRecord?.forecast ?? null
+        if (!cancelled) setWeather({ temperature: median === null ? null : Math.round(median), condition })
+      } catch {
+        if (!cancelled) setWeather({ temperature: null, condition: null })
+      }
+    }
+    loadWeather()
+    const timer = window.setInterval(loadWeather, 5 * 60 * 1000)
+    return () => { cancelled = true; window.clearInterval(timer) }
+  }, [])
 
   useEffect(() => {
     document.documentElement.lang = locale
@@ -567,10 +606,26 @@ function App() {
           <span className="brand-mark"><BrandMark /></span>
         </button>
         <div className="top-controls">
-          <nav className="language-switch" aria-label={t.languageSwitcher}>
-            <a className={locale === 'en' ? 'active' : ''} href={localeHref('en', { selected: selectedId ?? '', sheet: expanded ? 'expanded' : 'compact' })} hrefLang="en" aria-current={locale === 'en' ? 'page' : undefined} onClick={switchLanguage}>EN</a>
-            <a className={locale === 'ja' ? 'active' : ''} href={localeHref('ja', { selected: selectedId ?? '', sheet: expanded ? 'expanded' : 'compact' })} hrefLang="ja" aria-current={locale === 'ja' ? 'page' : undefined} onClick={switchLanguage}>JP</a>
-          </nav>
+          <a className="weather-chip" href={weatherPortalUrl} target="_blank" rel="noreferrer" aria-label={weather.condition ? `${weather.condition}${weather.temperature === null ? '' : `, ${weather.temperature} degrees Celsius`}` : 'Singapore weather'}>
+            <WeatherGlyph condition={weather.condition} />
+            {weather.temperature !== null && <span>{weather.temperature}°</span>}
+          </a>
+          <div className="language-menu">
+            <button type="button" className="language-trigger" aria-label={t.languageSwitcher} aria-haspopup="menu" aria-expanded={languageOpen} onClick={() => setLanguageOpen((open) => !open)}>
+              <span>{locale.toUpperCase()}</span>
+              <CaretDown aria-hidden="true" size={16} weight="regular" />
+            </button>
+            {languageOpen && (
+              <nav className="language-popover" aria-label={t.languageSwitcher}>
+                <a href={localeHref('en', { selected: selectedId ?? '', sheet: expanded ? 'expanded' : 'compact' })} hrefLang="en" aria-current={locale === 'en' ? 'page' : undefined} onClick={switchLanguage}>
+                  <span>EN</span>{locale === 'en' && <Check aria-hidden="true" size={16} weight="bold" />}
+                </a>
+                <a href={localeHref('ja', { selected: selectedId ?? '', sheet: expanded ? 'expanded' : 'compact' })} hrefLang="ja" aria-current={locale === 'ja' ? 'page' : undefined} onClick={switchLanguage}>
+                  <span>JP</span>{locale === 'ja' && <Check aria-hidden="true" size={16} weight="bold" />}
+                </a>
+              </nav>
+            )}
+          </div>
         </div>
       </header>
 
@@ -597,14 +652,6 @@ function App() {
       </search>
 
       <div className="map-tools">
-        <div className="map-navigation" role="group" aria-label={locale === 'ja' ? '地図の拡大縮小' : 'Map zoom controls'}>
-          <button type="button" onClick={() => mapRef.current?.zoomIn({ duration: motionDuration(150) })} aria-label={t.mapControls['NavigationControl.ZoomIn'] ?? 'Zoom in'}>
-            <Plus aria-hidden="true" size={20} weight="regular" />
-          </button>
-          <button type="button" onClick={() => mapRef.current?.zoomOut({ duration: motionDuration(150) })} aria-label={t.mapControls['NavigationControl.ZoomOut'] ?? 'Zoom out'}>
-            <Minus aria-hidden="true" size={20} weight="regular" />
-          </button>
-        </div>
         <button className={`locate-button ${locating ? 'loading' : ''}`} onClick={locate} disabled={locating} aria-label={locating ? t.locating : t.locate}>
           <Crosshair aria-hidden="true" size={20} weight="regular" />
         </button>
@@ -621,6 +668,15 @@ function App() {
       {notice && <div className="notice" role="status">{notice}</div>}
     </main>
   )
+}
+
+function WeatherGlyph({ condition }: { condition: string | null }) {
+  const normalized = condition?.toLowerCase() ?? ''
+  if (/thunder|lightning/.test(normalized)) return <Lightning aria-hidden="true" size={20} weight="regular" />
+  if (/shower|rain/.test(normalized)) return <CloudRain aria-hidden="true" size={20} weight="regular" />
+  if (/cloud|overcast/.test(normalized)) return <Cloud aria-hidden="true" size={20} weight="regular" />
+  if (/partly|fair/.test(normalized)) return <CloudSun aria-hidden="true" size={20} weight="regular" />
+  return <Sun aria-hidden="true" size={20} weight="regular" />
 }
 
 type LocalizedProps = { building: Building; locale: Locale; t: Translation }

@@ -59,19 +59,22 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
 .maplibregl-ctrl-group { border-radius: 5px !important; overflow: hidden; box-shadow: 0 4px 16px rgba(22, 31, 27, .12) !important; }
 .maplibregl-ctrl-group button { width: var(--control-min); height: var(--control-min); }
 .map-tools { position: absolute; z-index: 8; right: 14px; bottom: max(98px, calc(env(safe-area-inset-bottom) + 88px)); display: grid; justify-items: end; gap: 8px; }
-.map-navigation { display: grid; overflow: hidden; color: var(--ink); background: var(--paper-strong); border: 1px solid var(--line); border-radius: 5px; box-shadow: none; }
-.map-navigation button { width: var(--control-min); height: var(--control-min); display: grid; place-items: center; padding: 0; color: currentColor; background: transparent; border: 0; cursor: pointer; }
-.map-navigation button + button { border-top: 1px solid var(--line); }
-.map-navigation svg { width: 20px; height: 20px; }
 
 .topbar { position: absolute; z-index: 10; top: max(14px, env(safe-area-inset-top)); left: 14px; right: 14px; display: flex; justify-content: space-between; align-items: flex-start; pointer-events: none; }
 .brand { pointer-events: auto; width: 50px; height: 50px; display: grid; place-items: center; padding: 5px; color: var(--paper-strong); background: var(--ink); border: 1px solid var(--ink); border-radius: 5px; box-shadow: none; cursor: pointer; }
 .brand-mark { display: grid; place-items: center; width: 38px; height: 38px; color: currentColor; background: transparent; border-radius: 0; }
 .brand-mark svg { width: 25px; height: 25px; }
 .top-controls { pointer-events: auto; display: flex; align-items: stretch; gap: 0; min-height: 50px; padding: 3px; color: var(--ink); background: var(--paper-strong); border: 1px solid var(--line); border-radius: 4px; box-shadow: none; }
-.language-switch { display: flex; align-items: center; gap: 2px; min-height: 42px; background: transparent; border: 0; border-radius: 0; box-shadow: none; }
-.language-switch a { width: var(--control-min); min-width: var(--control-min); min-height: var(--control-min); display: grid; place-items: center; padding: 0; color: var(--muted); border-radius: 2px; font-size: 15px; font-weight: 500; line-height: 20px; text-decoration: none; }
-.language-switch a.active { color: var(--paper-strong); background: var(--accent); }
+.top-controls { display: flex; align-items: flex-start; gap: 8px; pointer-events: auto; }
+.weather-chip, .language-trigger { min-height: var(--control-min); display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 0 10px; color: var(--ink); background: var(--paper-strong); border: 1px solid var(--line); border-radius: 5px; font-size: 15px; font-weight: 500; line-height: 20px; text-decoration: none; }
+.weather-chip { min-width: var(--control-min); }
+.weather-chip svg { width: 20px; height: 20px; }
+.language-menu { position: relative; }
+.language-trigger { min-width: 58px; cursor: pointer; }
+.language-popover { position: absolute; top: calc(100% + 6px); right: 0; width: 112px; padding: 4px; background: var(--paper-strong); border: 1px solid var(--line); border-radius: 5px; }
+.language-popover a { min-height: var(--control-min); display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0 10px; color: var(--ink); font-size: 15px; font-weight: 500; line-height: 20px; text-decoration: none; }
+.language-popover a:hover { background: var(--system-soft); }
+.language-popover a[aria-current="page"] { font-weight: 600; }
 
 .search-shell { position: absolute; z-index: 12; top: max(80px, calc(env(safe-area-inset-top) + 68px)); left: 14px; right: 14px; max-width: 420px; }
 .search-input-wrap { min-height: 50px; display: flex; align-items: center; gap: var(--space-3); padding: 0 4px 0 13px; background: var(--paper-strong); border: 1px solid var(--line); border-radius: 5px; box-shadow: none; }
