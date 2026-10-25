@@ -1,12 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { ArrowLeft, ArrowRight, ArrowSquareOut, CaretDown, Check, Cloud, CloudRain, CloudSun, Crosshair, Lightning, MagnifyingGlass, NavigationArrow, Sun, X } from '@phosphor-icons/react'
-import type { GeoJSONSource, Map as MapLibreMap, Marker as MapLibreMarker } from 'maplibre-gl'
+import * as maplibregl from 'maplibre-gl'
+import type { GeoJSONSource, Map as MapLibreMap } from 'maplibre-gl'
 import data from './data/buildings.json'
 import { getBuildingCopy, getLocaleFromPath, localeHref, translations } from './i18n'
 import type { RefObject } from 'react'
 import type { Locale, Translation } from './i18n'
-
-const maplibregl = (window as typeof window & { maplibregl: typeof import('maplibre-gl') }).maplibregl
 
 type Coordinates = [number, number]
 type WeatherState = { temperature: number | null; condition: string | null }
@@ -169,42 +168,8 @@ const loadSvgMarker = (svg: string) => new Promise<HTMLImageElement>((resolve, r
 })
 const legacyComparisonParams = ['ui', 'font', 'visual', 'map', 'scale', 'preset', 'lab', 'shape', 'weight', 'pin', 'surface', 'spacing', 'identity', 'mapMode', 'color', 'mapColor']
 
-const mapThemeDiagnosticsKey = 'sgm-map-theme-diagnostics'
-
-const recordMapThemeDiagnostic = (entry: string) => {
-  try {
-    const current = JSON.parse(window.sessionStorage.getItem(mapThemeDiagnosticsKey) ?? '[]') as string[]
-    window.sessionStorage.setItem(mapThemeDiagnosticsKey, JSON.stringify([...current.slice(-19), entry]))
-  } catch {
-    // Diagnostics must never affect map rendering.
-  }
-}
-
 const setPaint = (map: MapLibreMap, layerId: string, property: string, value: unknown) => {
-  if (!map.getLayer(layerId)) return
-  try {
-    map.setPaintProperty(layerId, property as never, value as never)
-  } catch (error) {
-    recordMapThemeDiagnostic(`paint:${layerId}:${property}:${error instanceof Error ? error.message : String(error)}`)
-  }
-}
-
-const setLayout = (map: MapLibreMap, layerId: string, property: string, value: unknown) => {
-  if (!map.getLayer(layerId)) return
-  try {
-    map.setLayoutProperty(layerId, property as never, value as never)
-  } catch (error) {
-    recordMapThemeDiagnostic(`layout:${layerId}:${property}:${error instanceof Error ? error.message : String(error)}`)
-  }
-}
-
-const setZoomRange = (map: MapLibreMap, layerId: string, minzoom: number, maxzoom: number) => {
-  if (!map.getLayer(layerId)) return
-  try {
-    map.setLayerZoomRange(layerId, minzoom, maxzoom)
-  } catch (error) {
-    recordMapThemeDiagnostic(`zoom:${layerId}:${error instanceof Error ? error.message : String(error)}`)
-  }
+  if (map.getLayer(layerId)) map.setPaintProperty(layerId, property as never, value as never)
 }
 
 const applyMapPalette = (map: MapLibreMap, palette: MapPalette) => {
@@ -218,23 +183,23 @@ const applyMapPalette = (map: MapLibreMap, palette: MapPalette) => {
   setPaint(map, 'water', 'fill-color', palette.water)
   ;['waterway_tunnel', 'waterway_river', 'waterway_other'].forEach((id) => setPaint(map, id, 'line-color', palette.waterway))
   // Liberty's 2D buildings otherwise stop at z14 when 3D buildings begin.
-  setZoomRange(map, 'building', 13, 24)
+  if (map.getLayer('building')) map.setLayerZoomRange('building', 13, 24)
   setPaint(map, 'building', 'fill-color', palette.building)
   setPaint(map, 'building', 'fill-outline-color', palette.building)
-  setLayout(map, 'building-3d', 'visibility', 'none')
+  if (map.getLayer('building-3d')) map.setLayoutProperty('building-3d', 'visibility', 'none')
 
   // Keep line-based water labels subordinate to district names.
-  setLayout(map, 'waterway_line_label', 'text-size', 12)
-  setLayout(map, 'water_name_line_label', 'text-size', 13)
+  if (map.getLayer('waterway_line_label')) map.setLayoutProperty('waterway_line_label', 'text-size', 12)
+  if (map.getLayer('water_name_line_label')) map.setLayoutProperty('water_name_line_label', 'text-size', 13)
 
   // Let district names lead until the viewer zooms closer to street level.
-  setZoomRange(map, 'highway-name-minor', 15.5, 24)
+  if (map.getLayer('highway-name-minor')) map.setLayerZoomRange('highway-name-minor', 15.5, 24)
 
   const layers = map.getStyle().layers ?? []
   layers.forEach((layer) => {
     const id = layer.id
     if (layer.type === 'line' && /^(road|bridge|tunnel)_.*_casing$/.test(id)) {
-      setLayout(map, id, 'visibility', 'none')
+      map.setLayoutProperty(id, 'visibility', 'none')
       return
     }
     // Navigation-only symbols are not needed on an architecture discovery map.
@@ -245,11 +210,11 @@ const applyMapPalette = (map: MapLibreMap, palette: MapPalette) => {
       id === 'highway-shield-us-interstate' ||
       id === 'road_shield_us'
     )) {
-      setLayout(map, id, 'visibility', 'none')
+      map.setLayoutProperty(id, 'visibility', 'none')
       return
     }
     if (layer.type === 'symbol' && id.startsWith('poi_')) {
-      setLayout(map, id, 'visibility', 'none')
+      map.setLayoutProperty(id, 'visibility', 'none')
       return
     }
     if (layer.type === 'line' && /^(road|bridge|tunnel)_/.test(id)) {
@@ -319,16 +284,13 @@ const BrandMark = () => <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" 
 
 function App() {
   const locale = useMemo(getLocaleFromPath, [])
-  const debugMode = useMemo(() => new URLSearchParams(window.location.search).get('debug'), [])
-  const basemapDiagnostic = debugMode === 'basemap'
-  const iframeDiagnostic = debugMode === 'iframe'
   const t = translations[locale]
   const restoredState = useMemo(readRestoredMapState, [])
   const requestedSelectedId = useMemo(getRequestedSelectedId, [])
   const mapContainer = useRef<HTMLDivElement>(null)
   const mapRef = useRef<MapLibreMap | null>(null)
-  const userMarkerRef = useRef<MapLibreMarker | null>(null)
-  const selectedMarkerRef = useRef<MapLibreMarker | null>(null)
+  const userMarkerRef = useRef<maplibregl.Marker | null>(null)
+  const selectedMarkerRef = useRef<maplibregl.Marker | null>(null)
   const detailBackRef = useRef<HTMLButtonElement>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
   const [selectedId, setSelectedId] = useState<string | null>(requestedSelectedId ?? restoredState?.selectedId ?? null)
@@ -398,7 +360,7 @@ function App() {
   }, [expanded, selectedId])
 
   useEffect(() => {
-    if (iframeDiagnostic || !mapContainer.current || mapRef.current) return
+    if (!mapContainer.current || mapRef.current) return
 
     const map = new maplibregl.Map({
       container: mapContainer.current,
@@ -419,30 +381,7 @@ function App() {
 
     map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-left')
 
-    try { window.sessionStorage.removeItem(mapThemeDiagnosticsKey) } catch {}
-    map.on('error', (event) => {
-      const error = event.error
-      recordMapThemeDiagnostic(`map:${error instanceof Error ? error.message : String(error ?? 'unknown error')}`)
-    })
-    const canvas = map.getCanvas()
-    canvas.addEventListener('webglcontextlost', (event) => {
-      event.preventDefault()
-      recordMapThemeDiagnostic('webgl:context-lost')
-    })
-    canvas.addEventListener('webglcontextrestored', () => {
-      recordMapThemeDiagnostic('webgl:context-restored')
-      map.triggerRepaint()
-    })
-
     map.on('load', async () => {
-      // Diagnostic control: keep the full React/UI shell but stop at the untouched
-      // OpenFreeMap Liberty basemap. This isolates SGM's custom map source/layers.
-      if (basemapDiagnostic) return
-
-      // Apply production cartography immediately after the base style loads.
-      // Keep this independent from marker image decoding so map appearance is deterministic.
-      applyProductionMapTheme(map)
-
       const [normalPin, selectedPin] = await Promise.all([
         loadSvgMarker(createBuildingPinSvg(24, 29, 1.5, 11)),
         loadSvgMarker(createBuildingPinSvg(44, 52, 2, 20)),
@@ -483,6 +422,7 @@ function App() {
         layout: { 'text-field': ['get', 'name'], 'text-size': 12, 'text-offset': [0, 1.45], 'text-anchor': 'top', 'text-variable-anchor': ['top', 'bottom', 'left', 'right'], 'text-radial-offset': 0.75 },
         paint: { 'text-color': '#282724', 'text-halo-color': '#f8f4ec', 'text-halo-width': 2 },
       })
+      applyProductionMapTheme(map)
       applyProductionTypeScaleToMap(map, locale)
       const deepLinkedBuilding = buildings.find((building) => building.id === requestedSelectedId)
       if (deepLinkedBuilding && !restoredState) {
@@ -519,10 +459,9 @@ function App() {
       map.remove()
       mapRef.current = null
     }
-  }, [basemapDiagnostic, iframeDiagnostic, locale, restoredState])
+  }, [locale, restoredState])
 
   useEffect(() => {
-    if (basemapDiagnostic || iframeDiagnostic) return
     const map = mapRef.current
     const source = map?.getSource('buildings') as GeoJSONSource | undefined
     source?.setData(featureCollection(selectedId, locale))
@@ -592,7 +531,7 @@ function App() {
       marker.remove()
       if (selectedMarkerRef.current === marker) selectedMarkerRef.current = null
     }
-  }, [basemapDiagnostic, iframeDiagnostic, locale, selectedId])
+  }, [locale, selectedId])
 
   useEffect(() => {
     const url = new URL(window.location.href)
@@ -672,15 +611,7 @@ function App() {
 
   return (
     <main className={`app locale-${locale} ${expanded ? 'details-expanded' : ''}`}>
-      {iframeDiagnostic ? (
-        <iframe
-          className="map map-diagnostic-frame"
-          src={new URL('../diagnostics/maplibre-v5.html', window.location.href).href}
-          title="Standalone MapLibre diagnostic"
-        />
-      ) : (
-        <div ref={mapContainer} className="map" role="region" aria-label={t.mapLabel} />
-      )}
+      <div ref={mapContainer} className="map" role="region" aria-label={t.mapLabel} />
 
       <header className="topbar">
         <button className="brand" type="button" onClick={goHome} aria-label={t.resetMap}>
