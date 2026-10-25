@@ -420,6 +420,15 @@ function App() {
       const error = event.error
       recordMapThemeDiagnostic(`map:${error instanceof Error ? error.message : String(error ?? 'unknown error')}`)
     })
+    const canvas = map.getCanvas()
+    canvas.addEventListener('webglcontextlost', (event) => {
+      event.preventDefault()
+      recordMapThemeDiagnostic('webgl:context-lost')
+    })
+    canvas.addEventListener('webglcontextrestored', () => {
+      recordMapThemeDiagnostic('webgl:context-restored')
+      map.triggerRepaint()
+    })
 
     map.on('load', async () => {
       // Base cartography belongs to the style lifecycle, not marker asset loading.
