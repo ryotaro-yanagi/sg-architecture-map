@@ -303,6 +303,7 @@ function App() {
   const [weather, setWeather] = useState<WeatherState>({ temperature: null, condition: null })
 
   const selected = buildings.find((building) => building.id === selectedId) ?? null
+  const surfaceState = expanded ? 'detail' : selected ? 'preview' : searchOpen ? 'search' : 'explore'
   const results = useMemo(() => {
     const normalized = query.trim().toLocaleLowerCase(locale)
     if (!normalized) return buildings
@@ -615,7 +616,7 @@ function App() {
   }
 
   return (
-    <main className={`app locale-${locale} ${expanded ? 'details-expanded' : ''}`}>
+    <main className={`app locale-${locale} state-${surfaceState} ${expanded ? 'details-expanded' : ''}`}>
       <div ref={mapContainer} className="map" role="region" aria-label={t.mapLabel} />
 
       <header className="topbar">
@@ -646,27 +647,40 @@ function App() {
         </div>
       </header>
 
-      <search className={`search-shell ${searchOpen ? 'open' : ''}`}>
-        <div className="search-input-wrap">
-          <MagnifyingGlass aria-hidden="true" size={20} weight="regular" />
-          <input ref={searchInputRef} type="search" value={query} onChange={(event) => { setQuery(event.target.value); setSearchOpen(true) }} onFocus={() => setSearchOpen(true)} aria-label={t.searchLabel} aria-expanded={searchOpen} aria-controls="search-results" autoComplete="off" placeholder={t.searchPlaceholder} />
-          {searchOpen && <button className="icon-button small" onClick={() => { setSearchOpen(false); setQuery('') }} aria-label={t.closeSearch}><X aria-hidden="true" size={16} weight="regular" /></button>}
-        </div>
-        {searchOpen && (
-          <div className="search-results" id="search-results" aria-label={t.searchResults}>
-            <p className="result-count" aria-live="polite">{results.length ? t.resultCount(results.length) : t.noResults}</p>
-            {results.map((building) => {
-              const copy = getBuildingCopy(locale, building.id, building.name)
-              return (
-                <button key={building.id} className={building.id === selectedId ? 'selected' : ''} aria-current={building.id === selectedId ? 'true' : undefined} onClick={() => chooseBuilding(building, true)}>
-                  <span><strong>{copy.name}</strong><small>{copy.architectCredit}</small></span>
-                  <ArrowRight aria-hidden="true" size={20} weight="regular" />
-                </button>
-              )
-            })}
-          </div>
+      <div className={`bottom-surface ${surfaceState}`}>
+        {!selected ? (
+          <search className={`search-shell ${searchOpen ? 'open' : ''}`}>
+            <div className="search-input-wrap">
+              <MagnifyingGlass aria-hidden="true" size={20} weight="regular" />
+              <input ref={searchInputRef} type="search" value={query} onChange={(event) => { setQuery(event.target.value); setSearchOpen(true) }} onFocus={() => setSearchOpen(true)} aria-label={t.searchLabel} aria-expanded={searchOpen} aria-controls="search-results" autoComplete="off" placeholder={t.searchPlaceholder} />
+              {searchOpen && <button className="icon-button small" onClick={() => { setSearchOpen(false); setQuery('') }} aria-label={t.closeSearch}><X aria-hidden="true" size={16} weight="regular" /></button>}
+            </div>
+            {searchOpen && (
+              <div className="search-results" id="search-results" aria-label={t.searchResults}>
+                <p className="result-count" aria-live="polite">{results.length ? t.resultCount(results.length) : t.noResults}</p>
+                {results.map((building) => {
+                  const copy = getBuildingCopy(locale, building.id, building.name)
+                  return (
+                    <button key={building.id} className={building.id === selectedId ? 'selected' : ''} aria-current={building.id === selectedId ? 'true' : undefined} onClick={() => chooseBuilding(building, true)}>
+                      <span><strong>{copy.name}</strong><small>{copy.architectCredit}</small></span>
+                      <ArrowRight aria-hidden="true" size={20} weight="regular" />
+                    </button>
+                  )
+                })}
+              </div>
+            )}
+          </search>
+        ) : (
+          <aside className="place-surface" aria-label={expanded ? t.detailLabel(getBuildingCopy(locale, selected.id, selected.name).name) : t.previewLabel(getBuildingCopy(locale, selected.id, selected.name).name)}>
+            <div className="sheet-compact" aria-hidden={expanded}>
+              <PreviewCard building={selected} locale={locale} t={t} onDetails={() => setExpanded(true)} onClose={() => setSelectedId(null)} />
+            </div>
+            <div className="sheet-expanded" aria-hidden={!expanded}>
+              <DetailContent building={selected} locale={locale} t={t} onClose={() => setExpanded(false)} backRef={detailBackRef} />
+            </div>
+          </aside>
         )}
-      </search>
+      </div>
 
       <div className="map-tools">
         <button className={`locate-button ${locating ? 'loading' : ''}`} onClick={locate} disabled={locating} aria-label={locating ? t.locating : t.locate}>
@@ -674,17 +688,6 @@ function App() {
         </button>
       </div>
       <div className="data-note">{t.dataNote(buildings.length)}</div>
-
-      {selected && (
-        <aside className={`place-sheet ${expanded ? 'expanded' : 'compact'}`} aria-label={expanded ? t.detailLabel(getBuildingCopy(locale, selected.id, selected.name).name) : t.previewLabel(getBuildingCopy(locale, selected.id, selected.name).name)}>
-          <div className="sheet-compact" aria-hidden={expanded}>
-            <PreviewCard building={selected} locale={locale} t={t} onDetails={() => setExpanded(true)} onClose={() => setSelectedId(null)} />
-          </div>
-          <div className="sheet-expanded" aria-hidden={!expanded}>
-            <DetailContent building={selected} locale={locale} t={t} onClose={() => setExpanded(false)} backRef={detailBackRef} />
-          </div>
-        </aside>
-      )}
 
       {notice && <div className="notice" role="status">{notice}</div>}
     </main>
