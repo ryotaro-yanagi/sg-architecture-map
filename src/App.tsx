@@ -207,7 +207,7 @@ const setZoomRange = (map: MapLibreMap, layerId: string, minzoom: number, maxzoo
 }
 
 const applyMapPalette = (map: MapLibreMap, palette: MapPalette) => {
-  setPaint(map, 'background', 'background-color', palette.background)
+  // Diagnostic: keep Liberty's background unchanged while isolating the intermittent flat-map failure.
   setPaint(map, 'landuse_residential', 'fill-color', palette.residential)
   setPaint(map, 'park', 'fill-color', palette.park)
   setPaint(map, 'park_outline', 'line-color', palette.park)
