@@ -174,7 +174,17 @@ const markerPixelRatio = 3
 const markerSwitchZoom = 14.5
 const markerIcon = '#ffffff'
 const phosphorBuildingFillPath = 'M232,224H208V32h8a8,8,0,0,0,0-16H40a8,8,0,0,0,0,16h8V224H24a8,8,0,0,0,0,16H232a8,8,0,0,0,0-16ZM88,56h24a8,8,0,0,1,0,16H88a8,8,0,0,1,0-16Zm0,40h24a8,8,0,0,1,0,16H88a8,8,0,0,1,0-16Zm-8,48a8,8,0,0,1,8-8h24a8,8,0,0,1,0,16H88A8,8,0,0,1,80,144Zm72,80H104V184h48Zm16-72H144a8,8,0,0,1,0-16h24a8,8,0,0,1,0,16Zm0-40H144a8,8,0,0,1,0-16h24a8,8,0,0,1,0,16Zm0-40H144a8,8,0,0,1,0-16h24a8,8,0,0,1,0,16Z'
-const createBuildingPinSvg = (width: number, height: number, strokeWidth: number, iconSize: number, fill = markerFill) => {
+// Restrained line pictograms keep category meaning readable without changing pin shape.
+const categoryIconPaths: Record<MapCategory, string> = {
+  culture_civic: '<path d="M3 9h18M5 9V20m14-11V20M9 9V20m6-11V20M3 20h18M3 7l9-4 9 4v2"/>',
+  mixed_use: '<rect x="4" y="4" width="10" height="16" rx="1"/><rect x="14" y="9" width="6" height="11" rx="1"/><path d="M7 8h4M7 12h4M7 16h4M16 13h2M16 16h2"/>',
+  commercial: '<rect x="5" y="3" width="14" height="18" rx="1"/><path d="M9 7h2m2 0h2M9 11h2m2 0h2M9 15h2m2 0h2M10 21v-3h4v3"/>',
+  education: '<path d="m2 9 10-5 10 5-10 5L2 9Zm4 3v5c4 3 8 3 12 0v-5M22 9v7"/>',
+  hospitality: '<path d="M3 20V6M3 13h18v7M7 13V9h5a3 3 0 0 1 3 3v1M3 17h18"/>',
+  residential: '<path d="m3 11 9-8 9 8v10H3V11Zm6 10v-7h6v7"/>',
+}
+
+const createBuildingPinSvg = (width: number, height: number, strokeWidth: number, iconSize: number, fill = markerFill, category: MapCategory | null = null) => {
   const cx = width / 2
   const iconX = (width - iconSize) / 2
   const iconY = width <= 24 ? 5 : 9
@@ -187,7 +197,7 @@ const createBuildingPinSvg = (width: number, height: number, strokeWidth: number
   ].join(' ')
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${width * markerPixelRatio}" height="${height * markerPixelRatio}" viewBox="0 0 ${width} ${height}">
     <path d="${path}" fill="${fill}" stroke="${markerOutline}" stroke-width="${strokeWidth}" stroke-linejoin="round"/>
-    <svg x="${iconX}" y="${iconY}" width="${iconSize}" height="${iconSize}" viewBox="0 0 256 256" fill="${markerIcon}"><path d="${phosphorBuildingFillPath}"/></svg>
+    ${category ? `<svg x="${iconX}" y="${iconY}" width="${iconSize}" height="${iconSize}" viewBox="0 0 24 24" fill="none" stroke="${markerIcon}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${categoryIconPaths[category]}</svg>` : `<svg x="${iconX}" y="${iconY}" width="${iconSize}" height="${iconSize}" viewBox="0 0 256 256" fill="${markerIcon}"><path d="${phosphorBuildingFillPath}"/></svg>`}
   </svg>`
 }
 const loadSvgMarker = (svg: string) => new Promise<HTMLImageElement>((resolve, reject) => {
@@ -437,7 +447,7 @@ function App() {
       map.addImage('building-pin-normal', normalPin, { pixelRatio: markerPixelRatio })
       map.addImage('building-pin-selected', selectedPin, { pixelRatio: markerPixelRatio })
       await Promise.all(Object.entries(mapCategoryStyle).map(async ([category, style]) => {
-        const normal = await loadSvgMarker(createBuildingPinSvg(24, 29, 1.5, 11, style.color))
+        const normal = await loadSvgMarker(createBuildingPinSvg(24, 29, 1.5, 11, style.color, category as MapCategory))
         map.addImage(`building-pin-normal-${category}`, normal, { pixelRatio: markerPixelRatio })
       }))
       map.addSource('buildings', { type: 'geojson', data: featureCollection(selectedId, locale) })
@@ -553,7 +563,7 @@ function App() {
     const category = getMapCategory(building.buildingType)
     const fill = category ? mapCategoryStyle[category].color : markerFill
     const normal = map.getZoom() >= markerSwitchZoom
-      ? createImage(createBuildingPinSvg(24, 29, 1.5, 11, fill), 24, 29, 1)
+      ? createImage(createBuildingPinSvg(24, 29, 1.5, 11, fill, category), 24, 29, 1)
       : document.createElement('span')
     if (normal instanceof HTMLSpanElement) {
       normal.style.position = 'absolute'
@@ -567,7 +577,7 @@ function App() {
       normal.style.boxSizing = 'border-box'
       normal.style.zIndex = '1'
     }
-    const selected = createImage(createBuildingPinSvg(44, 52, 2, 20, fill), 44, 52, 2)
+    const selected = createImage(createBuildingPinSvg(44, 52, 2, 20, fill, category), 44, 52, 2)
     element.append(normal, selected)
     const marker = new maplibregl.Marker({ element, anchor: 'bottom' })
       .setLngLat(building.coordinates)
