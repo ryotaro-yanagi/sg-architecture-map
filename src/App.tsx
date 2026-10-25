@@ -333,7 +333,12 @@ function App() {
             : (values[values.length / 2 - 1] + values[values.length / 2]) / 2
           : null
         const forecastRecord = forecastJson?.data?.records?.[0] ?? forecastJson?.data?.items?.[0] ?? forecastJson?.data
-        const condition = forecastRecord?.general?.forecast ?? forecastRecord?.general?.condition ?? forecastRecord?.forecast ?? null
+        const forecastValue = forecastRecord?.general?.forecast ?? forecastRecord?.general?.condition ?? forecastRecord?.forecast ?? null
+        const condition = typeof forecastValue === 'string'
+          ? forecastValue
+          : typeof forecastValue?.text === 'string'
+            ? forecastValue.text
+            : null
         if (!cancelled) setWeather({ temperature: median === null ? null : Math.round(median), condition })
       } catch {
         if (!cancelled) setWeather({ temperature: null, condition: null })
@@ -687,7 +692,7 @@ function App() {
 }
 
 function WeatherGlyph({ condition }: { condition: string | null }) {
-  const normalized = condition?.toLowerCase() ?? ''
+  const normalized = typeof condition === 'string' ? condition.toLowerCase() : ''
   if (/thunder|lightning/.test(normalized)) return <Lightning aria-hidden="true" size={20} weight="regular" />
   if (/shower|rain/.test(normalized)) return <CloudRain aria-hidden="true" size={20} weight="regular" />
   if (/cloud|overcast/.test(normalized)) return <Cloud aria-hidden="true" size={20} weight="regular" />
