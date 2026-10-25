@@ -422,6 +422,11 @@ function App() {
     })
 
     map.on('load', async () => {
+      // Base cartography belongs to the style lifecycle, not marker asset loading.
+      // Apply it synchronously at load so image decode/cache timing cannot reorder
+      // the production theme transition.
+      applyProductionMapTheme(map)
+
       const [normalPin, selectedPin] = await Promise.all([
         loadSvgMarker(createBuildingPinSvg(24, 29, 1.5, 11)),
         loadSvgMarker(createBuildingPinSvg(44, 52, 2, 20)),
@@ -462,7 +467,6 @@ function App() {
         layout: { 'text-field': ['get', 'name'], 'text-size': 12, 'text-offset': [0, 1.45], 'text-anchor': 'top', 'text-variable-anchor': ['top', 'bottom', 'left', 'right'], 'text-radial-offset': 0.75 },
         paint: { 'text-color': '#282724', 'text-halo-color': '#f8f4ec', 'text-halo-width': 2 },
       })
-      applyProductionMapTheme(map)
       applyProductionTypeScaleToMap(map, locale)
       const deepLinkedBuilding = buildings.find((building) => building.id === requestedSelectedId)
       if (deepLinkedBuilding && !restoredState) {
