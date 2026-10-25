@@ -1,5 +1,5 @@
 import { Component, useEffect, useMemo, useRef, useState } from 'react'
-import { ArrowLeft, ArrowRight, ArrowSquareOut, CaretDown, Check, Cloud, CloudRain, CloudSun, Crosshair, Lightning, MagnifyingGlass, NavigationArrow, Sun, X } from '@phosphor-icons/react'
+import { ArrowLeft, ArrowRight, ArrowSquareOut, CaretDown, Check, Cloud, CloudRain, CloudSun, Compass, Crosshair, Lightning, MagnifyingGlass, NavigationArrow, Sun, X } from '@phosphor-icons/react'
 import * as maplibregl from 'maplibre-gl'
 import type { GeoJSONSource, Map as MapLibreMap } from 'maplibre-gl'
 import data from './data/buildings.json'
@@ -323,6 +323,7 @@ function App() {
   const [query, setQuery] = useState('')
   const [searchOpen, setSearchOpen] = useState(false)
   const [locating, setLocating] = useState(false)
+  const [mapBearing, setMapBearing] = useState(restoredState?.bearing ?? 0)
   const [notice, setNotice] = useState<string | null>(null)
   const [languageOpen, setLanguageOpen] = useState(false)
   const [weather, setWeather] = useState<WeatherState>({ temperature: null, condition: null })
@@ -468,8 +469,12 @@ function App() {
       map.on('mouseleave', 'building-hit-targets', () => { map.getCanvas().style.cursor = '' })
     })
 
+    const syncBearing = () => setMapBearing(map.getBearing())
+    map.on('rotate', syncBearing)
+    syncBearing()
     mapRef.current = map
     return () => {
+      map.off('rotate', syncBearing)
       userMarkerRef.current?.remove()
       selectedMarkerRef.current?.remove()
       map.remove()
@@ -601,6 +606,10 @@ function App() {
     window.sessionStorage.setItem(mapStateKey, JSON.stringify(state))
   }
 
+  const resetNorth = () => {
+    mapRef.current?.easeTo({ bearing: 0, duration: motionDuration(350) })
+  }
+
   const locate = () => {
     if (!navigator.geolocation) {
       setNotice(t.locationUnsupported)
@@ -695,6 +704,11 @@ function App() {
       </div>
 
       <div className="map-tools">
+        {Math.abs(((mapBearing + 180) % 360 + 360) % 360 - 180) > 3 && (
+          <button className="locate-button" type="button" onClick={resetNorth} aria-label={locale === 'ja' ? '北を上に戻す' : 'Reset map to north'} title={locale === 'ja' ? '北を上に戻す' : 'Reset map to north'}>
+            <Compass aria-hidden="true" size={20} weight="regular" style={{ transform: `rotate(${-mapBearing}deg)` }} />
+          </button>
+        )}
         <button className={`locate-button ${locating ? 'loading' : ''}`} onClick={locate} disabled={locating} aria-label={locating ? t.locating : t.locate}>
           <Crosshair aria-hidden="true" size={20} weight="regular" />
         </button>
