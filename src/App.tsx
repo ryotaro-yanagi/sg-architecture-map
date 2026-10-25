@@ -434,7 +434,7 @@ function App() {
       // Base cartography belongs to the style lifecycle, not marker asset loading.
       // Apply it synchronously at load so image decode/cache timing cannot reorder
       // the production theme transition.
-      applyProductionMapTheme(map)
+      // Diagnostic control: keep the upstream Liberty basemap untouched.
 
       const [normalPin, selectedPin] = await Promise.all([
         loadSvgMarker(createBuildingPinSvg(24, 29, 1.5, 11)),
