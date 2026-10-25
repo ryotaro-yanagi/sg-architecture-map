@@ -39,6 +39,35 @@ type RestoredMapState = {
   expanded: boolean
 }
 
+// The detailed database types remain unchanged; map symbols use six visual groups.
+const mapCategoryByType = {
+  civic_cultural: 'culture_civic',
+  community: 'culture_civic',
+  sports: 'culture_civic',
+  mixed_use: 'mixed_use',
+  retail: 'commercial',
+  office: 'commercial',
+  education: 'education',
+  hospitality: 'hospitality',
+  residential: 'residential',
+} as const
+
+type MapCategory = typeof mapCategoryByType[keyof typeof mapCategoryByType]
+
+const mapCategoryStyle: Record<MapCategory, { color: string; icon: string }> = {
+  culture_civic: { color: '#AA9BC6', icon: 'landmark' },
+  mixed_use: { color: '#EF9E76', icon: 'layers' },
+  commercial: { color: '#83ADC8', icon: 'building' },
+  education: { color: '#E9CC76', icon: 'graduation-cap' },
+  hospitality: { color: '#E9A2A0', icon: 'bed' },
+  residential: { color: '#78AF92', icon: 'house' },
+}
+
+const getMapCategory = (buildingType: string): MapCategory | null =>
+  Object.prototype.hasOwnProperty.call(mapCategoryByType, buildingType)
+    ? mapCategoryByType[buildingType as keyof typeof mapCategoryByType]
+    : null
+
 const buildings = data.buildings as unknown as Building[]
 const defaultCenter: Coordinates = [103.879, 1.315]
 const defaultZoom = 11.35
@@ -277,6 +306,8 @@ const featureCollection = (selectedId: string | null, locale: Locale): GeoJSON.F
       id: building.id,
       name: getBuildingCopy(locale, building.id, building.name).name,
       selected: building.id === selectedId,
+      mapCategory: getMapCategory(building.buildingType),
+      mapCategoryColor: getMapCategory(building.buildingType) ? mapCategoryStyle[getMapCategory(building.buildingType)!].color : null,
     },
   })),
 })
