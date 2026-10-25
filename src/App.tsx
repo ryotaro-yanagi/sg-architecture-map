@@ -1,10 +1,10 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { Component, useEffect, useMemo, useRef, useState } from 'react'
 import { ArrowLeft, ArrowRight, ArrowSquareOut, CaretDown, Check, Cloud, CloudRain, CloudSun, Crosshair, Lightning, MagnifyingGlass, NavigationArrow, Sun, X } from '@phosphor-icons/react'
 import * as maplibregl from 'maplibre-gl'
 import type { GeoJSONSource, Map as MapLibreMap } from 'maplibre-gl'
 import data from './data/buildings.json'
 import { getBuildingCopy, getLocaleFromPath, localeHref, translations } from './i18n'
-import type { RefObject } from 'react'
+import type { ErrorInfo, ReactNode, RefObject } from 'react'
 import type { Locale, Translation } from './i18n'
 import { parseWeatherPayloads } from './weather'
 import type { WeatherState } from './weather'
@@ -282,6 +282,30 @@ const featureCollection = (selectedId: string | null, locale: Locale): GeoJSON.F
 })
 
 const BrandMark = () => <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="square" strokeLinejoin="miter"><path d="M7 7h10v10H7z"/><circle cx="17" cy="7" r="2.25" fill="currentColor" stroke="none"/><path d="M4 20h16"/></svg>
+
+class WeatherBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
+  state = { hasError: false }
+
+  static getDerivedStateFromError() {
+    return { hasError: true }
+  }
+
+  componentDidCatch(_error: Error, _info: ErrorInfo) {
+    // React 19 reports caught render errors to the console. Keep the optional
+    // weather feature contained so the map and primary navigation stay usable.
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <a className="weather-chip" href={weatherPortalUrl} target="_blank" rel="noreferrer" aria-label="Singapore weather">
+          <Sun aria-hidden="true" size={20} weight="regular" />
+        </a>
+      )
+    }
+    return this.props.children
+  }
+}
 
 function App() {
   const locale = useMemo(getLocaleFromPath, [])
@@ -610,10 +634,12 @@ function App() {
           <span className="brand-mark"><BrandMark /></span>
         </button>
         <div className="top-controls">
-          <a className="weather-chip" href={weatherPortalUrl} target="_blank" rel="noreferrer" aria-label={weather.condition ? `${weather.condition}${weather.temperature === null ? '' : `, ${weather.temperature} degrees Celsius`}` : 'Singapore weather'}>
-            <WeatherGlyph condition={weather.condition} />
-            {weather.temperature !== null && <span>{weather.temperature}°</span>}
-          </a>
+          <WeatherBoundary>
+            <a className="weather-chip" href={weatherPortalUrl} target="_blank" rel="noreferrer" aria-label={weather.condition ? `${weather.condition}${weather.temperature === null ? '' : `, ${weather.temperature} degrees Celsius`}` : 'Singapore weather'}>
+              <WeatherGlyph condition={weather.condition} />
+              {weather.temperature !== null && <span>{weather.temperature}°</span>}
+            </a>
+          </WeatherBoundary>
           <div className="language-menu">
             <button type="button" className="language-trigger" aria-label={t.languageSwitcher} aria-haspopup="menu" aria-expanded={languageOpen} onClick={() => setLanguageOpen((open) => !open)}>
               <span>{locale.toUpperCase()}</span>
