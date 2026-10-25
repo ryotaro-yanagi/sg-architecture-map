@@ -207,7 +207,7 @@ const setZoomRange = (map: MapLibreMap, layerId: string, minzoom: number, maxzoo
 }
 
 const applyMapPalette = (map: MapLibreMap, palette: MapPalette) => {
-  // Diagnostic: keep Liberty's background unchanged while isolating the intermittent flat-map failure.
+  setPaint(map, 'background', 'background-color', palette.background)
   setPaint(map, 'landuse_residential', 'fill-color', palette.residential)
   setPaint(map, 'park', 'fill-color', palette.park)
   setPaint(map, 'park_outline', 'line-color', palette.park)
@@ -431,10 +431,9 @@ function App() {
     })
 
     map.on('load', async () => {
-      // Base cartography belongs to the style lifecycle, not marker asset loading.
-      // Apply it synchronously at load so image decode/cache timing cannot reorder
-      // the production theme transition.
-      // Diagnostic control: keep the upstream Liberty basemap untouched.
+      // Apply production cartography immediately after the base style loads.
+      // Keep this independent from marker image decoding so map appearance is deterministic.
+      applyProductionMapTheme(map)
 
       const [normalPin, selectedPin] = await Promise.all([
         loadSvgMarker(createBuildingPinSvg(24, 29, 1.5, 11)),
