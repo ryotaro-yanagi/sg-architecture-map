@@ -347,7 +347,7 @@ function App() {
 
   useEffect(() => {
     if (expanded) {
-      detailBackRef.current?.closest('.detail-panel')?.scrollTo({ top: 0 })
+      detailBackRef.current?.closest('.sheet-expanded')?.scrollTo({ top: 0 })
       detailBackRef.current?.focus({ preventScroll: true })
     }
   }, [expanded, selectedId])
@@ -658,10 +658,14 @@ function App() {
       </div>
       <div className="data-note">{t.dataNote(buildings.length)}</div>
 
-      {selected && !expanded && <PreviewCard building={selected} locale={locale} t={t} onDetails={() => setExpanded(true)} onClose={() => setSelectedId(null)} />}
-      {selected && expanded && (
-        <aside className="detail-panel" aria-label={t.detailLabel(getBuildingCopy(locale, selected.id, selected.name).name)}>
-          <DetailContent building={selected} locale={locale} t={t} onClose={() => setExpanded(false)} backRef={detailBackRef} />
+      {selected && (
+        <aside className={`place-sheet ${expanded ? 'expanded' : 'compact'}`} aria-label={expanded ? t.detailLabel(getBuildingCopy(locale, selected.id, selected.name).name) : t.previewLabel(getBuildingCopy(locale, selected.id, selected.name).name)}>
+          <div className="sheet-compact" aria-hidden={expanded}>
+            <PreviewCard building={selected} locale={locale} t={t} onDetails={() => setExpanded(true)} onClose={() => setSelectedId(null)} />
+          </div>
+          <div className="sheet-expanded" aria-hidden={!expanded}>
+            <DetailContent building={selected} locale={locale} t={t} onClose={() => setExpanded(false)} backRef={detailBackRef} />
+          </div>
         </aside>
       )}
 
