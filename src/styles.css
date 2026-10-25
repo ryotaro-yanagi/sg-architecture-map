@@ -198,3 +198,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
   .sheet-compact, .sheet-expanded { transition: opacity 80ms linear; }
   .notice { animation: none; }
 }
+
+.map-diagnostic-frame {
+  border: 0;
+}

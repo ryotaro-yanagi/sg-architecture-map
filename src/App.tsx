@@ -319,7 +319,9 @@ const BrandMark = () => <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" 
 
 function App() {
   const locale = useMemo(getLocaleFromPath, [])
-  const basemapDiagnostic = useMemo(() => new URLSearchParams(window.location.search).get('debug') === 'basemap', [])
+  const debugMode = useMemo(() => new URLSearchParams(window.location.search).get('debug'), [])
+  const basemapDiagnostic = debugMode === 'basemap'
+  const iframeDiagnostic = debugMode === 'iframe'
   const t = translations[locale]
   const restoredState = useMemo(readRestoredMapState, [])
   const requestedSelectedId = useMemo(getRequestedSelectedId, [])
@@ -396,7 +398,7 @@ function App() {
   }, [expanded, selectedId])
 
   useEffect(() => {
-    if (!mapContainer.current || mapRef.current) return
+    if (iframeDiagnostic || !mapContainer.current || mapRef.current) return
 
     const map = new maplibregl.Map({
       container: mapContainer.current,
@@ -517,10 +519,10 @@ function App() {
       map.remove()
       mapRef.current = null
     }
-  }, [basemapDiagnostic, locale, restoredState])
+  }, [basemapDiagnostic, iframeDiagnostic, locale, restoredState])
 
   useEffect(() => {
-    if (basemapDiagnostic) return
+    if (basemapDiagnostic || iframeDiagnostic) return
     const map = mapRef.current
     const source = map?.getSource('buildings') as GeoJSONSource | undefined
     source?.setData(featureCollection(selectedId, locale))
@@ -590,7 +592,7 @@ function App() {
       marker.remove()
       if (selectedMarkerRef.current === marker) selectedMarkerRef.current = null
     }
-  }, [basemapDiagnostic, locale, selectedId])
+  }, [basemapDiagnostic, iframeDiagnostic, locale, selectedId])
 
   useEffect(() => {
     const url = new URL(window.location.href)
@@ -670,7 +672,15 @@ function App() {
 
   return (
     <main className={`app locale-${locale} ${expanded ? 'details-expanded' : ''}`}>
-      <div ref={mapContainer} className="map" role="region" aria-label={t.mapLabel} />
+      {iframeDiagnostic ? (
+        <iframe
+          className="map map-diagnostic-frame"
+          src={`${import.meta.env.BASE_URL}diagnostics/maplibre-v5.html`}
+          title="Standalone MapLibre diagnostic"
+        />
+      ) : (
+        <div ref={mapContainer} className="map" role="region" aria-label={t.mapLabel} />
+      )}
 
       <header className="topbar">
         <button className="brand" type="button" onClick={goHome} aria-label={t.resetMap}>
