@@ -327,8 +327,6 @@ function App() {
   const selectedMarkerRef = useRef<maplibregl.Marker | null>(null)
   const detailBackRef = useRef<HTMLButtonElement>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
-  const mapDebugRef = useRef<HTMLPreElement>(null)
-  const mapDebugEnabled = useMemo(() => new URLSearchParams(window.location.search).get('debug') === 'map', [])
   const [selectedId, setSelectedId] = useState<string | null>(requestedSelectedId ?? restoredState?.selectedId ?? null)
   const [expanded, setExpanded] = useState(getRequestedExpandedState() ?? restoredState?.expanded ?? false)
   const [query, setQuery] = useState('')
@@ -417,132 +415,22 @@ function App() {
 
     map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-left')
 
-    const debugState = {
-      phase: 'constructed',
-      renders: 0,
-      idle: 0,
-      openmaptilesEvents: 0,
-      naturalEarthEvents: 0,
-      lastSource: '—',
-      probe: 'pending',
-      tileProbe: 'pending',
-      webgl: 'ok',
-      errors: [] as string[],
-    }
-    const renderMapDebug = () => {
-      if (!mapDebugEnabled || !mapDebugRef.current) return
-      let styleLoaded = false
-      let tilesLoaded = false
-      let sourceLoaded = false
-      try { styleLoaded = map.isStyleLoaded() } catch {}
-      try { tilesLoaded = map.areTilesLoaded() } catch {}
-      try { sourceLoaded = map.getSource('openmaptiles') ? map.isSourceLoaded('openmaptiles') : false } catch {}
-      const version = (maplibregl as unknown as { version?: string }).version ?? 'unknown'
-      mapDebugRef.current.textContent = [
-        `MapLibre ${version}`,
-        `phase      ${debugState.phase}`,
-        `style      ${styleLoaded ? 'loaded' : 'waiting'}`,
-        `tiles      ${tilesLoaded ? 'loaded' : 'waiting'}`,
-        `openmap    ${sourceLoaded ? 'loaded' : 'waiting'}`,
-        `events     open:${debugState.openmaptilesEvents} ne:${debugState.naturalEarthEvents}`,
-        `render     ${debugState.renders}  idle:${debugState.idle}`,
-        `last       ${debugState.lastSource}`,
-        `planet     ${debugState.probe}`,
-        `tile       ${debugState.tileProbe}`,
-        `webgl      ${debugState.webgl}`,
-        ...(debugState.errors.length ? ['errors', ...debugState.errors.slice(-3)] : []),
-      ].join('\n')
-    }
-
-    if (mapDebugEnabled) {
-      renderMapDebug()
-      void (async () => {
-        const started = performance.now()
-        try {
-          const response = await fetch('https://tiles.openfreemap.org/planet', { cache: 'no-store' })
-          const tileJson = await response.json() as { tiles?: string[] }
-          debugState.probe = `${response.status} ${Math.round(performance.now() - started)}ms`
-          renderMapDebug()
-          const template = tileJson.tiles?.[0]
-          if (!template) {
-            debugState.tileProbe = 'no tile template'
-            renderMapDebug()
-            return
-          }
-          const zoom = 12
-          const [lng, lat] = defaultCenter
-          const scale = 2 ** zoom
-          const x = Math.floor((lng + 180) / 360 * scale)
-          const latRad = lat * Math.PI / 180
-          const y = Math.floor((1 - Math.asinh(Math.tan(latRad)) / Math.PI) / 2 * scale)
-          const tileUrl = template
-            .replace('{z}', String(zoom))
-            .replace('{x}', String(x))
-            .replace('{y}', String(y))
-          const tileStarted = performance.now()
-          const tileResponse = await fetch(tileUrl, { cache: 'no-store' })
-          const bytes = (await tileResponse.arrayBuffer()).byteLength
-          debugState.tileProbe = `${tileResponse.status} ${bytes}B ${Math.round(performance.now() - tileStarted)}ms`
-          renderMapDebug()
-        } catch (error) {
-          debugState.probe = `failed: ${error instanceof Error ? error.message : String(error)}`
-          renderMapDebug()
-        }
-      })()
-    }
-
     try { window.sessionStorage.removeItem(mapThemeDiagnosticsKey) } catch {}
     map.on('error', (event) => {
       const error = event.error
-      const message = error instanceof Error ? error.message : String(error ?? 'unknown error')
-      recordMapThemeDiagnostic(`map:${message}`)
-      debugState.errors.push(message)
-      debugState.phase = 'error'
-      renderMapDebug()
-    })
-    map.on('styledata', () => {
-      debugState.phase = 'styledata'
-      renderMapDebug()
-    })
-    map.on('sourcedata', (event) => {
-      const sourceId = (event as unknown as { sourceId?: string }).sourceId ?? 'unknown'
-      const sourceDataType = (event as unknown as { sourceDataType?: string }).sourceDataType ?? 'unknown'
-      const sourceIsLoaded = (event as unknown as { isSourceLoaded?: boolean }).isSourceLoaded
-      if (sourceId === 'openmaptiles') debugState.openmaptilesEvents += 1
-      if (sourceId === 'ne2_shaded') debugState.naturalEarthEvents += 1
-      if (sourceId === 'openmaptiles' || sourceId === 'ne2_shaded') {
-        debugState.lastSource = `${sourceId}:${sourceDataType}:${sourceIsLoaded ? 'loaded' : 'waiting'}`
-        renderMapDebug()
-      }
-    })
-    map.on('render', () => {
-      debugState.renders += 1
-      if (debugState.renders <= 5 || debugState.renders % 30 === 0) renderMapDebug()
-    })
-    map.on('idle', () => {
-      debugState.idle += 1
-      debugState.phase = 'idle'
-      renderMapDebug()
+      recordMapThemeDiagnostic(`map:${error instanceof Error ? error.message : String(error ?? 'unknown error')}`)
     })
     const canvas = map.getCanvas()
     canvas.addEventListener('webglcontextlost', (event) => {
       event.preventDefault()
-      debugState.webgl = 'context-lost'
-      debugState.phase = 'webgl-lost'
       recordMapThemeDiagnostic('webgl:context-lost')
-      renderMapDebug()
     })
     canvas.addEventListener('webglcontextrestored', () => {
-      debugState.webgl = 'restored'
-      debugState.phase = 'webgl-restored'
       recordMapThemeDiagnostic('webgl:context-restored')
       map.triggerRepaint()
-      renderMapDebug()
     })
 
     map.on('load', async () => {
-      debugState.phase = 'load'
-      renderMapDebug()
       // Base cartography belongs to the style lifecycle, not marker asset loading.
       // Apply it synchronously at load so image decode/cache timing cannot reorder
       // the production theme transition.
@@ -847,7 +735,6 @@ function App() {
       )}
 
       {notice && <div className="notice" role="status">{notice}</div>}
-      {mapDebugEnabled && <pre ref={mapDebugRef} className="map-debug" aria-label="Map diagnostics">Map diagnostics starting…</pre>}
     </main>
   )
 }
