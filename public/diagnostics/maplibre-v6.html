@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>SGM MapLibre 6.15.0 Minimal Diagnostic</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@6.15.0/dist/maplibre-gl.css" />
+  <style>
+    html, body, #map { width: 100%; height: 100%; margin: 0; }
+    body { overflow: hidden; background: #eee; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    #status {
+      position: fixed;
+      z-index: 10;
+      left: 8px;
+      right: 8px;
+      bottom: max(8px, env(safe-area-inset-bottom));
+      margin: 0;
+      padding: 10px 12px;
+      color: #fff;
+      background: rgba(20,20,20,.86);
+      border-radius: 4px;
+      font-size: 11px;
+      line-height: 1.35;
+      pointer-events: none;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <pre id="status">starting…</pre>
+  <script src="https://cdn.jsdelivr.net/npm/maplibre-gl@6.15.0/dist/maplibre-gl.js"></script>
+  <script>
+    const status = document.getElementById('status');
+    const state = { phase: 'constructing', renders: 0, idle: 0, open: 0, ne: 0, errors: [], webgl: 'ok' };
+    let map;
+    const paint = () => {
+      let style = false, tiles = false, open = false;
+      try { style = map?.isStyleLoaded?.() ?? false; } catch {}
+      try { tiles = map?.areTilesLoaded?.() ?? false; } catch {}
+      try { open = map?.getSource?.('openmaptiles') ? map.isSourceLoaded('openmaptiles') : false; } catch {}
+      status.textContent = [
+        'MapLibre 6.15.0 / minimal',
+        'phase      ' + state.phase,
+        'style      ' + (style ? 'loaded' : 'waiting'),
+        'tiles      ' + (tiles ? 'loaded' : 'waiting'),
+        'openmap    ' + (open ? 'loaded' : 'waiting'),
+        'events     open:' + state.open + ' ne:' + state.ne,
+        'render     ' + state.renders + ' idle:' + state.idle,
+        'webgl      ' + state.webgl,
+        ...(state.errors.length ? ['errors', ...state.errors.slice(-3)] : [])
+      ].join('\n');
+    };
+    try {
+      map = new maplibregl.Map({
+        container: 'map',
+        style: 'https://tiles.openfreemap.org/styles/liberty',
+        center: [103.8198, 1.3521],
+        zoom: 11.2,
+        attributionControl: true
+      });
+      paint();
+      map.on('load', () => { state.phase = 'load'; paint(); });
+      map.on('styledata', () => { state.phase = 'styledata'; paint(); });
+      map.on('sourcedata', (e) => {
+        if (e.sourceId === 'openmaptiles') state.open += 1;
+        if (e.sourceId === 'ne2_shaded') state.ne += 1;
+        if (e.sourceId === 'openmaptiles' || e.sourceId === 'ne2_shaded') paint();
+      });
+      map.on('render', () => {
+        state.renders += 1;
+        if (state.renders < 5 || state.renders % 30 === 0) paint();
+      });
+      map.on('idle', () => { state.idle += 1; state.phase = 'idle'; paint(); });
+      map.on('error', (e) => {
+        const message = e?.error?.message || String(e?.error || 'unknown error');
+        state.errors.push(message);
+        state.phase = 'error';
+        paint();
+      });
+      const canvas = map.getCanvas();
+      canvas.addEventListener('webglcontextlost', (e) => {
+        e.preventDefault();
+        state.webgl = 'context-lost';
+        state.phase = 'webgl-lost';
+        paint();
+      });
+      canvas.addEventListener('webglcontextrestored', () => {
+        state.webgl = 'restored';
+        state.phase = 'webgl-restored';
+        try { map.triggerRepaint(); } catch {}
+        paint();
+      });
+    } catch (e) {
+      state.phase = 'construct-failed';
+      state.errors.push(e instanceof Error ? e.message : String(e));
+      paint();
+    }
+  </script>
+</body>
+</html>
