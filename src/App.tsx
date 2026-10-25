@@ -447,7 +447,7 @@ function App() {
         filter: ['==', ['get', 'selected'], false],
         paint: {
           'circle-radius': 4,
-          'circle-color': markerFill,
+          'circle-color': ['coalesce', ['get', 'mapCategoryColor'], markerFill],
           'circle-stroke-color': '#ffffff',
           'circle-stroke-width': 1,
           'circle-opacity': 1,
