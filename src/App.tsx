@@ -675,7 +675,7 @@ function App() {
       {iframeDiagnostic ? (
         <iframe
           className="map map-diagnostic-frame"
-          src={`${import.meta.env.BASE_URL}diagnostics/maplibre-v5.html`}
+          src={new URL('../diagnostics/maplibre-v5.html', window.location.href).href}
           title="Standalone MapLibre diagnostic"
         />
       ) : (
