@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { ArrowLeft, ArrowRight, ArrowSquareOut, CaretDown, Check, Cloud, CloudRain, CloudSun, Crosshair, Lightning, MagnifyingGlass, NavigationArrow, Sun, X } from '@phosphor-icons/react'
-import * as maplibregl from 'maplibre-gl'
-import type { GeoJSONSource, Map as MapLibreMap } from 'maplibre-gl'
+import type { GeoJSONSource, Map as MapLibreMap, Marker as MapLibreMarker } from 'maplibre-gl'
 import data from './data/buildings.json'
 import { getBuildingCopy, getLocaleFromPath, localeHref, translations } from './i18n'
 import type { RefObject } from 'react'
 import type { Locale, Translation } from './i18n'
+
+const maplibregl = (window as typeof window & { maplibregl: typeof import('maplibre-gl') }).maplibregl
 
 type Coordinates = [number, number]
 type WeatherState = { temperature: number | null; condition: string | null }
@@ -323,8 +324,8 @@ function App() {
   const requestedSelectedId = useMemo(getRequestedSelectedId, [])
   const mapContainer = useRef<HTMLDivElement>(null)
   const mapRef = useRef<MapLibreMap | null>(null)
-  const userMarkerRef = useRef<maplibregl.Marker | null>(null)
-  const selectedMarkerRef = useRef<maplibregl.Marker | null>(null)
+  const userMarkerRef = useRef<MapLibreMarker | null>(null)
+  const selectedMarkerRef = useRef<MapLibreMarker | null>(null)
   const detailBackRef = useRef<HTMLButtonElement>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
   const [selectedId, setSelectedId] = useState<string | null>(requestedSelectedId ?? restoredState?.selectedId ?? null)

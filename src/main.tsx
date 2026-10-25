@@ -1,6 +1,5 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import 'maplibre-gl/dist/maplibre-gl.css'
 import '@fontsource/hanken-grotesk/latin-400.css'
 import '@fontsource/hanken-grotesk/latin-500.css'
 import '@fontsource/hanken-grotesk/latin-600.css'
