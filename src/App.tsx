@@ -668,12 +668,10 @@ function DetailContent({ building, locale, t, onClose, backRef }: LocalizedProps
         <p className="detail-year">{building.completionYear ?? t.unverified}</p>
       </header>
 
-      <dl className="facts">
-        <div><dt>{t.type}</dt><dd>{t.types[building.buildingType]}</dd></div>
-        <div><dt>{t.address}</dt><dd>{building.address}</dd></div>
-      </dl>
-
-      <p className="verification-note">{t.verificationNote}</p>
+      <section className="detail-location" aria-label={t.address}>
+        <p>{building.address}</p>
+        <small>{t.verificationNote}</small>
+      </section>
 
       <nav className="actions" aria-label={locale === 'ja' ? '建築を調べる' : 'Explore this building'}>
         <a className="map-action" href={`https://www.google.com/maps/search/?api=1&query=${mapsQuery}`} target="_blank" rel="noreferrer">
