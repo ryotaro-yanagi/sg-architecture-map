@@ -168,86 +168,6 @@ const loadSvgMarker = (svg: string) => new Promise<HTMLImageElement>((resolve, r
 })
 const legacyComparisonParams = ['ui', 'font', 'visual', 'map', 'scale', 'preset', 'lab', 'shape', 'weight', 'pin', 'surface', 'spacing', 'identity', 'mapMode', 'color', 'mapColor']
 
-const setPaint = (map: MapLibreMap, layerId: string, property: string, value: unknown) => {
-  if (map.getLayer(layerId)) map.setPaintProperty(layerId, property as never, value as never)
-}
-
-const applyMapPalette = (map: MapLibreMap, palette: MapPalette) => {
-  setPaint(map, 'background', 'background-color', palette.background)
-  setPaint(map, 'landuse_residential', 'fill-color', palette.residential)
-  setPaint(map, 'park', 'fill-color', palette.park)
-  setPaint(map, 'park_outline', 'line-color', palette.park)
-  setPaint(map, 'landcover_wood', 'fill-color', palette.wood)
-  setPaint(map, 'landcover_grass', 'fill-color', palette.grass)
-  ;['landuse_pitch', 'landuse_track', 'landuse_cemetery', 'landuse_hospital', 'landuse_school'].forEach((id) => setPaint(map, id, 'fill-color', palette.grass))
-  setPaint(map, 'water', 'fill-color', palette.water)
-  ;['waterway_tunnel', 'waterway_river', 'waterway_other'].forEach((id) => setPaint(map, id, 'line-color', palette.waterway))
-  // Liberty's 2D buildings otherwise stop at z14 when 3D buildings begin.
-  if (map.getLayer('building')) map.setLayerZoomRange('building', 13, 24)
-  setPaint(map, 'building', 'fill-color', palette.building)
-  setPaint(map, 'building', 'fill-outline-color', palette.building)
-  if (map.getLayer('building-3d')) map.setLayoutProperty('building-3d', 'visibility', 'none')
-
-  // Keep line-based water labels subordinate to district names.
-  if (map.getLayer('waterway_line_label')) map.setLayoutProperty('waterway_line_label', 'text-size', 12)
-  if (map.getLayer('water_name_line_label')) map.setLayoutProperty('water_name_line_label', 'text-size', 13)
-
-  // Let district names lead until the viewer zooms closer to street level.
-  if (map.getLayer('highway-name-minor')) map.setLayerZoomRange('highway-name-minor', 15.5, 24)
-
-  const layers = map.getStyle().layers ?? []
-  layers.forEach((layer) => {
-    const id = layer.id
-    if (layer.type === 'line' && /^(road|bridge|tunnel)_.*_casing$/.test(id)) {
-      map.setLayoutProperty(id, 'visibility', 'none')
-      return
-    }
-    // Navigation-only symbols are not needed on an architecture discovery map.
-    if (layer.type === 'symbol' && (
-      id === 'road_one_way_arrow' ||
-      id === 'road_one_way_arrow_opposite' ||
-      id === 'highway-shield-non-us' ||
-      id === 'highway-shield-us-interstate' ||
-      id === 'road_shield_us'
-    )) {
-      map.setLayoutProperty(id, 'visibility', 'none')
-      return
-    }
-    if (layer.type === 'symbol' && id.startsWith('poi_')) {
-      map.setLayoutProperty(id, 'visibility', 'none')
-      return
-    }
-    if (layer.type === 'line' && /^(road|bridge|tunnel)_/.test(id)) {
-      const color = id.includes('casing')
-        ? palette.roadCasing
-        : /(motorway|trunk_primary)/.test(id)
-          ? palette.roadMotorway
-          : /(secondary_tertiary|motorway_link|road_link)/.test(id)
-            ? palette.roadMajor
-            : palette.roadMinor
-      setPaint(map, id, 'line-color', color)
-    }
-
-    if (layer.type !== 'symbol' || id === 'building-labels') return
-    const isWater = id.startsWith('water')
-    const isPoi = id.startsWith('poi_')
-    const isSecondary = isPoi || /^(airport|railway|highway-name)/.test(id)
-    if (isWater || isSecondary || id.startsWith('label_')) {
-      setPaint(map, id, 'text-color', isWater ? palette.labelWater : isSecondary ? palette.labelSecondary : palette.label)
-      setPaint(map, id, 'text-halo-color', palette.labelHalo)
-      setPaint(map, id, 'text-halo-width', 1.25)
-      if (isPoi) setPaint(map, id, 'text-opacity', palette.poiOpacity)
-    }
-  })
-}
-
-const applyProductionMapTheme = (map: MapLibreMap) => {
-  applyMapPalette(map, productionMapPalette)
-  if (!map.getLayer('building-labels')) return
-  map.setPaintProperty('building-labels', 'text-color', markerStroke)
-  map.setPaintProperty('building-labels', 'text-halo-color', productionMapPalette.labelHalo)
-}
-
 const applyProductionTypeScaleToMap = (map: MapLibreMap, locale: Locale) => {
   if (!map.getLayer('building-labels')) return
   map.setLayoutProperty('building-labels', 'text-size', locale === 'en' ? 16 : 12)
@@ -364,7 +284,7 @@ function App() {
 
     const map = new maplibregl.Map({
       container: mapContainer.current,
-      style: 'https://tiles.openfreemap.org/styles/liberty',
+      style: `${import.meta.env.BASE_URL}map/sgm-liberty.json`,
       center: restoredState?.center ?? defaultCenter,
       zoom: restoredState?.zoom ?? defaultZoom,
       bearing: restoredState?.bearing ?? 0,
@@ -422,7 +342,6 @@ function App() {
         layout: { 'text-field': ['get', 'name'], 'text-size': 12, 'text-offset': [0, 1.45], 'text-anchor': 'top', 'text-variable-anchor': ['top', 'bottom', 'left', 'right'], 'text-radial-offset': 0.75 },
         paint: { 'text-color': '#282724', 'text-halo-color': '#f8f4ec', 'text-halo-width': 2 },
       })
-      applyProductionMapTheme(map)
       applyProductionTypeScaleToMap(map, locale)
       const deepLinkedBuilding = buildings.find((building) => building.id === requestedSelectedId)
       if (deepLinkedBuilding && !restoredState) {
