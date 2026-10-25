@@ -168,8 +168,42 @@ const loadSvgMarker = (svg: string) => new Promise<HTMLImageElement>((resolve, r
 })
 const legacyComparisonParams = ['ui', 'font', 'visual', 'map', 'scale', 'preset', 'lab', 'shape', 'weight', 'pin', 'surface', 'spacing', 'identity', 'mapMode', 'color', 'mapColor']
 
+const mapThemeDiagnosticsKey = 'sgm-map-theme-diagnostics'
+
+const recordMapThemeDiagnostic = (entry: string) => {
+  try {
+    const current = JSON.parse(window.sessionStorage.getItem(mapThemeDiagnosticsKey) ?? '[]') as string[]
+    window.sessionStorage.setItem(mapThemeDiagnosticsKey, JSON.stringify([...current.slice(-19), entry]))
+  } catch {
+    // Diagnostics must never affect map rendering.
+  }
+}
+
 const setPaint = (map: MapLibreMap, layerId: string, property: string, value: unknown) => {
-  if (map.getLayer(layerId)) map.setPaintProperty(layerId, property as never, value as never)
+  if (!map.getLayer(layerId)) return
+  try {
+    map.setPaintProperty(layerId, property as never, value as never)
+  } catch (error) {
+    recordMapThemeDiagnostic(`paint:${layerId}:${property}:${error instanceof Error ? error.message : String(error)}`)
+  }
+}
+
+const setLayout = (map: MapLibreMap, layerId: string, property: string, value: unknown) => {
+  if (!map.getLayer(layerId)) return
+  try {
+    map.setLayoutProperty(layerId, property as never, value as never)
+  } catch (error) {
+    recordMapThemeDiagnostic(`layout:${layerId}:${property}:${error instanceof Error ? error.message : String(error)}`)
+  }
+}
+
+const setZoomRange = (map: MapLibreMap, layerId: string, minzoom: number, maxzoom: number) => {
+  if (!map.getLayer(layerId)) return
+  try {
+    map.setLayerZoomRange(layerId, minzoom, maxzoom)
+  } catch (error) {
+    recordMapThemeDiagnostic(`zoom:${layerId}:${error instanceof Error ? error.message : String(error)}`)
+  }
 }
 
 const applyMapPalette = (map: MapLibreMap, palette: MapPalette) => {
@@ -183,23 +217,23 @@ const applyMapPalette = (map: MapLibreMap, palette: MapPalette) => {
   setPaint(map, 'water', 'fill-color', palette.water)
   ;['waterway_tunnel', 'waterway_river', 'waterway_other'].forEach((id) => setPaint(map, id, 'line-color', palette.waterway))
   // Liberty's 2D buildings otherwise stop at z14 when 3D buildings begin.
-  if (map.getLayer('building')) map.setLayerZoomRange('building', 13, 24)
+  setZoomRange(map, 'building', 13, 24)
   setPaint(map, 'building', 'fill-color', palette.building)
   setPaint(map, 'building', 'fill-outline-color', palette.building)
-  if (map.getLayer('building-3d')) map.setLayoutProperty('building-3d', 'visibility', 'none')
+  setLayout(map, 'building-3d', 'visibility', 'none')
 
   // Keep line-based water labels subordinate to district names.
-  if (map.getLayer('waterway_line_label')) map.setLayoutProperty('waterway_line_label', 'text-size', 12)
-  if (map.getLayer('water_name_line_label')) map.setLayoutProperty('water_name_line_label', 'text-size', 13)
+  setLayout(map, 'waterway_line_label', 'text-size', 12)
+  setLayout(map, 'water_name_line_label', 'text-size', 13)
 
   // Let district names lead until the viewer zooms closer to street level.
-  if (map.getLayer('highway-name-minor')) map.setLayerZoomRange('highway-name-minor', 15.5, 24)
+  setZoomRange(map, 'highway-name-minor', 15.5, 24)
 
   const layers = map.getStyle().layers ?? []
   layers.forEach((layer) => {
     const id = layer.id
     if (layer.type === 'line' && /^(road|bridge|tunnel)_.*_casing$/.test(id)) {
-      map.setLayoutProperty(id, 'visibility', 'none')
+      setLayout(map, id, 'visibility', 'none')
       return
     }
     // Navigation-only symbols are not needed on an architecture discovery map.
@@ -210,11 +244,11 @@ const applyMapPalette = (map: MapLibreMap, palette: MapPalette) => {
       id === 'highway-shield-us-interstate' ||
       id === 'road_shield_us'
     )) {
-      map.setLayoutProperty(id, 'visibility', 'none')
+      setLayout(map, id, 'visibility', 'none')
       return
     }
     if (layer.type === 'symbol' && id.startsWith('poi_')) {
-      map.setLayoutProperty(id, 'visibility', 'none')
+      setLayout(map, id, 'visibility', 'none')
       return
     }
     if (layer.type === 'line' && /^(road|bridge|tunnel)_/.test(id)) {
@@ -380,6 +414,12 @@ function App() {
     })
 
     map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-left')
+
+    try { window.sessionStorage.removeItem(mapThemeDiagnosticsKey) } catch {}
+    map.on('error', (event) => {
+      const error = event.error
+      recordMapThemeDiagnostic(`map:${error instanceof Error ? error.message : String(error ?? 'unknown error')}`)
+    })
 
     map.on('load', async () => {
       const [normalPin, selectedPin] = await Promise.all([
