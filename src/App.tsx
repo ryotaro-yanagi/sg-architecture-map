@@ -319,6 +319,7 @@ const BrandMark = () => <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" 
 
 function App() {
   const locale = useMemo(getLocaleFromPath, [])
+  const basemapDiagnostic = useMemo(() => new URLSearchParams(window.location.search).get('debug') === 'basemap', [])
   const t = translations[locale]
   const restoredState = useMemo(readRestoredMapState, [])
   const requestedSelectedId = useMemo(getRequestedSelectedId, [])
@@ -432,6 +433,10 @@ function App() {
     })
 
     map.on('load', async () => {
+      // Diagnostic control: keep the full React/UI shell but stop at the untouched
+      // OpenFreeMap Liberty basemap. This isolates SGM's custom map source/layers.
+      if (basemapDiagnostic) return
+
       // Apply production cartography immediately after the base style loads.
       // Keep this independent from marker image decoding so map appearance is deterministic.
       applyProductionMapTheme(map)
@@ -512,9 +517,10 @@ function App() {
       map.remove()
       mapRef.current = null
     }
-  }, [locale, restoredState])
+  }, [basemapDiagnostic, locale, restoredState])
 
   useEffect(() => {
+    if (basemapDiagnostic) return
     const map = mapRef.current
     const source = map?.getSource('buildings') as GeoJSONSource | undefined
     source?.setData(featureCollection(selectedId, locale))
@@ -584,7 +590,7 @@ function App() {
       marker.remove()
       if (selectedMarkerRef.current === marker) selectedMarkerRef.current = null
     }
-  }, [locale, selectedId])
+  }, [basemapDiagnostic, locale, selectedId])
 
   useEffect(() => {
     const url = new URL(window.location.href)
