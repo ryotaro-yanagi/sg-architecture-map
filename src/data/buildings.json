@@ -1239,6 +1239,39 @@
       "scopeGroups": [
         "Kerry Hill Architects"
       ]
+    },
+    {
+      "id": "SGM-0094",
+      "name": "NTU North Spine",
+      "aliases": [
+        "NTI Academic Complex",
+        "Nanyang Technological Institute North Spine",
+        "NTU Academic North Spine"
+      ],
+      "architects": [
+        "Kenzo Tange Associates"
+      ],
+      "architectCredit": "Kenzo Tange (original NTI academic complex)",
+      "buildingType": "education",
+      "completionYear": 1986,
+      "yearSource": "https://www.ntu.edu.sg/alumni/alumni-stories-news/detail/ntu-then-and-now",
+      "address": "North Spine, Nanyang Technological University, 50 Nanyang Avenue, Singapore 639798",
+      "coordinates": [
+        103.68089,
+        1.34644
+      ],
+      "coordinatePrecision": "multi_building_spine_anchor_approximate",
+      "coordinateSource": "https://mapcarta.com/W49967705",
+      "officialSource": "https://www.ntu.edu.sg/life-at-ntu/museum/campus-art-trail",
+      "attributionSource": "https://www.ntu.edu.sg/life-at-ntu/museum/campus-art-trail",
+      "coordinateReviewNote": "The North Spine is a multi-block academic spine with lecture theatres and branching wings. Marker represents a building within the complex, not the full masterplan or a main entrance.",
+      "yearNote": "NTU official historical record identifies the North Spine as new in 1986; the later North Spine Plaza dates to 2016 and is not the original architectural work.",
+      "photo": null,
+      "publicAccess": "unverified",
+      "editorialStatus": "needs_review",
+      "scopeGroups": [
+        "Kenzo Tange"
+      ]
     }
   ]
 }
