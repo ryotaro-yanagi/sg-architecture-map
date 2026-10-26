@@ -189,7 +189,7 @@ const categoryIconPaths: Record<MapCategory, string> = {
 const createBuildingPinSvg = (width: number, height: number, strokeWidth: number, iconSize: number, fill = markerFill, category: MapCategory | null = null) => {
   const cx = width / 2
   const iconX = (width - iconSize) / 2
-  const iconY = width <= 28 ? 5 : 9
+  const iconY = (width <= 28 ? 5 : 9) + (width <= 28 ? 1 : 2)
   const path = [
     `M ${cx} ${height - strokeWidth / 2}`,
     `C ${cx - width * .16} ${height * .84}, ${width * .07} ${height * .68}, ${width * .07} ${height * .44}`,
