@@ -32,7 +32,10 @@
       "officialSource": "https://www.dpa.com.sg/projects/esplanade-theatres-on-the-bay/",
       "photo": null,
       "publicAccess": "unverified",
-      "editorialStatus": "needs_review"
+      "editorialStatus": "needs_review",
+      "pdaAwardYear": 2006,
+      "pdaAwardDiscipline": "Architecture",
+      "pdaAwardSource": "https://pda.designsingapore.org/award-recipients/2006/"
     },
     {
       "id": "dpa-suntec-city",
@@ -200,7 +203,10 @@
       "yearSource": "https://woha.net/project/21-carpenter/",
       "photo": null,
       "publicAccess": "unverified",
-      "editorialStatus": "needs_review"
+      "editorialStatus": "needs_review",
+      "pdaAwardYear": 2025,
+      "pdaAwardDiscipline": "Architecture",
+      "pdaAwardSource": "https://pda.designsingapore.org/award-recipients/2025/21-carpenter/"
     },
     {
       "id": "SGM-0102",
@@ -1056,6 +1062,183 @@
       "photo": null,
       "publicAccess": "unverified",
       "editorialStatus": "needs_review"
+    },
+    {
+      "id": "SGM-0134",
+      "name": "Belle Vue Residences",
+      "architects": [
+        "Toyo Ito & Associates"
+      ],
+      "architectCredit": "Toyo Ito & Associates",
+      "buildingType": "residential",
+      "completionYear": 2010,
+      "yearSource": "https://www.toyo-ito.co.jp/WWW/Project_Descript/2010-/2010-p_02/2010-p_02_en.html",
+      "address": "15–33 Oxley Walk, Singapore",
+      "coordinates": [
+        103.84232,
+        1.29607
+      ],
+      "coordinatePrecision": "site_area_representative_point_approximate",
+      "coordinateSource": "https://mapcarta.com/W173112803",
+      "officialSource": "https://www.toyo-ito.co.jp/WWW/Project_Descript/2010-/2010-p_02/2010-p_02_en.html",
+      "coordinateReviewNote": "Represents the site of a multi-block private residential complex, not any apartment entrance.",
+      "yearNote": "Office project period is March 2006–September 2010, used for completion year.",
+      "photo": null,
+      "publicAccess": "unverified",
+      "editorialStatus": "needs_review",
+      "scopeGroups": [
+        "Toyo Ito"
+      ]
+    },
+    {
+      "id": "SGM-0135",
+      "name": "Skyline @ Orchard Boulevard",
+      "architects": [
+        "Maki & Associates",
+        "DP Architects"
+      ],
+      "architectCredit": "Maki & Associates · DP Architects (architect of record)",
+      "buildingType": "residential",
+      "completionYear": 2015,
+      "yearSource": "https://www.maki-and-associates.co.jp/projects/SSO?lang=en",
+      "address": "23 Angullia Park, Singapore 239975",
+      "coordinates": [
+        103.82966,
+        1.30318
+      ],
+      "coordinatePrecision": "site_area_representative_point_approximate",
+      "coordinateSource": "https://mapcarta.com/W1383259344",
+      "officialSource": "https://www.maki-and-associates.co.jp/projects/SSO?lang=en",
+      "coordinateReviewNote": "Private residential condominium; representative site point, access not verified.",
+      "photo": null,
+      "publicAccess": "unverified",
+      "editorialStatus": "needs_review",
+      "scopeGroups": [
+        "Maki & Associates",
+        "DP Architects"
+      ]
+    },
+    {
+      "id": "SGM-0136",
+      "name": "Singapore Land Tower Regeneration Project",
+      "aliases": [
+        "Singapore Land Tower",
+        "SLT"
+      ],
+      "architects": [
+        "Maki & Associates",
+        "architects61"
+      ],
+      "architectCredit": "Maki & Associates · architects61 (architect of record)",
+      "buildingType": "office",
+      "completionYear": null,
+      "renovationCompletionYear": 2025,
+      "renovationSource": "https://singaporeland.com/portfolio/singapore-land-tower/",
+      "address": "50 Raffles Place, Singapore 048623",
+      "coordinates": [
+        103.85202,
+        1.28471
+      ],
+      "coordinatePrecision": "building_representative_point_approximate",
+      "coordinateSource": "https://mapcarta.com/W46595418",
+      "officialSource": "https://www.maki-and-associates.co.jp/projects/SLT?lang=en",
+      "yearNote": "2025 is the completion of asset enhancement/recladding, not original building construction (1980s). Owner confirms completion in 2025; office project page describes it as expected at publication.",
+      "sourceNote": "Owner identifies the late Fumihiko Maki as design architect for renovation; architects61 is architect of record.",
+      "photo": null,
+      "publicAccess": "unverified",
+      "editorialStatus": "needs_review",
+      "scopeGroups": [
+        "Maki & Associates"
+      ]
+    },
+    {
+      "id": "SGM-0137",
+      "name": "One Raffles Place Tower Two",
+      "architects": [
+        "TANGE Associates"
+      ],
+      "architectCredit": "TANGE Associates (Paul Noritaka Tange)",
+      "buildingType": "office",
+      "completionYear": 2012,
+      "yearSource": "https://www.ouereit.com/one-raffles-place.html",
+      "address": "1 Raffles Place, Singapore 048616",
+      "coordinates": [
+        103.85071,
+        1.28472
+      ],
+      "coordinatePrecision": "tower_footprint_representative_point_approximate",
+      "coordinateSource": "https://mapcarta.com/W407705559",
+      "officialSource": "https://www.tangeweb.com/works/works_no-204/",
+      "architectRoleSource": "https://www.onerafflesplace.com.sg/orp-tower-two.html",
+      "scopeNote": "Post-Kenzo-Tange TANGE office work designed by Paul Noritaka Tange, not a personal Kenzo Tange work.",
+      "photo": null,
+      "publicAccess": "unverified",
+      "editorialStatus": "needs_review",
+      "scopeGroups": [
+        "TANGE successor practice"
+      ]
+    },
+    {
+      "id": "SGM-0138",
+      "name": "orchardgateway",
+      "aliases": [
+        "Orchard Gateway",
+        "Orchard Gateway @ Emerald"
+      ],
+      "architects": [
+        "TANGE Associates"
+      ],
+      "architectCredit": "TANGE Associates (post-2005 practice)",
+      "buildingType": "mixed_use",
+      "completionYear": 2014,
+      "yearSource": "https://www.tangeweb.com/works/works_no-216/",
+      "address": "277 and 218 Orchard Road, Singapore",
+      "coordinates": [
+        103.83931,
+        1.3007
+      ],
+      "coordinatePrecision": "multi_plot_mall_anchor_approximate",
+      "coordinateSource": "https://mapcarta.com/W182822197",
+      "officialSource": "https://www.tangeweb.com/works/works_no-216/",
+      "addressSource": "https://www.tangeweb.com/project/orchard/",
+      "coordinateReviewNote": "Two sites linked by overhead glass bridge and underground connection; marker represents one building/site anchor, not the complete development.",
+      "scopeNote": "Post-Kenzo-Tange TANGE practice work. Do not credit personally to Kenzo Tange.",
+      "photo": null,
+      "publicAccess": "unverified",
+      "editorialStatus": "needs_review",
+      "scopeGroups": [
+        "TANGE successor practice"
+      ]
+    },
+    {
+      "id": "SGM-0139",
+      "name": "HANA",
+      "aliases": [
+        "Hana at Tomlinson Road"
+      ],
+      "architects": [
+        "Kerry Hill Architects"
+      ],
+      "architectCredit": "Kerry Hill Architects",
+      "buildingType": "residential",
+      "completionYear": 2014,
+      "yearSource": "https://www.shimz-global.com/sg/en/works/detail/index.html?id=382",
+      "address": "8 Tomlinson Road, Singapore 247857",
+      "coordinates": [
+        103.82551,
+        1.3042
+      ],
+      "coordinatePrecision": "residential_site_representative_point_approximate",
+      "coordinateSource": "https://mapcarta.com/W1044452764",
+      "officialSource": "https://www.pontiacland.com/residential/hana/",
+      "sourceNote": "Owner attributes design to Kerry Hill; contractor confirms April 2014 completion.",
+      "coordinateReviewNote": "Private residential development. Marker does not imply access to residential areas.",
+      "photo": null,
+      "publicAccess": "unverified",
+      "editorialStatus": "needs_review",
+      "scopeGroups": [
+        "Kerry Hill Architects"
+      ]
     }
   ]
 }

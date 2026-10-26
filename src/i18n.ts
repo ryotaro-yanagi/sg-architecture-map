@@ -212,6 +212,12 @@ const buildingCopy: Record<Locale, Record<string, BuildingCopy>> = {
     'SGM-0099': { name: 'Delta Sport Centre', architectCredit: 'Red Bean Architects' },
     'SGM-0127': { name: 'Henderson Waves', architectCredit: 'RSP Architects · IJP Corporation' },
     'SGM-0128': { name: 'SJ Campus', architectCredit: 'Safdie Architects · SJ Group' },
+    'SGM-0134': { name: 'Belle Vue Residences', architectCredit: 'Toyo Ito & Associates' },
+    'SGM-0135': { name: 'Skyline @ Orchard Boulevard', architectCredit: 'Maki & Associates · DP Architects (architect of record)' },
+    'SGM-0136': { name: 'Singapore Land Tower Regeneration Project', architectCredit: 'Maki & Associates · architects61 (architect of record)' },
+    'SGM-0137': { name: 'One Raffles Place Tower Two', architectCredit: 'TANGE Associates (Paul Noritaka Tange)' },
+    'SGM-0138': { name: 'orchardgateway', architectCredit: 'TANGE Associates (post-2005 practice)' },
+    'SGM-0139': { name: 'HANA', architectCredit: 'Kerry Hill Architects' },
   },
   ja: {
     'dpa-esplanade': { name: 'Esplanade – Theatres on the Bay', architectCredit: 'DP Architects、Michael Wilford & Partners（英国）による協働' },
@@ -253,6 +259,12 @@ const buildingCopy: Record<Locale, Record<string, BuildingCopy>> = {
     'SGM-0099': { name: 'Delta Sport Centre', architectCredit: 'Red Bean Architects' },
     'SGM-0127': { name: 'Henderson Waves', architectCredit: 'RSP Architects · IJP Corporation' },
     'SGM-0128': { name: 'SJ Campus', architectCredit: 'Safdie Architects · SJ Group' },
+    'SGM-0134': { name: 'Belle Vue Residences', architectCredit: '伊東豊雄建築設計事務所' },
+    'SGM-0135': { name: 'Skyline @ Orchard Boulevard', architectCredit: '槇総合計画事務所 · DP Architects（現地設計事務所）' },
+    'SGM-0136': { name: 'Singapore Land Tower Regeneration Project', architectCredit: '槇総合計画事務所 · architects61（現地設計事務所）' },
+    'SGM-0137': { name: 'One Raffles Place Tower Two', architectCredit: 'TANGE建築都市設計（丹下憲孝）' },
+    'SGM-0138': { name: 'orchardgateway', architectCredit: 'TANGE建築都市設計' },
+    'SGM-0139': { name: 'HANA', architectCredit: 'Kerry Hill Architects' },
   },
 }
 
