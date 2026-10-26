@@ -17,6 +17,7 @@ const weatherForecastUrl = 'https://api-open.data.gov.sg/v2/real-time/api/twenty
 type Building = {
   id: string
   name: string
+  aliases?: string[]
   architects: string[]
   buildingType: string
   completionYear: number | null
@@ -397,11 +398,21 @@ function App() {
   const selected = buildings.find((building) => building.id === selectedId) ?? null
   const surfaceState = expanded ? 'detail' : selected ? 'preview' : searchOpen ? 'search' : 'explore'
   const results = useMemo(() => {
-    const normalized = query.trim().toLocaleLowerCase(locale)
+    const normalizeSearch = (value: string) =>
+      value.normalize('NFKC').replace(/[‘’]/g, "'").toLocaleLowerCase(locale)
+    const normalized = normalizeSearch(query.trim())
     if (!normalized) return buildings
     return buildings.filter((building) => {
-      const copy = getBuildingCopy(locale, building.id, building.name)
-      return `${copy.name} ${copy.architectCredit} ${building.architects.join(' ')}`.toLocaleLowerCase(locale).includes(normalized)
+      const en = getBuildingCopy('en', building.id, building.name)
+      const ja = getBuildingCopy('ja', building.id, building.name)
+      const searchable = [
+        building.name,
+        ...building.architects,
+        ...(building.aliases ?? []),
+        en.name, en.architectCredit,
+        ja.name, ja.architectCredit,
+      ]
+      return normalizeSearch(searchable.join(' ')).includes(normalized)
     })
   }, [locale, query])
 
@@ -832,7 +843,7 @@ function PreviewCard({ building, locale, t, onDetails, onClose }: LocalizedProps
 
 function DetailContent({ building, locale, t, onClose, backRef }: LocalizedProps & { onClose: () => void; backRef: RefObject<HTMLButtonElement | null> }) {
   const copy = getBuildingCopy(locale, building.id, building.name)
-  const mapsQuery = encodeURIComponent(`${building.coordinates[1]},${building.coordinates[0]}`)
+  const mapsQuery = encodeURIComponent(`${building.name}, ${building.address}`)
   const searchQuery = encodeURIComponent(`${copy.name} Singapore architecture`)
   return (
     <div className="detail-content">

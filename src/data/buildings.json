@@ -153,7 +153,7 @@
       "architectCredit": "DP Architects (historic authorship and current project phase require detailed differentiation)",
       "buildingType": "mixed_use",
       "completionYear": null,
-      "address": "5001 Beach Road, Singapore 199588",
+      "address": "800 Beach Road, Singapore 199979",
       "coordinates": [
         103.865,
         1.30272
@@ -163,7 +163,12 @@
       "officialSource": "https://www.dpa.com.sg/projects/golden-mile-complex/",
       "photo": null,
       "publicAccess": "unverified",
-      "editorialStatus": "needs_review"
+      "editorialStatus": "needs_review",
+      "historicAddress": "5001 Beach Road, Singapore 199588",
+      "addressSource": "https://www.ura.gov.sg/conservation/find-a-building/conservation-portal/gmc-00001/",
+      "aliases": [
+        "The Golden Mile"
+      ]
     },
     {
       "id": "SGM-0098",
@@ -350,7 +355,11 @@
       "yearSource": "https://www.tangeweb.com/works/works_no-69/",
       "photo": null,
       "publicAccess": "unverified",
-      "editorialStatus": "needs_review"
+      "editorialStatus": "needs_review",
+      "aliases": [
+        "OUB Centre"
+      ],
+      "aliasSource": "https://www.onerafflesplace.com.sg/orp-tower-one.html"
     },
     {
       "id": "SGM-0093",

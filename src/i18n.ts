@@ -81,7 +81,7 @@ export const translations: Record<Locale, Translation> = {
     googleSearch: 'Google Search',
     imageSearch: 'Image Search',
     sources: 'Sources',
-    officialProject: 'Architect’s official project',
+    officialProject: 'Official source',
     coordinateSource: 'Coordinate source',
     types: {
       civic_cultural: 'Civic & cultural',
@@ -135,7 +135,7 @@ export const translations: Record<Locale, Translation> = {
     googleSearch: 'Google検索',
     imageSearch: '画像検索',
     sources: '出典',
-    officialProject: '設計者公式プロジェクト',
+    officialProject: '公式情報',
     coordinateSource: '座標情報',
     types: {
       civic_cultural: '文化・公共',

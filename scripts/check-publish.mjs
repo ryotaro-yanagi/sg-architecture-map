@@ -11,9 +11,16 @@ const assert = (condition, message) => {
 assert(data.status === 'test-data-only', 'Dataset must remain marked test-data-only.')
 assert(Array.isArray(data.buildings) && data.buildings.length >= 7, 'Prototype must preserve the original seven or more buildings.')
 
+const ids = new Set()
 for (const building of data.buildings ?? []) {
   const label = building.id || '(missing id)'
-  assert(Array.isArray(building.coordinates) && building.coordinates.length === 2, `${label}: coordinates are missing.`)
+  assert(!ids.has(building.id), `${label}: duplicate id.`)
+  ids.add(building.id)
+  if (building.aliases !== undefined) {
+    assert(Array.isArray(building.aliases) && building.aliases.every((alias) => typeof alias === 'string' && alias.trim()), `${label}: invalid aliases.`)
+  }
+  assert(Array.isArray(building.coordinates) && building.coordinates.length === 2 && building.coordinates.every(Number.isFinite), `${label}: coordinates are missing or invalid.`)
+  assert(building.coordinates[0] >= 103.6 && building.coordinates[0] <= 104.1 && building.coordinates[1] >= 1.15 && building.coordinates[1] <= 1.50, `${label}: outside Singapore bounds or wrong coordinate order.`)
   assert(building.coordinatePrecision?.includes('approximate'), `${label}: coordinate precision must remain approximate.`)
   assert(/^https:\/\//.test(building.coordinateSource ?? ''), `${label}: coordinate source must be an HTTPS URL.`)
   assert(/^https:\/\//.test(building.officialSource ?? ''), `${label}: official source must be an HTTPS URL.`)
