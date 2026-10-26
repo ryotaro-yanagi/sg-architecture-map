@@ -129,7 +129,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
 .sheet-expanded { position: absolute; inset: 0; overflow-y: auto; scroll-padding-top: 24px; opacity: 0; pointer-events: none; transition: opacity 180ms ease-out 70ms; }
 .bottom-surface.detail .sheet-compact { opacity: 0; pointer-events: none; }
 .bottom-surface.detail .sheet-expanded { opacity: 1; pointer-events: auto; }
-.preview-card { position: relative; width: 100%; padding: 18px 18px 0; background: transparent; border: 0; border-radius: 0; box-shadow: none; }
+.preview-card { position: relative; width: 100%; padding: 16px 16px 0; background: transparent; border: 0; border-radius: 0; box-shadow: none; }
 .close-preview { position: absolute; top: 10px; right: 10px; }
 .eyebrow { margin: 0 0 8px; color: var(--accent); font-size: var(--vs-meta-size); font-weight: 500; line-height: var(--vs-meta-line); letter-spacing: 0; text-transform: uppercase; }
 .preview-meta { display: flex; justify-content: space-between; align-items: baseline; gap: 18px; padding-right: 52px; }
@@ -175,7 +175,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
 .notice { position: absolute; z-index: 30; left: 50%; bottom: max(24px, env(safe-area-inset-bottom)); transform: translateX(-50%); width: max-content; max-width: calc(100% - 28px); padding: 12px 16px; color: #fff; background: #282724; border-radius: 5px; box-shadow: none; font-size: 14px; line-height: 20px; animation: rise .2s ease-out; }
 
 @media (max-width: 719px) {
-  .bottom-surface.preview { animation: sheet-enter 360ms cubic-bezier(.22,1,.36,1); }
 }
 
 @keyframes sheet-enter { from { transform: translateY(calc(100% + 24px)); } }
