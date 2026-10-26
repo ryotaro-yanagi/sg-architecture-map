@@ -1272,6 +1272,37 @@
       "scopeGroups": [
         "Kenzo Tange"
       ]
+    },
+    {
+      "id": "SGM-0140",
+      "name": "UOB Plaza One",
+      "aliases": [
+        "UOB Plaza 1",
+        "UOB (United Overseas Bank) Plaza"
+      ],
+      "architects": [
+        "Kenzo Tange Associates"
+      ],
+      "architectCredit": "Kenzo Tange (original tower)",
+      "buildingType": "office",
+      "completionYear": 1995,
+      "yearSource": "https://www.tangeweb.com/works/works_no-77/",
+      "address": "80 Raffles Place, Singapore 048624",
+      "coordinates": [
+        103.85021,
+        1.28548
+      ],
+      "coordinatePrecision": "tower_footprint_representative_point_approximate",
+      "coordinateSource": "https://mapcarta.com/W335167827",
+      "officialSource": "https://www.tangeweb.com/works/works_no-77/",
+      "addressSource": "https://www.uob.sg/online-branch/locate-us.page",
+      "coordinateReviewNote": "Represents UOB Plaza One, the Kenzo Tange-designed tower, not the entire UOB Plaza campus or Plaza Two.",
+      "photo": null,
+      "publicAccess": "unverified",
+      "editorialStatus": "needs_review",
+      "scopeGroups": [
+        "Kenzo Tange"
+      ]
     }
   ]
 }
