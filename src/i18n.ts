@@ -176,6 +176,12 @@ const buildingCopy: Record<Locale, Record<string, BuildingCopy>> = {
     'SGM-0096': { name: 'SkyVille @ Dawson', architectCredit: 'WOHA' },
     'SGM-0097': { name: 'Enabling Village', architectCredit: 'WOHA' },
     'SGM-0126': { name: 'Mediacorp Campus', architectCredit: 'Maki & Associates · DP Architects' },
+    'SGM-0005': { name: 'One Punggol', architectCredit: 'DP Architects' },
+    'SGM-0009': { name: 'Paya Lebar Quarter', architectCredit: 'DP Architects' },
+    'SGM-0066': { name: 'Singapore Chinese Cultural Centre', architectCredit: 'DP Architects' },
+    'SGM-0056': { name: 'The Fullerton Bay Hotel', architectCredit: 'DP Architects' },
+    'SGM-0122': { name: 'Bishan Public Library', architectCredit: 'LOOK Architects' },
+    'SGM-0115': { name: 'National Design Centre', architectCredit: 'SCDA Architects' },
   },
   ja: {
     'dpa-esplanade': { name: 'Esplanade – Theatres on the Bay', architectCredit: 'DP Architects、Michael Wilford & Partners（英国）による協働' },
@@ -201,6 +207,12 @@ const buildingCopy: Record<Locale, Record<string, BuildingCopy>> = {
     'SGM-0096': { name: 'SkyVille @ Dawson', architectCredit: 'WOHA' },
     'SGM-0097': { name: 'Enabling Village', architectCredit: 'WOHA' },
     'SGM-0126': { name: 'Mediacorp Campus', architectCredit: '槇総合計画事務所 · DP Architects' },
+    'SGM-0005': { name: 'One Punggol', architectCredit: 'DP Architects' },
+    'SGM-0009': { name: 'Paya Lebar Quarter', architectCredit: 'DP Architects' },
+    'SGM-0066': { name: 'Singapore Chinese Cultural Centre', architectCredit: 'DP Architects' },
+    'SGM-0056': { name: 'The Fullerton Bay Hotel', architectCredit: 'DP Architects' },
+    'SGM-0122': { name: 'Bishan Public Library', architectCredit: 'LOOK Architects' },
+    'SGM-0115': { name: 'National Design Centre', architectCredit: 'SCDA Architects' },
   },
 }
 

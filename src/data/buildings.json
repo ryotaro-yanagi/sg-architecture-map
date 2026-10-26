@@ -589,6 +589,167 @@
       "photo": null,
       "publicAccess": "unverified",
       "editorialStatus": "needs_review"
+    },
+    {
+      "id": "SGM-0005",
+      "name": "One Punggol",
+      "architects": [
+        "DP Architects"
+      ],
+      "architectCredit": "DP Architects",
+      "buildingType": "community",
+      "completionYear": null,
+      "address": "1 Punggol Drive, Singapore 828629",
+      "coordinates": [
+        103.9051,
+        1.40877
+      ],
+      "coordinatePrecision": "building_footprint_representative_point_approximate",
+      "coordinateSource": "https://mapcarta.com/W301736966",
+      "officialSource": "https://www.dpa.com.sg/projects/one-punggol/",
+      "addressSource": "https://www.pa.gov.sg/our-network/one-punggol/contact-us/",
+      "photo": null,
+      "publicAccess": "unverified",
+      "editorialStatus": "needs_review"
+    },
+    {
+      "id": "SGM-0009",
+      "name": "Paya Lebar Quarter",
+      "architects": [
+        "DP Architects"
+      ],
+      "architectCredit": "DP Architects",
+      "buildingType": "mixed_use",
+      "completionYear": null,
+      "address": "10 Paya Lebar Road (PLQ Mall), Singapore 409057",
+      "coordinates": [
+        103.89287,
+        1.31753
+      ],
+      "coordinatePrecision": "mall_building_site_anchor_approximate",
+      "coordinateSource": "https://mapcarta.com/W463063314",
+      "officialSource": "https://www.dpa.com.sg/projects/paya-lebar-quarter/",
+      "aliases": [
+        "PLQ",
+        "PLQ Mall"
+      ],
+      "architectProjectAddress": "20 Paya Lebar Road (DP Architects)",
+      "addressSource": "https://shaw.sg/theatre/location/shaw-theatres-paya-lebar-quarter",
+      "coordinateReviewNote": "The marker is anchored to the PLQ Mall building, one part of a multi-plot mixed-use development. It is not an office-tower entrance or a centroid for the entire development.",
+      "photo": null,
+      "publicAccess": "unverified",
+      "editorialStatus": "needs_review"
+    },
+    {
+      "id": "SGM-0066",
+      "name": "Singapore Chinese Cultural Centre",
+      "architects": [
+        "DP Architects"
+      ],
+      "architectCredit": "DP Architects",
+      "buildingType": "civic_cultural",
+      "completionYear": null,
+      "address": "1 Straits Boulevard, Singapore 018906",
+      "coordinates": [
+        103.84952,
+        1.27583
+      ],
+      "coordinatePrecision": "building_footprint_representative_point_approximate",
+      "coordinateSource": "https://mapcarta.com/35533320",
+      "officialSource": "https://www.dpa.com.sg/projects/singapore-chinese-cultural-centre/",
+      "aliases": [
+        "SCCC"
+      ],
+      "addressSource": "https://singaporeccc.org.sg/visit/",
+      "openingYear": 2017,
+      "yearNote": "Centre opened in May 2017; opening date is not confirmed completion date.",
+      "photo": null,
+      "publicAccess": "unverified",
+      "editorialStatus": "needs_review"
+    },
+    {
+      "id": "SGM-0056",
+      "name": "The Fullerton Bay Hotel",
+      "architects": [
+        "DP Architects"
+      ],
+      "architectCredit": "DP Architects",
+      "buildingType": "hospitality",
+      "completionYear": null,
+      "address": "80 Collyer Quay, Singapore 049326",
+      "coordinates": [
+        103.85339,
+        1.28334
+      ],
+      "coordinatePrecision": "hotel_poi_representative_point_approximate",
+      "coordinateSource": "https://mapcarta.com/32599962",
+      "officialSource": "https://www.dpa.com.sg/projects/the-fullerton-bay-hotel/",
+      "addressSource": "https://www.fullertonhotels.com/fullerton-bay-hotel-singapore/contact-us",
+      "architectProjectAddress": "1 Fullerton Road (DP Architects page)",
+      "openingYear": 2010,
+      "yearNote": "Operator confirms 2010 opening; display current hotel address rather than the different architect project address.",
+      "photo": null,
+      "publicAccess": "unverified",
+      "editorialStatus": "needs_review"
+    },
+    {
+      "id": "SGM-0122",
+      "name": "Bishan Public Library",
+      "architects": [
+        "LOOK Architects"
+      ],
+      "architectCredit": "LOOK Architects",
+      "buildingType": "civic_cultural",
+      "completionYear": null,
+      "address": "5 Bishan Place, Singapore 579841",
+      "coordinates": [
+        103.84885,
+        1.34995
+      ],
+      "coordinatePrecision": "library_poi_representative_point_approximate",
+      "coordinateSource": "https://mapcarta.com/N9457437924",
+      "officialSource": "https://pda.designsingapore.org/award-recipients/2007/bishan-community-library/",
+      "aliases": [
+        "Bishan Community Library"
+      ],
+      "openingYear": 2006,
+      "pdaAwardYear": 2007,
+      "pdaAwardDiscipline": "Architecture",
+      "pdaAwardSource": "https://pda.designsingapore.org/award-recipients/2007/bishan-community-library/",
+      "yearNote": "2006 opening and 2007 award are not completion-year evidence.",
+      "photo": null,
+      "publicAccess": "unverified",
+      "editorialStatus": "needs_review"
+    },
+    {
+      "id": "SGM-0115",
+      "name": "National Design Centre",
+      "architects": [
+        "SCDA Architects"
+      ],
+      "architectCredit": "SCDA Architects",
+      "buildingType": "civic_cultural",
+      "completionYear": null,
+      "address": "111 Middle Road, Singapore 188969",
+      "coordinates": [
+        103.85353,
+        1.29878
+      ],
+      "coordinatePrecision": "arts_centre_poi_representative_point_approximate",
+      "coordinateSource": "https://mapcarta.com/N3390536563",
+      "officialSource": "https://pda.designsingapore.org/award-recipients/2016/national-design-centre/",
+      "aliases": [
+        "NDC"
+      ],
+      "openingYear": 2014,
+      "pdaAwardYear": 2016,
+      "pdaAwardDiscipline": "Interior Design",
+      "pdaAwardSource": "https://pda.designsingapore.org/award-recipients/2016/national-design-centre/",
+      "addressSource": "https://designsingapore.org/contact-us/",
+      "yearNote": "2016 P*DA is Interior Design, not Architecture. 2014 is opening year.",
+      "photo": null,
+      "publicAccess": "unverified",
+      "editorialStatus": "needs_review"
     }
   ]
 }
