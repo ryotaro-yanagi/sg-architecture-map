@@ -459,6 +459,9 @@ function App() {
     map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-left')
 
     map.on('load', async () => {
+      // Apply geographic styling before asynchronous marker SVG decoding.
+      // Otherwise Liberty's original buildings and linework can briefly appear.
+      applyMapPalette(map, productionMapPalette)
       const [normalPin, selectedPin] = await Promise.all([
         loadSvgMarker(createBuildingPinSvg(28, 31, 1.5, 13)),
         loadSvgMarker(createBuildingPinSvg(52, 56, 2, 24)),
