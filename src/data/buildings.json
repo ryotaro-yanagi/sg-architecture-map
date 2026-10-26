@@ -1303,6 +1303,33 @@
       "scopeGroups": [
         "Kenzo Tange"
       ]
+    },
+    {
+      "id": "SGM-0141",
+      "name": "Crescent and Pioneer Halls (NTU)",
+      "aliases": [
+        "Residential Hall at Nanyang Drive",
+        "CresPion Halls"
+      ],
+      "architects": [
+        "Toyo Ito & Associates",
+        "RSP Architects Planners & Engineers"
+      ],
+      "architectCredit": "Toyo Ito & Associates · RSP Architects",
+      "buildingType": "residential",
+      "completionYear": 2014,
+      "yearSource": "https://www.toyo-ito.co.jp/WWW/Project_Descript/2010-/2010-p_12/2010-p_12_en.html",
+      "address": "Nanyang Crescent, Nanyang Technological University, Singapore",
+      "coordinates": [
+        103.68795,
+        1.34649
+      ],
+      "coordinatePrecision": "campus_representative_point_approximate",
+      "coordinateSource": "https://mapcarta.com/W500300130",
+      "officialSource": "https://www.toyo-ito.co.jp/WWW/Project_Descript/2010-/2010-p_12/2010-p_12_en.html",
+      "photo": null,
+      "publicAccess": "unverified",
+      "editorialStatus": "needs_review"
     }
   ]
 }

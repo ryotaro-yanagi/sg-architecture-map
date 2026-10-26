@@ -220,6 +220,7 @@ const buildingCopy: Record<Locale, Record<string, BuildingCopy>> = {
     'SGM-0139': { name: 'HANA', architectCredit: 'Kerry Hill Architects' },
     'SGM-0094': { name: 'NTU North Spine', architectCredit: 'Kenzo Tange (original NTI academic complex)' },
     'SGM-0140': { name: 'UOB Plaza One', architectCredit: 'Kenzo Tange (original tower)' },
+    'SGM-0141': { name: 'Crescent and Pioneer Halls (NTU)', architectCredit: 'Toyo Ito & Associates · RSP Architects' },
   },
   ja: {
     'dpa-esplanade': { name: 'Esplanade – Theatres on the Bay', architectCredit: 'DP Architects、Michael Wilford & Partners（英国）による協働' },
@@ -269,6 +270,7 @@ const buildingCopy: Record<Locale, Record<string, BuildingCopy>> = {
     'SGM-0139': { name: 'HANA', architectCredit: 'Kerry Hill Architects' },
     'SGM-0094': { name: 'NTU North Spine', architectCredit: '丹下健三（旧NTI学術施設）' },
     'SGM-0140': { name: 'UOB Plaza One', architectCredit: '丹下健三（竣工時のタワー）' },
+    'SGM-0141': { name: 'Crescent and Pioneer Halls (NTU)', architectCredit: '伊東豊雄建築設計事務所 · RSP Architects' },
   },
 }
 
