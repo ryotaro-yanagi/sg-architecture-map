@@ -228,10 +228,10 @@ const applyMapPalette = (map: MapLibreMap, palette: MapPalette) => {
   setPaint(map, 'water', 'fill-color', palette.water)
   ;['waterway_tunnel', 'waterway_river', 'waterway_other'].forEach((id) => setPaint(map, id, 'line-color', palette.waterway))
   // Liberty's 2D buildings otherwise stop at z14 when 3D buildings begin.
-  if (map.getLayer('building')) map.setLayerZoomRange('building', markerSwitchZoom, 24)
+  if (map.getLayer('building')) map.setLayerZoomRange('building', 14, 24)
   setPaint(map, 'building', 'fill-color', palette.building)
   // Reveal building footprints gradually as the viewer zooms into street scale.
-  setPaint(map, 'building', 'fill-opacity', ['interpolate', ['linear'], ['zoom'], markerSwitchZoom, 0, 15, 1])
+  setPaint(map, 'building', 'fill-opacity', ['interpolate', ['linear'], ['zoom'], 14, 0, 15.5, 1])
   setPaint(map, 'building', 'fill-outline-color', palette.building)
   if (map.getLayer('building-3d')) map.setLayoutProperty('building-3d', 'visibility', 'none')
 
