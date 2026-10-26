@@ -166,7 +166,7 @@ type MapPalette = {
 
 const productionMapPalette: MapPalette = {
   background: '#fbf8f3', residential: '#eae0d0', park: '#e1ebb0', wood: '#d3e4d5', grass: '#e6eee6',
-  water: '#b0d0d6', waterway: '#83b8c4', roadMinor: '#ffffff', roadMajor: '#ffffff', roadMotorway: '#fafafa', roadCasing: '#cbd0cd',
+  water: '#b0d0d6', waterway: '#83b8c4', roadMinor: '#E7E5E0', roadMajor: '#DADCD9', roadMotorway: '#C8D0D2', roadCasing: '#cbd0cd',
   building: '#ded3be', buildingOutline: '#c8ccca', label: '#414744', labelSecondary: '#6b726e', labelWater: '#3f7885', labelHalo: '#ffffff', poiOpacity: .58,
 }
 const markerFill = '#35946b'
