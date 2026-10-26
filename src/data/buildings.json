@@ -5,7 +5,7 @@
   "status": "test-data-only",
   "notes": [
     "This is a prototype seed, not a complete or authoritative architecture catalogue.",
-    "Building attribution and addresses are drawn from official DP Architects project pages; coordinates are approximate representative points from OpenStreetMap-derived data / Wikidata as credited per record.",
+    "Building attribution and addresses are based on linked architect, institution and property sources. Coordinates are approximate representative points from the per-record cited mapping sources.",
     "Coordinates have not been independently verified on-site or via Singapore OneMap. Check before public editorial release.",
     "Do not assume a building is publicly accessible just because a point is shown.",
     "Photo fields are intentionally null; do not scrape third-party photographs.",
@@ -46,15 +46,25 @@
       "completionYear": null,
       "address": "3 Temasek Boulevard, Singapore 038983",
       "coordinates": [
-        103.85919,
-        1.29427
+        103.85875,
+        1.29605
       ],
-      "coordinatePrecision": "area_representative_point_approximate",
-      "coordinateSource": "https://mapcarta.com/N2511052703",
+      "coordinatePrecision": "mall_building_representative_point_approximate",
+      "coordinateSource": "https://mapcarta.com/W492114727",
       "officialSource": "https://www.dpa.com.sg/projects/suntec-city/",
       "photo": null,
       "publicAccess": "unverified",
-      "editorialStatus": "needs_review"
+      "editorialStatus": "needs_review",
+      "previousCoordinateReference": {
+        "coordinates": [
+          103.85919,
+          1.29427
+        ],
+        "precision": "area_representative_point_approximate",
+        "source": "https://mapcarta.com/N2511052703",
+        "description": "OSM neighbourhood node for the wider Suntec City area, not a specific building"
+      },
+      "coordinateReviewNote": "Uses Suntec City Mall building geometry at 3 Temasek Boulevard as a representative marker for the wider mixed-use development; it does not pinpoint the entire multi-tower complex or a specific entrance."
     },
     {
       "id": "dpa-orchard-central",
@@ -333,7 +343,8 @@
       "pdaAwardSource": "https://pda.designsingapore.org/award-recipients/2009/republic-polytechnic/",
       "photo": null,
       "publicAccess": "unverified",
-      "editorialStatus": "needs_review"
+      "editorialStatus": "needs_review",
+      "coordinateReviewNote": "OSM site polygon represents the Republic Polytechnic campus rather than an individual block or visitor entrance."
     },
     {
       "id": "SGM-0092",
@@ -359,7 +370,8 @@
       "aliases": [
         "OUB Centre"
       ],
-      "aliasSource": "https://www.onerafflesplace.com.sg/orp-tower-one.html"
+      "aliasSource": "https://www.onerafflesplace.com.sg/orp-tower-one.html",
+      "coordinateReviewNote": "Wikidata coordinate identifies the One Raffles Place development; Tower One's individual building footprint has not been isolated. Do not treat as verified tower-specific location."
     },
     {
       "id": "SGM-0093",
@@ -522,7 +534,8 @@
       "pdaAwardSource": "https://pda.designsingapore.org/award-recipients/2016/skyville-at-dawson/",
       "photo": null,
       "publicAccess": "unverified",
-      "editorialStatus": "needs_review"
+      "editorialStatus": "needs_review",
+      "coordinateReviewNote": "SkyVille @ Dawson comprises multiple housing blocks (85–88 Dawson Road); marker is a site-level representative point, not a specific residential block or public entrance."
     },
     {
       "id": "SGM-0097",
