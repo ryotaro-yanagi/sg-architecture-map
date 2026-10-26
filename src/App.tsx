@@ -257,6 +257,10 @@ const applyMapPalette = (map: MapLibreMap, palette: MapPalette) => {
       map.setLayoutProperty(id, 'visibility', 'none')
       return
     }
+    // Keep walking routes legible but reduce the fine white dash texture.
+    if (layer.type === 'line' && /^(road|bridge|tunnel)_path_pedestrian$/.test(id)) {
+      setPaint(map, id, 'line-opacity', 0.45)
+    }
     if (layer.type === 'line' && /^(road|bridge|tunnel)_/.test(id)) {
       const color = id.includes('casing')
         ? palette.roadCasing
