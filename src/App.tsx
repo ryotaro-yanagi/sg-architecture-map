@@ -232,6 +232,11 @@ const applyMapPalette = (map: MapLibreMap, palette: MapPalette) => {
   if (map.getLayer('waterway_line_label')) map.setLayoutProperty('waterway_line_label', 'text-size', 12)
   if (map.getLayer('water_name_line_label')) map.setLayoutProperty('water_name_line_label', 'text-size', 13)
 
+  // City labels orient the overview; district and architecture labels lead closer in.
+  ;['label_city', 'label_city_capital'].forEach((id) => {
+    if (map.getLayer(id)) map.setLayerZoomRange(id, 3, 12.5)
+  })
+
   // Let district names lead until the viewer zooms closer to street level.
   if (map.getLayer('highway-name-minor')) map.setLayerZoomRange('highway-name-minor', 15.5, 24)
 
