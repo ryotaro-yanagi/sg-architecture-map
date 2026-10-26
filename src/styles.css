@@ -36,6 +36,40 @@
 }
 
 .app { font-family: var(--font-ui); }
+/* Temporary N1b comparison. Keep the existing Light tokens unchanged. */
+.app.night-preview {
+  color-scheme: dark;
+  --paper: #1B211F;
+  --paper-strong: #28302D;
+  --ink: #F2F4F0;
+  --muted: #B3BDB7;
+  --line: #48534D;
+  --accent: #EDF1EA;
+  --focus-ring: #8FBCFF;
+  --system-soft: #333C38;
+  --interaction-hover: #35403A;
+  --interaction-pressed: #45534A;
+}
+.appearance-preview-trigger {
+  min-height: var(--control-min);
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: var(--paper-strong);
+  color: var(--ink);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+.appearance-preview-trigger:hover { background: var(--interaction-hover); }
+.appearance-preview-trigger:active { background: var(--interaction-pressed); }
+.app.night-preview .primary-button { color: #1B211F; }
+.app.night-preview .data-note { color: #B3BDB7; text-shadow: none; }
+.app.night-preview .notice { color: #F2F4F0; background: #333C38; }
+.app.night-preview .maplibregl-ctrl-group { background: var(--paper-strong); }
+.app.night-preview .maplibregl-ctrl-group button { background-color: var(--paper-strong); }
+.app.night-preview .maplibregl-ctrl-group button:hover { background-color: var(--interaction-hover); }
+
 
 .app.locale-ja {
   --heading-leading: 1.26;
