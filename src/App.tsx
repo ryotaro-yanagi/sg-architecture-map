@@ -308,7 +308,7 @@ const applyProductionMapTheme = (map: MapLibreMap) => {
 
 const applyProductionTypeScaleToMap = (map: MapLibreMap, locale: Locale) => {
   if (!map.getLayer('building-labels')) return
-  map.setLayoutProperty('building-labels', 'text-size', locale === 'en' ? 12 : 10)
+  map.setLayoutProperty('building-labels', 'text-size', locale === 'en' ? 13 : 11)
 }
 
 const readRestoredMapState = (): RestoredMapState | null => {
@@ -499,7 +499,8 @@ function App() {
       })
       map.addLayer({
         id: 'building-labels', type: 'symbol', source: 'buildings', minzoom: markerSwitchZoom,
-        layout: { 'text-field': ['get', 'name'], 'text-size': 12, 'text-anchor': 'left', 'text-justify': 'auto', 'text-variable-anchor-offset': ['left', [1.55, -1.3], 'right', [-1.55, -1.3]], 'text-max-width': 12 },
+        filter: ['==', ['get', 'selected'], false],
+        layout: { 'text-field': ['get', 'name'], 'text-size': 13, 'text-anchor': 'left', 'text-justify': 'auto', 'text-variable-anchor-offset': ['left', [1.55, -1.3], 'right', [-1.55, -1.3]], 'text-max-width': 12 },
         paint: { 'text-color': '#282724', 'text-halo-color': '#f8f4ec', 'text-halo-width': 1 },
       })
       applyProductionMapTheme(map)
