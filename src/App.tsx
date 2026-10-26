@@ -247,27 +247,17 @@ const setPaint = (map: MapLibreMap, layerId: string, property: string, value: un
   if (map.getLayer(layerId)) map.setPaintProperty(layerId, property as never, value as never)
 }
 
-const applyMapPalette = (map: MapLibreMap, palette: MapPalette) => {
-  setPaint(map, 'background', 'background-color', palette.background)
+const applyMapStructure = (map: MapLibreMap) => {
   // Liberty's residential land-use polygons reappear below z12 and resemble building footprints.
   // Keep the broad overview neutral; actual buildings remain controlled by z14–15.5.
   if (map.getLayer('landuse_residential')) map.setLayoutProperty('landuse_residential', 'visibility', 'none')
-  setPaint(map, 'park', 'fill-color', palette.park)
-  setPaint(map, 'park_outline', 'line-color', palette.park)
   // Local administrative boundaries are visual clutter in the architecture map.
   // Preserve national and disputed boundaries as separate semantic layers.
   if (map.getLayer('boundary_3')) map.setLayoutProperty('boundary_3', 'visibility', 'none')
-  setPaint(map, 'landcover_wood', 'fill-color', palette.wood)
-  setPaint(map, 'landcover_grass', 'fill-color', palette.grass)
-  ;['landuse_pitch', 'landuse_track', 'landuse_cemetery', 'landuse_hospital', 'landuse_school'].forEach((id) => setPaint(map, id, 'fill-color', palette.grass))
-  setPaint(map, 'water', 'fill-color', palette.water)
-  ;['waterway_tunnel', 'waterway_river', 'waterway_other'].forEach((id) => setPaint(map, id, 'line-color', palette.waterway))
   // Liberty's 2D buildings otherwise stop at z14 when 3D buildings begin.
   if (map.getLayer('building')) map.setLayerZoomRange('building', 14, 24)
-  setPaint(map, 'building', 'fill-color', palette.building)
   // Reveal building footprints gradually as the viewer zooms into street scale.
   setPaint(map, 'building', 'fill-opacity', ['interpolate', ['linear'], ['zoom'], 14, 0, 15.5, 1])
-  setPaint(map, 'building', 'fill-outline-color', palette.building)
   if (map.getLayer('building-3d')) map.setLayoutProperty('building-3d', 'visibility', 'none')
 
   // Keep line-based water labels subordinate to district names.
@@ -316,6 +306,23 @@ const applyMapPalette = (map: MapLibreMap, palette: MapPalette) => {
       setPaint(map, id, 'line-opacity', 0.45)
     }
     if (id === 'tunnel_path_pedestrian') setPaint(map, id, 'line-opacity', 0.45)
+  })
+}
+
+const applyMapColors = (map: MapLibreMap, palette: MapPalette) => {
+  setPaint(map, 'background', 'background-color', palette.background)
+  setPaint(map, 'park', 'fill-color', palette.park)
+  setPaint(map, 'park_outline', 'line-color', palette.park)
+  setPaint(map, 'landcover_wood', 'fill-color', palette.wood)
+  setPaint(map, 'landcover_grass', 'fill-color', palette.grass)
+  ;['landuse_pitch', 'landuse_track', 'landuse_cemetery', 'landuse_hospital', 'landuse_school'].forEach((id) => setPaint(map, id, 'fill-color', palette.grass))
+  setPaint(map, 'water', 'fill-color', palette.water)
+  ;['waterway_tunnel', 'waterway_river', 'waterway_other'].forEach((id) => setPaint(map, id, 'line-color', palette.waterway))
+  setPaint(map, 'building', 'fill-color', palette.building)
+  setPaint(map, 'building', 'fill-outline-color', palette.building)
+  const layers = map.getStyle().layers ?? []
+  layers.forEach((layer) => {
+    const id = layer.id
     if (layer.type === 'line' && /^(road|bridge|tunnel)_/.test(id)) {
       const color = id.includes('casing')
         ? palette.roadCasing
@@ -339,9 +346,8 @@ const applyMapPalette = (map: MapLibreMap, palette: MapPalette) => {
     }
   })
 }
-
 const applyProductionMapTheme = (map: MapLibreMap) => {
-  applyMapPalette(map, productionMapPalette)
+  applyMapColors(map, productionMapPalette)
   if (!map.getLayer('building-labels')) return
   map.setPaintProperty('building-labels', 'text-color', markerStroke)
   map.setPaintProperty('building-labels', 'text-halo-color', productionMapPalette.labelHalo)
@@ -516,7 +522,8 @@ function App() {
     map.on('load', async () => {
       // Apply geographic styling before asynchronous marker SVG decoding.
       // Otherwise Liberty's original buildings and linework can briefly appear.
-      applyMapPalette(map, productionMapPalette)
+      applyMapStructure(map)
+      applyMapColors(map, productionMapPalette)
       const [normalPin, selectedPin] = await Promise.all([
         loadSvgMarker(createBuildingPinSvg(28, 31, 1.5, 13)),
         loadSvgMarker(createBuildingPinSvg(52, 56, 2, 24)),
