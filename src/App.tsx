@@ -70,8 +70,8 @@ const getMapCategory = (buildingType: string): MapCategory | null =>
 
 const buildings = data.buildings as unknown as Building[]
 // Main island, Sentosa and Pulau Ubin; peripheral southern islands are outside this overview.
-const overviewBounds: [[number, number], [number, number]] = [[103.60, 1.19], [104.11, 1.48]]
-const overviewPadding = { top: 64, right: 24, bottom: 112, left: 24 }
+const overviewBounds: [[number, number], [number, number]] = [[103.62, 1.205], [104.085, 1.465]]
+const overviewPadding = { top: 54, right: 18, bottom: 100, left: 18 }
 const mapStateKey = 'sgm-language-map-state'
 
 const prefersReducedMotion = () =>
