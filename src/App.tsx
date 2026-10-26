@@ -216,7 +216,9 @@ const setPaint = (map: MapLibreMap, layerId: string, property: string, value: un
 
 const applyMapPalette = (map: MapLibreMap, palette: MapPalette) => {
   setPaint(map, 'background', 'background-color', palette.background)
-  setPaint(map, 'landuse_residential', 'fill-color', palette.residential)
+  // Liberty's residential land-use polygons reappear below z12 and resemble building footprints.
+  // Keep the broad overview neutral; actual buildings remain controlled by z14–15.5.
+  if (map.getLayer('landuse_residential')) map.setLayoutProperty('landuse_residential', 'visibility', 'none')
   setPaint(map, 'park', 'fill-color', palette.park)
   setPaint(map, 'park_outline', 'line-color', palette.park)
   // Local administrative boundaries are visual clutter in the architecture map.
