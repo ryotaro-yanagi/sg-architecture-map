@@ -32,6 +32,8 @@
   --vs-divider-width: 1px;
 }
 
+.app { font-family: var(--font-ui); }
+
 .app.locale-ja {
   --font-ui: 'LINE Seed JP', 'Hiragino Sans', 'Yu Gothic', 'YuGothic', 'Noto Sans JP', system-ui, -apple-system, sans-serif;
   --font-display: var(--font-ui);
