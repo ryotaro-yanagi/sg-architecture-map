@@ -257,6 +257,10 @@ const applyMapPalette = (map: MapLibreMap, palette: MapPalette) => {
       map.setLayoutProperty(id, 'visibility', 'none')
       return
     }
+    // Reduce rail cross-hatching while retaining the continuous rail geometry.
+    if (layer.type === 'line' && /^(road|bridge|tunnel)_(major|transit)_rail_hatching$/.test(id)) {
+      setPaint(map, id, 'line-opacity', 0.4)
+    }
     // Keep walking routes legible but reduce the fine white dash texture.
     if (layer.type === 'line' && /^(road|bridge|tunnel)_path_pedestrian$/.test(id)) {
       setPaint(map, id, 'line-opacity', 0.45)
