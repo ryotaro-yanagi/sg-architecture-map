@@ -201,6 +201,12 @@ const productionMapPalette: MapPalette = {
   water: '#b0d0d6', waterway: '#83b8c4', roadMinor: '#E7E5E0', roadMajor: '#DADCD9', roadMotorway: '#C8D0D2', roadCasing: '#cbd0cd',
   building: '#ded3be', buildingOutline: '#c8ccca', label: '#414744', labelSecondary: '#6b726e', labelWater: '#3f7885', labelHalo: '#ffffff', poiOpacity: .58,
 }
+// N1b is a comparison palette, not an adopted production Dark theme.
+const nightPreviewPalette: MapPalette = {
+  background: '#202824', residential: '#202824', park: '#3E5645', wood: '#293D32', grass: '#2B3930',
+  water: '#365562', waterway: '#477687', roadMinor: '#4B5950', roadMajor: '#617267', roadMotorway: '#78867C', roadCasing: '#202824',
+  building: '#596157', buildingOutline: '#596157', label: '#D4DDD6', labelSecondary: '#A6B3AA', labelWater: '#85B6C7', labelHalo: '#202824', poiOpacity: .58,
+}
 const markerFill = '#35946b'
 const markerStroke = '#242424'
 const markerOutline = '#ffffff'
@@ -346,11 +352,22 @@ const applyMapColors = (map: MapLibreMap, palette: MapPalette) => {
     }
   })
 }
-const applyProductionMapTheme = (map: MapLibreMap) => {
-  applyMapColors(map, productionMapPalette)
+const applyProductionMapTheme = (map: MapLibreMap, nightPreview = false) => {
+  const palette = nightPreview ? nightPreviewPalette : productionMapPalette
+  applyMapColors(map, palette)
+  // Dark-only overrides for Liberty layers that still have light original paints.
+  if (nightPreview) {
+    ;['aeroway_fill', 'landcover_sand', 'landcover_ice'].forEach(id => setPaint(map, id, 'fill-color', '#35413C'))
+    ;['aeroway_runway', 'aeroway_taxiway'].forEach(id => setPaint(map, id, 'line-color', '#54605B'))
+    ;['boundary_2', 'boundary_disputed'].forEach(id => setPaint(map, id, 'line-color', '#63736A'))
+    ;['road_major_rail', 'road_transit_rail', 'bridge_major_rail', 'bridge_transit_rail', 'tunnel_major_rail', 'tunnel_transit_rail'].forEach(id => setPaint(map, id, 'line-color', '#748079'))
+    ;['road_major_rail_hatching', 'road_transit_rail_hatching', 'bridge_major_rail_hatching', 'bridge_transit_rail_hatching', 'tunnel_major_rail_hatching', 'tunnel_transit_rail_hatching'].forEach(id => setPaint(map, id, 'line-color', '#748079'))
+    setPaint(map, 'landcover_wetland', 'fill-opacity', 0)
+    setPaint(map, 'road_area_pattern', 'fill-opacity', 0)
+  }
   if (!map.getLayer('building-labels')) return
-  map.setPaintProperty('building-labels', 'text-color', markerStroke)
-  map.setPaintProperty('building-labels', 'text-halo-color', productionMapPalette.labelHalo)
+  map.setPaintProperty('building-labels', 'text-color', nightPreview ? '#F2F4F0' : markerStroke)
+  map.setPaintProperty('building-labels', 'text-halo-color', palette.labelHalo)
 }
 
 const applyProductionTypeScaleToMap = (map: MapLibreMap, locale: Locale) => {
@@ -431,6 +448,7 @@ function App() {
   const [mapBearing, setMapBearing] = useState(restoredState?.bearing ?? 0)
   const [notice, setNotice] = useState<string | null>(null)
   const [languageOpen, setLanguageOpen] = useState(false)
+  const [nightPreview, setNightPreview] = useState(false)
   const [weather, setWeather] = useState<WeatherState>({ temperature: null, condition: null })
 
   const selected = buildings.find((building) => building.id === selectedId) ?? null
@@ -480,6 +498,12 @@ function App() {
     const timer = window.setInterval(loadWeather, 5 * 60 * 1000)
     return () => { cancelled = true; window.clearInterval(timer) }
   }, [])
+
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map || !map.isStyleLoaded()) return
+    applyProductionMapTheme(map, nightPreview)
+  }, [nightPreview])
 
   useEffect(() => {
     document.documentElement.lang = locale
@@ -767,7 +791,7 @@ function App() {
   }
 
   return (
-    <main className={`app locale-${locale} state-${surfaceState} ${expanded ? 'details-expanded' : ''}`}>
+    <main className={`app locale-${locale} state-${surfaceState} ${expanded ? 'details-expanded' : ''} ${nightPreview ? 'night-preview' : ''}`}>
       <div ref={mapContainer} className="map" role="region" aria-label={t.mapLabel} />
 
       <header className="topbar">
@@ -781,6 +805,7 @@ function App() {
               {weather.temperature !== null && <span>{weather.temperature}°</span>}
             </a>
           </WeatherBoundary>
+          <button type="button" className="appearance-preview-trigger" aria-label={nightPreview ? 'Switch to light map preview' : 'Switch to night map preview'} aria-pressed={nightPreview} onClick={() => setNightPreview(value => !value)}>{nightPreview ? 'Day' : 'Night'}</button>
           <div className="language-menu">
             <button type="button" className="language-trigger" aria-label={t.languageSwitcher} aria-haspopup="menu" aria-expanded={languageOpen} onClick={() => setLanguageOpen((open) => !open)}>
               <span>{locale.toUpperCase()}</span>
