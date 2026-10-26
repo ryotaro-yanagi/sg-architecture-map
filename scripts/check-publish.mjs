@@ -15,6 +15,15 @@ const ids = new Set()
 for (const building of data.buildings ?? []) {
   const label = building.id || '(missing id)'
   assert(!ids.has(building.id), `${label}: duplicate id.`)
+  for (const [field, value] of [['completionYear', building.completionYear], ['openingYear', building.openingYear], ['pdaAwardYear', building.pdaAwardYear]]) {
+    if (value !== undefined && value !== null)
+      assert(Number.isInteger(value) && value >= 1800 && value <= 2100, `${label}: invalid ${field}.`)
+  }
+  if (building.openingYear != null)
+    assert(/^https:\/\//.test(building.openingSource ?? building.yearSource ?? building.officialSource ?? ''), `${label}: opening year has no linked source.`)
+  if (building.pdaAwardYear != null)
+    assert(/^https:\/\//.test(building.pdaAwardSource ?? ''), `${label}: award year must have an award record.`)
+
   ids.add(building.id)
   if (building.aliases !== undefined) {
     assert(Array.isArray(building.aliases) && building.aliases.every((alias) => typeof alias === 'string' && alias.trim()), `${label}: invalid aliases.`)

@@ -33,6 +33,12 @@ export type Translation = {
   photoPlaceholder: string
   design: string
   completion: string
+  completed: string
+  opened: string
+  openedHospitality: string
+  openedEducation: string
+  awardInterior: string
+  pdaSourceLabel: string
   type: string
   address: string
   unverified: string
@@ -74,6 +80,12 @@ export const translations: Record<Locale, Translation> = {
     photoPlaceholder: 'A photo may be added after verification',
     design: 'Design',
     completion: 'Completion',
+    completed: 'Completed',
+    opened: 'Opened',
+    openedHospitality: 'Opened',
+    openedEducation: 'Opened',
+    awardInterior: 'Interior Design',
+    pdaSourceLabel: 'P*DA award record',
     type: 'Type',
     address: 'Address',
     unverified: 'Unverified',
@@ -128,6 +140,12 @@ export const translations: Record<Locale, Translation> = {
     photoPlaceholder: '写真は検証後に掲載予定',
     design: '設計',
     completion: '竣工',
+    completed: '竣工',
+    opened: '開館',
+    openedHospitality: '開業',
+    openedEducation: '供用開始',
+    awardInterior: 'インテリアデザイン',
+    pdaSourceLabel: 'P*DA受賞記録',
     type: '用途',
     address: '所在地',
     unverified: '未確認',

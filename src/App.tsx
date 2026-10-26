@@ -21,6 +21,10 @@ type Building = {
   architects: string[]
   buildingType: string
   completionYear: number | null
+  openingYear?: number
+  pdaAwardYear?: number
+  pdaAwardDiscipline?: string
+  pdaAwardSource?: string
   address: string
   coordinates: Coordinates
   coordinatePrecision: string
@@ -28,6 +32,33 @@ type Building = {
   officialSource: string
   photo: null
   publicAccess: string
+}
+
+// Keep building completion, public opening, and design awards as distinct events.
+const getOpeningLabel = (building: Building, t: Translation): string =>
+  building.buildingType === 'hospitality' ? t.openedHospitality
+    : building.buildingType === 'education' ? t.openedEducation
+      : t.opened
+
+const yearEvent = (label: string, year: number, locale: Locale): string =>
+  locale === 'ja' ? `${year}年${label}` : `${label} ${year}`
+
+const getBuildingYearDetails = (building: Building, locale: Locale, t: Translation) => {
+  const primary = building.completionYear != null
+    ? yearEvent(t.completed, building.completionYear, locale)
+    : building.openingYear != null
+      ? yearEvent(getOpeningLabel(building, t), building.openingYear, locale)
+      : null
+  const details: string[] = []
+  if (building.completionYear != null) details.push(yearEvent(t.completed, building.completionYear, locale))
+  if (building.openingYear != null && building.openingYear !== building.completionYear)
+    details.push(yearEvent(getOpeningLabel(building, t), building.openingYear, locale))
+  if (building.pdaAwardYear != null) {
+    const award = `P*DA ${locale === 'ja' ? `${building.pdaAwardYear}年` : building.pdaAwardYear}`
+    const discipline = building.pdaAwardDiscipline === 'Interior Design' ? ` (${t.awardInterior})` : ''
+    details.push(award + discipline)
+  }
+  return { primary, details }
 }
 
 type RestoredMapState = {
@@ -821,6 +852,7 @@ type LocalizedProps = { building: Building; locale: Locale; t: Translation }
 
 function PreviewCard({ building, locale, t, onDetails, onClose }: LocalizedProps & { onDetails: () => void; onClose: () => void }) {
   const copy = getBuildingCopy(locale, building.id, building.name)
+  const { primary: primaryYear } = getBuildingYearDetails(building, locale, t)
   return (
     <section className="preview-card" aria-label={t.previewLabel(copy.name)}>
       <button className="icon-button close-preview" onClick={onClose} aria-label={t.clearSelection}><X aria-hidden="true" size={20} weight="regular" /></button>
@@ -831,7 +863,7 @@ function PreviewCard({ building, locale, t, onDetails, onClose }: LocalizedProps
       <h1>{copy.name}</h1>
       <p className="architects">
         <span>{copy.architectCredit}</span>
-        {building.completionYear && <span className="preview-year">{building.completionYear}</span>}
+        {primaryYear && <span className="preview-year">{primaryYear}</span>}
       </p>
       <button className="preview-details" onClick={onDetails}>
         <span>{t.viewDetails}</span>
@@ -845,6 +877,7 @@ function DetailContent({ building, locale, t, onClose, backRef }: LocalizedProps
   const copy = getBuildingCopy(locale, building.id, building.name)
   const mapsQuery = encodeURIComponent(`${building.name}, ${building.address}`)
   const searchQuery = encodeURIComponent(`${copy.name} Singapore architecture`)
+  const { details: yearDetails } = getBuildingYearDetails(building, locale, t)
   return (
     <div className="detail-content">
       <div className="detail-heading">
@@ -859,7 +892,7 @@ function DetailContent({ building, locale, t, onClose, backRef }: LocalizedProps
         <p className="eyebrow">{t.types[building.buildingType]}</p>
         <h1>{copy.name}</h1>
         <p className="detail-architects">{copy.architectCredit}</p>
-        <p className="detail-year">{building.completionYear ?? t.unverified}</p>
+        {yearDetails.length > 0 && <p className="detail-year">{yearDetails.join(' · ')}</p>}
       </header>
 
       <section className="detail-location" aria-label={t.address}>
@@ -885,6 +918,7 @@ function DetailContent({ building, locale, t, onClose, backRef }: LocalizedProps
       <div className="sources">
         <p>{t.sources}</p>
         <a href={building.officialSource} target="_blank" rel="noreferrer">{t.officialProject} <ArrowSquareOut aria-hidden="true" size={16} weight="regular" /></a>
+        {building.pdaAwardSource && <a href={building.pdaAwardSource} target="_blank" rel="noreferrer">{t.pdaSourceLabel} <ArrowSquareOut aria-hidden="true" size={16} weight="regular" /></a>}
         <a href={building.coordinateSource} target="_blank" rel="noreferrer">{t.coordinateSource} <ArrowSquareOut aria-hidden="true" size={16} weight="regular" /></a>
       </div>
     </div>

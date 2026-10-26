@@ -317,7 +317,9 @@
       "pdaAwardSource": "https://pda.designsingapore.org/award-recipients/2015/national-gallery-singapore/",
       "photo": null,
       "publicAccess": "unverified",
-      "editorialStatus": "needs_review"
+      "editorialStatus": "needs_review",
+      "openingYear": 2015,
+      "openingSource": "https://www.nationalgallery.sg/sg/en/gallery-turns-10/milestones.html"
     },
     {
       "id": "SGM-0089",
@@ -435,7 +437,7 @@
       ],
       "architectCredit": "Toyo Ito & Associates · RSP Architects",
       "buildingType": "education",
-      "completionYear": 2023,
+      "completionYear": 2022,
       "address": "91 Nanyang Avenue, Singapore 639956",
       "coordinates": [
         103.68373,
@@ -444,7 +446,7 @@
       "coordinatePrecision": "campus_map_estimate_approximate",
       "coordinateSource": "https://isresearchworkshop.comp.nus.edu.sg/images/ntu_map.jpg",
       "officialSource": "https://www.ntu.edu.sg/life-at-ntu/museum/campus-art-trail",
-      "yearSource": "https://www.ntu.edu.sg/research/research-at-ntu/detail/gaia-the-largest-wooden-building-in-asia-launched",
+      "yearSource": "https://rsp.design/project/wee-cho-yaw-plaza/",
       "namingSource": "https://www.ntu.edu.sg/business/about-us/history-and-milestones",
       "photo": null,
       "publicAccess": "unverified",
@@ -459,8 +461,10 @@
         "description": "Academic Building South bus stop 27251 — not the architecture's representative point."
       },
       "coordinateReviewNote": "Approximate building-side representative point inferred from NUS workshop campus diagram relative to the separately geolocated Academic Building South bus stop. Not surveyed or verified against NTU/OneMap building footprint; review on a georeferenced map.",
-      "yearNote": "2023 is NTU's building launch/opening year. RSP's project page lists construction completion in Q4 2022; do not equate the two.",
-      "yearSourceAdditional": "https://rsp.design/project/wee-cho-yaw-plaza/"
+      "yearNote": "RSP lists completion in Q4 2022; NTU officially launched Gaia on 17 May 2023. The years describe different events.",
+      "yearSourceAdditional": "https://rsp.design/project/wee-cho-yaw-plaza/",
+      "openingYear": 2023,
+      "openingSource": "https://www.ntu.edu.sg/research/research-at-ntu/detail/gaia-the-largest-wooden-building-in-asia-launched"
     },
     {
       "id": "SGM-0091",
