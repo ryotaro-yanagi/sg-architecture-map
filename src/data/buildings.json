@@ -1330,6 +1330,39 @@
       "photo": null,
       "publicAccess": "unverified",
       "editorialStatus": "needs_review"
+    },
+    {
+      "id": "SGM-0142",
+      "name": "The Beaufort Sentosa (now Sofitel Singapore Sentosa)",
+      "aliases": [
+        "The Beaufort",
+        "The Beaufort Singapore",
+        "Sofitel Singapore Sentosa Resort & Spa",
+        "Sofitel Singapore Sentosa"
+      ],
+      "architects": [
+        "Kerry Hill Architects"
+      ],
+      "architectCredit": "Kerry Hill Architects (original Beaufort resort)",
+      "buildingType": "hospitality",
+      "completionYear": 1991,
+      "yearSource": "https://www.jrp-group.com/sg/en/projects/detail/523/",
+      "address": "2 Bukit Manis Road, Sentosa, Singapore 099891",
+      "coordinates": [
+        103.827905,
+        1.24517
+      ],
+      "coordinatePrecision": "hotel_operator_gps_approximate",
+      "coordinateSource": "https://all.accor.com/hotel/9474/index.en.shtml",
+      "officialSource": "https://sofitel.accor.com/en/hotels/9474.html",
+      "historicalSource": "https://www.sentosa.com.sg/-/media/sentosa/campaign-jubilee/thesentosastory2023.pdf",
+      "yearNote": "The original Beaufort was completed in 1991 and rebranded Sofitel in 2015. The operating resort includes later alterations and historic colonial buildings not attributable in full to Kerry Hill.",
+      "photo": null,
+      "publicAccess": "unverified",
+      "editorialStatus": "needs_review",
+      "scopeGroups": [
+        "Kerry Hill Architects"
+      ]
     }
   ]
 }
