@@ -22,6 +22,7 @@ for (const building of data.buildings ?? []) {
   assert(Array.isArray(building.coordinates) && building.coordinates.length === 2 && building.coordinates.every(Number.isFinite), `${label}: coordinates are missing or invalid.`)
   assert(building.coordinates[0] >= 103.6 && building.coordinates[0] <= 104.1 && building.coordinates[1] >= 1.15 && building.coordinates[1] <= 1.50, `${label}: outside Singapore bounds or wrong coordinate order.`)
   assert(building.coordinatePrecision?.includes('approximate'), `${label}: coordinate precision must remain approximate.`)
+  assert(!/bus_stop/.test(building.coordinatePrecision ?? ''), `${label}: architecture pin must not use a nearby bus stop as its representative point.`)
   assert(/^https:\/\//.test(building.coordinateSource ?? ''), `${label}: coordinate source must be an HTTPS URL.`)
   assert(/^https:\/\//.test(building.officialSource ?? ''), `${label}: official source must be an HTTPS URL.`)
   assert(building.photo === null, `${label}: a photo was added without the publication review workflow.`)

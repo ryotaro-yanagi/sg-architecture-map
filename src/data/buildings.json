@@ -426,17 +426,29 @@
       "completionYear": 2023,
       "address": "91 Nanyang Avenue, Singapore 639956",
       "coordinates": [
-        103.68366,
-        1.34114
+        103.68373,
+        1.34175
       ],
-      "coordinatePrecision": "nearby_bus_stop_approximate",
-      "coordinateSource": "https://mapcarta.com/N410467804",
+      "coordinatePrecision": "campus_map_estimate_approximate",
+      "coordinateSource": "https://isresearchworkshop.comp.nus.edu.sg/images/ntu_map.jpg",
       "officialSource": "https://www.ntu.edu.sg/life-at-ntu/museum/campus-art-trail",
       "yearSource": "https://www.ntu.edu.sg/research/research-at-ntu/detail/gaia-the-largest-wooden-building-in-asia-launched",
       "namingSource": "https://www.ntu.edu.sg/business/about-us/history-and-milestones",
       "photo": null,
       "publicAccess": "unverified",
-      "editorialStatus": "needs_review"
+      "editorialStatus": "needs_review",
+      "previousCoordinateReference": {
+        "coordinates": [
+          103.68366,
+          1.34114
+        ],
+        "precision": "nearby_bus_stop_approximate",
+        "source": "https://mapcarta.com/N410467804",
+        "description": "Academic Building South bus stop 27251 — not the architecture's representative point."
+      },
+      "coordinateReviewNote": "Approximate building-side representative point inferred from NUS workshop campus diagram relative to the separately geolocated Academic Building South bus stop. Not surveyed or verified against NTU/OneMap building footprint; review on a georeferenced map.",
+      "yearNote": "2023 is NTU's building launch/opening year. RSP's project page lists construction completion in Q4 2022; do not equate the two.",
+      "yearSourceAdditional": "https://rsp.design/project/wee-cho-yaw-plaza/"
     },
     {
       "id": "SGM-0091",
