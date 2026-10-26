@@ -161,6 +161,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
 .back-button svg { width: 16px; height: 16px; flex: 0 0 16px; }
 .record-index { color: var(--muted); font-size: var(--vs-meta-size); line-height: var(--vs-meta-line); letter-spacing: 0; }
 .detail-intro { padding-bottom: 22px; border-bottom: 1px solid var(--line); }
+.detail-intro .eyebrow { font-family: var(--font-attribution); font-weight: 400; }
 .detail-content h1 { padding: 0; font-size: 30px; }
 .detail-architects { margin: 12px 0 0; color: var(--ink); font-family: var(--font-attribution); font-size: var(--vs-body-size); font-weight: 400; line-height: var(--vs-body-line); }
 .detail-year { margin: 4px 0 0; color: var(--ink); font-family: var(--font-attribution); font-size: var(--vs-meta-size); line-height: var(--vs-meta-line); }
