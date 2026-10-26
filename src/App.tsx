@@ -76,6 +76,7 @@ const mapCategoryByType = {
   civic_cultural: 'culture_civic',
   community: 'culture_civic',
   sports: 'culture_civic',
+  infrastructure: 'culture_civic',
   mixed_use: 'mixed_use',
   retail: 'commercial',
   office: 'commercial',
