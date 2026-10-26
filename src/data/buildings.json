@@ -1363,6 +1363,40 @@
       "scopeGroups": [
         "Kerry Hill Architects"
       ]
+    },
+    {
+      "id": "SGM-0143",
+      "name": "Genesis Building",
+      "aliases": [
+        "Genesis",
+        "The Genesis Building"
+      ],
+      "architects": [
+        "Kerry Hill Architects"
+      ],
+      "architectCredit": "Kerry Hill Architects",
+      "buildingType": "mixed_use",
+      "completionYear": 1997,
+      "yearSource": "https://singaporearchitect.sg/culture/architectural-practice-in-singapore-through-the-last-50-years---consolidation-and-globalisation",
+      "address": "170 Bukit Timah Road, Singapore 229847",
+      "coordinates": [
+        103.8427215,
+        1.3114971
+      ],
+      "coordinatePrecision": "business_address_point_approximate",
+      "coordinateSource": "https://sg.near-place.com/home-success-the-genesis-building-01-29-170-bukit-timah-road-s229847/da",
+      "officialSource": "https://pda.designsingapore.org/award-recipients/2010/kerry-hill/",
+      "architecturalSource": "https://architectureau.com/articles/genesis/",
+      "addressSource": "https://www.cashew.sg/property/genesis-building",
+      "currentBuildingSource": "https://www.estate.sg/genesis-building.html",
+      "coordinateReviewNote": "Approximate business-address coordinate inside the named Genesis Building at 170 Bukit Timah Road; building footprint centre and public interior access not verified.",
+      "yearNote": "1997 completion confirmed by Singapore Architect; historical images and original project are documented by Architecture Australia. The current address and building management are independently confirmed.",
+      "photo": null,
+      "publicAccess": "unverified",
+      "editorialStatus": "needs_review",
+      "scopeGroups": [
+        "Kerry Hill Architects"
+      ]
     }
   ]
 }
