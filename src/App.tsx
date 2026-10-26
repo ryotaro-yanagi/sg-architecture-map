@@ -364,6 +364,16 @@ const applyProductionMapTheme = (map: MapLibreMap, nightPreview = false) => {
     ;['road_major_rail_hatching', 'road_transit_rail_hatching', 'bridge_major_rail_hatching', 'bridge_transit_rail_hatching', 'tunnel_major_rail_hatching', 'tunnel_transit_rail_hatching'].forEach(id => setPaint(map, id, 'line-color', '#748079'))
     setPaint(map, 'landcover_wetland', 'fill-opacity', 0)
     setPaint(map, 'road_area_pattern', 'fill-opacity', 0)
+  } else {
+    setPaint(map, 'aeroway_fill', 'fill-color', 'rgba(229, 228, 224, 1)')
+    setPaint(map, 'landcover_sand', 'fill-color', 'rgba(247, 239, 195, 1)')
+    setPaint(map, 'landcover_ice', 'fill-color', 'rgba(224, 236, 236, 1)')
+    ;['aeroway_runway', 'aeroway_taxiway'].forEach(id => setPaint(map, id, 'line-color', '#f0ede9'))
+    ;['boundary_2', 'boundary_disputed'].forEach(id => setPaint(map, id, 'line-color', 'hsl(248,1%,41%)'))
+    ;['road_major_rail', 'road_transit_rail', 'bridge_major_rail', 'bridge_transit_rail', 'tunnel_major_rail', 'tunnel_transit_rail',
+      'road_major_rail_hatching', 'road_transit_rail_hatching', 'bridge_major_rail_hatching', 'bridge_transit_rail_hatching', 'tunnel_major_rail_hatching', 'tunnel_transit_rail_hatching'].forEach(id => setPaint(map, id, 'line-color', '#bbb'))
+    setPaint(map, 'landcover_wetland', 'fill-opacity', 0.8)
+    setPaint(map, 'road_area_pattern', 'fill-opacity', 1)
   }
   if (!map.getLayer('building-labels')) return
   map.setPaintProperty('building-labels', 'text-color', nightPreview ? '#F2F4F0' : markerStroke)
