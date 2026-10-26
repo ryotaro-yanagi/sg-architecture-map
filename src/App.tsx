@@ -55,12 +55,12 @@ const mapCategoryByType = {
 type MapCategory = typeof mapCategoryByType[keyof typeof mapCategoryByType]
 
 const mapCategoryStyle: Record<MapCategory, { color: string; icon: string }> = {
-  culture_civic: { color: '#AA9BC6', icon: 'landmark' },
-  mixed_use: { color: '#EF9E76', icon: 'layers' },
-  commercial: { color: '#83ADC8', icon: 'building' },
-  education: { color: '#E9CC76', icon: 'graduation-cap' },
-  hospitality: { color: '#E9A2A0', icon: 'bed' },
-  residential: { color: '#78AF92', icon: 'house' },
+  culture_civic: { color: '#A987FF', icon: 'landmark' },
+  mixed_use: { color: '#FF8D4F', icon: 'layers' },
+  commercial: { color: '#46A5FF', icon: 'building' },
+  education: { color: '#FFC341', icon: 'graduation-cap' },
+  hospitality: { color: '#FD6360', icon: 'bed' },
+  residential: { color: '#5DD089', icon: 'house' },
 }
 
 const getMapCategory = (buildingType: string): MapCategory | null =>
@@ -174,6 +174,7 @@ const markerOutline = '#ffffff'
 const markerPixelRatio = 3
 const markerSwitchZoom = 13.5
 const markerIcon = '#ffffff'
+const categoryMarkerIcon = '#212121'
 const phosphorBuildingFillPath = 'M232,224H208V32h8a8,8,0,0,0,0-16H40a8,8,0,0,0,0,16h8V224H24a8,8,0,0,0,0,16H232a8,8,0,0,0,0-16ZM88,56h24a8,8,0,0,1,0,16H88a8,8,0,0,1,0-16Zm0,40h24a8,8,0,0,1,0,16H88a8,8,0,0,1,0-16Zm-8,48a8,8,0,0,1,8-8h24a8,8,0,0,1,0,16H88A8,8,0,0,1,80,144Zm72,80H104V184h48Zm16-72H144a8,8,0,0,1,0-16h24a8,8,0,0,1,0,16Zm0-40H144a8,8,0,0,1,0-16h24a8,8,0,0,1,0,16Zm0-40H144a8,8,0,0,1,0-16h24a8,8,0,0,1,0,16Z'
 // Restrained line pictograms keep category meaning readable without changing pin shape.
 const categoryIconPaths: Record<MapCategory, string> = {
@@ -198,7 +199,7 @@ const createBuildingPinSvg = (width: number, height: number, strokeWidth: number
   ].join(' ')
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${width * markerPixelRatio}" height="${height * markerPixelRatio}" viewBox="0 0 ${width} ${height}">
     <path d="${path}" fill="${fill}" stroke="${markerOutline}" stroke-width="${strokeWidth}" stroke-linejoin="round"/>
-    ${category ? `<svg x="${iconX}" y="${iconY}" width="${iconSize}" height="${iconSize}" viewBox="0 0 15 15" fill="${markerIcon}"><path d="${categoryIconPaths[category]}"/></svg>` : `<svg x="${iconX}" y="${iconY}" width="${iconSize}" height="${iconSize}" viewBox="0 0 256 256" fill="${markerIcon}"><path d="${phosphorBuildingFillPath}"/></svg>`}
+    ${category ? `<svg x="${iconX}" y="${iconY}" width="${iconSize}" height="${iconSize}" viewBox="0 0 15 15" fill="${categoryMarkerIcon}"><path d="${categoryIconPaths[category]}"/></svg>` : `<svg x="${iconX}" y="${iconY}" width="${iconSize}" height="${iconSize}" viewBox="0 0 256 256" fill="${markerIcon}"><path d="${phosphorBuildingFillPath}"/></svg>`}
   </svg>`
 }
 const loadSvgMarker = (svg: string) => new Promise<HTMLImageElement>((resolve, reject) => {
