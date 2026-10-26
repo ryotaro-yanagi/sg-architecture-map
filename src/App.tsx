@@ -224,7 +224,7 @@ const applyMapPalette = (map: MapLibreMap, palette: MapPalette) => {
   setPaint(map, 'water', 'fill-color', palette.water)
   ;['waterway_tunnel', 'waterway_river', 'waterway_other'].forEach((id) => setPaint(map, id, 'line-color', palette.waterway))
   // Liberty's 2D buildings otherwise stop at z14 when 3D buildings begin.
-  if (map.getLayer('building')) map.setLayerZoomRange('building', 13, 24)
+  if (map.getLayer('building')) map.setLayerZoomRange('building', markerSwitchZoom, 24)
   setPaint(map, 'building', 'fill-color', palette.building)
   setPaint(map, 'building', 'fill-outline-color', palette.building)
   if (map.getLayer('building-3d')) map.setLayoutProperty('building-3d', 'visibility', 'none')
@@ -306,7 +306,7 @@ const applyProductionMapTheme = (map: MapLibreMap) => {
 
 const applyProductionTypeScaleToMap = (map: MapLibreMap, locale: Locale) => {
   if (!map.getLayer('building-labels')) return
-  map.setLayoutProperty('building-labels', 'text-size', locale === 'en' ? 14 : 11)
+  map.setLayoutProperty('building-labels', 'text-size', locale === 'en' ? 12 : 10)
 }
 
 const readRestoredMapState = (): RestoredMapState | null => {
@@ -496,9 +496,9 @@ function App() {
         paint: { 'icon-opacity': 0 },
       })
       map.addLayer({
-        id: 'building-labels', type: 'symbol', source: 'buildings', minzoom: 13.2,
-        layout: { 'text-field': ['get', 'name'], 'text-size': 14, 'text-anchor': 'left', 'text-justify': 'auto', 'text-variable-anchor-offset': ['left', [2.3, -1.8], 'right', [-2.3, -1.8]], 'text-max-width': 12 },
-        paint: { 'text-color': '#282724', 'text-halo-color': '#f8f4ec', 'text-halo-width': 2 },
+        id: 'building-labels', type: 'symbol', source: 'buildings', minzoom: markerSwitchZoom,
+        layout: { 'text-field': ['get', 'name'], 'text-size': 12, 'text-anchor': 'left', 'text-justify': 'auto', 'text-variable-anchor-offset': ['left', [1.55, -1.3], 'right', [-1.55, -1.3]], 'text-max-width': 12 },
+        paint: { 'text-color': '#282724', 'text-halo-color': '#f8f4ec', 'text-halo-width': 1 },
       })
       applyProductionMapTheme(map)
       applyProductionTypeScaleToMap(map, locale)
