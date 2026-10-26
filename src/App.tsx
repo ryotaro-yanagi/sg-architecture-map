@@ -219,6 +219,9 @@ const applyMapPalette = (map: MapLibreMap, palette: MapPalette) => {
   setPaint(map, 'landuse_residential', 'fill-color', palette.residential)
   setPaint(map, 'park', 'fill-color', palette.park)
   setPaint(map, 'park_outline', 'line-color', palette.park)
+  // Local administrative boundaries are visual clutter in the architecture map.
+  // Preserve national and disputed boundaries as separate semantic layers.
+  if (map.getLayer('boundary_3')) map.setLayoutProperty('boundary_3', 'visibility', 'none')
   setPaint(map, 'landcover_wood', 'fill-color', palette.wood)
   setPaint(map, 'landcover_grass', 'fill-color', palette.grass)
   ;['landuse_pitch', 'landuse_track', 'landuse_cemetery', 'landuse_hospital', 'landuse_school'].forEach((id) => setPaint(map, id, 'fill-color', palette.grass))
