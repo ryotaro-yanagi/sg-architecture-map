@@ -154,20 +154,20 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
 .primary-button svg { width: 20px; height: 20px; }
 
 .detail-content { width: 100%; max-width: 68ch; min-height: 100%; margin-inline: auto; padding: 18px 18px max(30px, calc(env(safe-area-inset-bottom) + 20px)); overflow-wrap: anywhere; }
-.detail-heading { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+.detail-heading { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
 .back-button { min-height: var(--control-min); display: inline-flex; align-items: center; gap: 8px; margin-left: -8px; padding: 0 8px; border: 0; border-radius: 0; background: transparent; color: var(--ink); font-size: 15px; font-weight: 500; line-height: 20px; cursor: pointer; }
 .back-button:hover { background: var(--interaction-hover); }
 .back-button:active { background: var(--interaction-pressed); }
 .back-button svg { width: 16px; height: 16px; flex: 0 0 16px; }
 .record-index { color: var(--muted); font-size: var(--vs-meta-size); line-height: var(--vs-meta-line); letter-spacing: 0; }
-.detail-intro { padding-bottom: 20px; border-bottom: 1px solid var(--line); }
+.detail-intro { padding-bottom: 22px; border-bottom: 1px solid var(--line); }
 .detail-content h1 { padding: 0; font-size: 30px; }
 .detail-architects { margin: 12px 0 0; color: var(--ink); font-family: var(--font-attribution); font-size: var(--vs-body-size); font-weight: 400; line-height: var(--vs-body-line); }
 .detail-year { margin: 4px 0 0; color: var(--ink); font-family: var(--font-attribution); font-size: var(--vs-meta-size); line-height: var(--vs-meta-line); }
-.detail-location { padding: 16px 0 18px; border-bottom: 1px solid var(--line); }
+.detail-location { padding: 18px 0 20px; border-bottom: 1px solid var(--line); }
 .detail-location p { margin: 0; color: var(--ink); font-size: var(--vs-body-size); line-height: var(--vs-body-line); }
 .detail-location small { display: block; margin-top: 8px; color: var(--muted); font-family: var(--font-attribution); font-size: 12px; line-height: 18px; }
-.actions { display: grid; grid-template-columns: 1fr; gap: 0; margin-top: 18px; border-top: 1px solid var(--line); }
+.actions { display: grid; grid-template-columns: 1fr; gap: 0; margin-top: 0; border-top: 0; }
 .actions a { min-height: 48px; display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 0; color: var(--ink); border: 0; border-bottom: 1px solid var(--line); border-radius: 0; font-size: 15px; font-weight: 500; line-height: 20px; text-decoration: none; }
 .actions a:hover { background: var(--interaction-hover); }
 .actions a:active { background: var(--interaction-pressed); }
