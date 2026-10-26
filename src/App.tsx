@@ -266,10 +266,12 @@ const applyMapPalette = (map: MapLibreMap, palette: MapPalette) => {
     if (layer.type === 'line' && /^(road|bridge|tunnel)_(major|transit)_rail_hatching$/.test(id)) {
       setPaint(map, id, 'line-opacity', 0.4)
     }
-    // Keep walking routes legible but reduce the fine white dash texture.
-    if (layer.type === 'line' && /^(road|bridge|tunnel)_path_pedestrian$/.test(id)) {
+    // Surface walking routes use quiet solid lines; tunnel dashes still indicate underground passages.
+    if (layer.type === 'line' && /^(road|bridge)_path_pedestrian$/.test(id)) {
+      setPaint(map, id, 'line-dasharray', [1, 0])
       setPaint(map, id, 'line-opacity', 0.45)
     }
+    if (id === 'tunnel_path_pedestrian') setPaint(map, id, 'line-opacity', 0.45)
     if (layer.type === 'line' && /^(road|bridge|tunnel)_/.test(id)) {
       const color = id.includes('casing')
         ? palette.roadCasing
