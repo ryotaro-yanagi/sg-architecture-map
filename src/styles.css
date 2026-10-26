@@ -30,14 +30,14 @@
   --vs-section-space: 16px;
   --vs-text-space: 6px;
   --vs-divider-width: 1px;
-  --heading-leading: 1.14;
+  --heading-leading: 1.20;
   --heading-tracking: -0.01em;
 }
 
 .app { font-family: var(--font-ui); }
 
 .app.locale-ja {
-  --heading-leading: 1.2;
+  --heading-leading: 1.26;
   --heading-tracking: 0em;
   --font-ui: 'LINE Seed JP', 'Hiragino Sans', 'Yu Gothic', 'YuGothic', 'Noto Sans JP', system-ui, -apple-system, sans-serif;
   --font-display: var(--font-ui);
