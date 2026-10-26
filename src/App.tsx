@@ -226,6 +226,8 @@ const applyMapPalette = (map: MapLibreMap, palette: MapPalette) => {
   // Liberty's 2D buildings otherwise stop at z14 when 3D buildings begin.
   if (map.getLayer('building')) map.setLayerZoomRange('building', markerSwitchZoom, 24)
   setPaint(map, 'building', 'fill-color', palette.building)
+  // Reveal building footprints gradually as the viewer zooms into street scale.
+  setPaint(map, 'building', 'fill-opacity', ['interpolate', ['linear'], ['zoom'], markerSwitchZoom, 0, 15, 1])
   setPaint(map, 'building', 'fill-outline-color', palette.building)
   if (map.getLayer('building-3d')) map.setLayoutProperty('building-3d', 'visibility', 'none')
 
