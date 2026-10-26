@@ -69,8 +69,9 @@ const getMapCategory = (buildingType: string): MapCategory | null =>
     : null
 
 const buildings = data.buildings as unknown as Building[]
-const defaultCenter: Coordinates = [103.879, 1.315]
-const defaultZoom = 11.35
+// Main island, Sentosa and Pulau Ubin; peripheral southern islands are outside this overview.
+const overviewBounds: [[number, number], [number, number]] = [[103.60, 1.19], [104.11, 1.48]]
+const overviewPadding = { top: 64, right: 24, bottom: 112, left: 24 }
 const mapStateKey = 'sgm-language-map-state'
 
 const prefersReducedMotion = () =>
@@ -438,8 +439,9 @@ function App() {
     const map = new maplibregl.Map({
       container: mapContainer.current,
       style: 'https://tiles.openfreemap.org/styles/liberty',
-      center: restoredState?.center ?? defaultCenter,
-      zoom: restoredState?.zoom ?? defaultZoom,
+      ...(restoredState
+        ? { center: restoredState.center, zoom: restoredState.zoom }
+        : { bounds: overviewBounds, fitBoundsOptions: { padding: overviewPadding, maxZoom: 12 } }),
       bearing: restoredState?.bearing ?? 0,
       pitch: 0,
       minPitch: 0,
@@ -655,7 +657,7 @@ function App() {
     setSelectedId(null)
     setExpanded(false)
     setSearchOpen(false)
-    mapRef.current?.flyTo({ center: defaultCenter, zoom: defaultZoom, bearing: 0, pitch: 0, duration: motionDuration(700) })
+    mapRef.current?.fitBounds(overviewBounds, { padding: overviewPadding, maxZoom: 12, bearing: 0, pitch: 0, duration: motionDuration(700) })
   }
 
   const switchLanguage = () => {
