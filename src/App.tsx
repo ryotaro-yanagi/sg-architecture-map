@@ -86,8 +86,8 @@ const revealBuilding = (map: MapLibreMap | null, coordinates: Coordinates) => {
   const canvas = map.getCanvas()
   const bounds = canvas.getBoundingClientRect()
   const point = map.project(coordinates)
-  const pinHalfWidth = 22
-  const pinHeight = 52
+  const pinHalfWidth = 26
+  const pinHeight = 62
   const margin = 24
   const search = document.querySelector<HTMLElement>('.search-shell')
   const searchBounds = search?.getBoundingClientRect()
@@ -171,7 +171,7 @@ const markerFill = '#35946b'
 const markerStroke = '#242424'
 const markerOutline = '#ffffff'
 const markerPixelRatio = 3
-const markerSwitchZoom = 14.5
+const markerSwitchZoom = 13.5
 const markerIcon = '#ffffff'
 const phosphorBuildingFillPath = 'M232,224H208V32h8a8,8,0,0,0,0-16H40a8,8,0,0,0,0,16h8V224H24a8,8,0,0,0,0,16H232a8,8,0,0,0,0-16ZM88,56h24a8,8,0,0,1,0,16H88a8,8,0,0,1,0-16Zm0,40h24a8,8,0,0,1,0,16H88a8,8,0,0,1,0-16Zm-8,48a8,8,0,0,1,8-8h24a8,8,0,0,1,0,16H88A8,8,0,0,1,80,144Zm72,80H104V184h48Zm16-72H144a8,8,0,0,1,0-16h24a8,8,0,0,1,0,16Zm0-40H144a8,8,0,0,1,0-16h24a8,8,0,0,1,0,16Zm0-40H144a8,8,0,0,1,0-16h24a8,8,0,0,1,0,16Z'
 // Restrained line pictograms keep category meaning readable without changing pin shape.
@@ -187,7 +187,7 @@ const categoryIconPaths: Record<MapCategory, string> = {
 const createBuildingPinSvg = (width: number, height: number, strokeWidth: number, iconSize: number, fill = markerFill, category: MapCategory | null = null) => {
   const cx = width / 2
   const iconX = (width - iconSize) / 2
-  const iconY = width <= 24 ? 5 : 9
+  const iconY = width <= 28 ? 6 : 11
   const path = [
     `M ${cx} ${height - strokeWidth / 2}`,
     `C ${cx - width * .08} ${height * .89}, ${width * .12} ${height * .67}, ${width * .12} ${height * .42}`,
@@ -454,26 +454,26 @@ function App() {
 
     map.on('load', async () => {
       const [normalPin, selectedPin] = await Promise.all([
-        loadSvgMarker(createBuildingPinSvg(24, 29, 1.5, 11)),
-        loadSvgMarker(createBuildingPinSvg(44, 52, 2, 20)),
+        loadSvgMarker(createBuildingPinSvg(28, 34, 1.5, 13)),
+        loadSvgMarker(createBuildingPinSvg(52, 62, 2, 24)),
       ])
       map.addImage('building-pin-normal', normalPin, { pixelRatio: markerPixelRatio })
       map.addImage('building-pin-selected', selectedPin, { pixelRatio: markerPixelRatio })
       await Promise.all(Object.entries(mapCategoryStyle).map(async ([category, style]) => {
-        const normal = await loadSvgMarker(createBuildingPinSvg(24, 29, 1.5, 11, style.color, category as MapCategory))
+        const normal = await loadSvgMarker(createBuildingPinSvg(28, 34, 1.5, 13, style.color, category as MapCategory))
         map.addImage(`building-pin-normal-${category}`, normal, { pixelRatio: markerPixelRatio })
       }))
       map.addSource('buildings', { type: 'geojson', data: featureCollection(selectedId, locale) })
       map.addLayer({
         id: 'building-hit-targets', type: 'circle', source: 'buildings',
         layout: { 'circle-sort-key': ['case', ['get', 'selected'], 1, 0] },
-        paint: { 'circle-radius': 22, 'circle-opacity': 0 },
+        paint: { 'circle-radius': 26, 'circle-opacity': 0 },
       })
       map.addLayer({
         id: 'building-dots', type: 'circle', source: 'buildings', maxzoom: markerSwitchZoom,
         filter: ['==', ['get', 'selected'], false],
         paint: {
-          'circle-radius': 4,
+          'circle-radius': 5,
           'circle-color': ['coalesce', ['get', 'mapCategoryColor'], markerFill],
           'circle-stroke-color': '#ffffff',
           'circle-stroke-width': 1,
@@ -510,7 +510,7 @@ function App() {
             const point = map.project(building.coordinates)
             return { building, distance: Math.hypot(point.x - event.point.x, point.y - event.point.y) }
           })
-          .filter(({ distance }) => distance <= 22)
+          .filter(({ distance }) => distance <= 26)
           .sort((a, b) => a.distance - b.distance)[0]?.building
         if (nearest) {
           setSelectedId(nearest.id)
@@ -554,8 +554,8 @@ function App() {
     // is filtered out on selection, so this temporary copy fades out in its
     // place while the selected pin responds immediately.
     const element = document.createElement('div')
-    element.style.width = '44px'
-    element.style.height = '52px'
+    element.style.width = '52px'
+    element.style.height = '62px'
     element.style.pointerEvents = 'none'
     element.style.zIndex = '20'
     element.style.isolation = 'isolate'
@@ -568,7 +568,7 @@ function App() {
       image.setAttribute('aria-hidden', 'true')
       image.style.position = 'absolute'
       image.style.bottom = '0'
-      image.style.left = `${(44 - width) / 2}px`
+      image.style.left = `${(52 - width) / 2}px`
       image.style.display = 'block'
       image.style.zIndex = String(zIndex)
       return image
@@ -576,13 +576,13 @@ function App() {
     const category = getMapCategory(building.buildingType)
     const fill = category ? mapCategoryStyle[category].color : markerFill
     const normal = map.getZoom() >= markerSwitchZoom
-      ? createImage(createBuildingPinSvg(24, 29, 1.5, 11, fill, category), 24, 29, 1)
+      ? createImage(createBuildingPinSvg(28, 34, 1.5, 13, fill, category), 28, 34, 1)
       : document.createElement('span')
     if (normal instanceof HTMLSpanElement) {
       normal.style.position = 'absolute'
-      normal.style.width = '8px'
-      normal.style.height = '8px'
-      normal.style.left = '18px'
+      normal.style.width = '10px'
+      normal.style.height = '10px'
+      normal.style.left = '21px'
       normal.style.bottom = '0'
       normal.style.border = '1px solid #ffffff'
       normal.style.borderRadius = '50%'
@@ -590,7 +590,7 @@ function App() {
       normal.style.boxSizing = 'border-box'
       normal.style.zIndex = '1'
     }
-    const selected = createImage(createBuildingPinSvg(44, 52, 2, 20, fill, category), 44, 52, 2)
+    const selected = createImage(createBuildingPinSvg(52, 62, 2, 24, fill, category), 52, 62, 2)
     element.append(normal, selected)
     const marker = new maplibregl.Marker({ element, anchor: 'bottom' })
       .setLngLat(building.coordinates)
