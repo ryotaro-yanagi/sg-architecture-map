@@ -38,6 +38,25 @@ for (const building of data.buildings ?? []) {
   assert(building.publicAccess === 'unverified', `${label}: public access must remain unverified.`)
 }
 
+// The interface needs both EN and JA copy for every published map record.
+const i18nText = await readFile(new URL('../src/i18n.ts', import.meta.url), 'utf8')
+const buildingCopyStart = i18nText.indexOf('const buildingCopy:')
+const copySection = buildingCopyStart >= 0
+  ? i18nText.slice(buildingCopyStart, i18nText.indexOf('export const getLocaleFromPath', buildingCopyStart))
+  : ''
+const enBoundary = copySection.indexOf('  en: {')
+const jaBoundary = copySection.indexOf('  ja: {')
+assert(enBoundary >= 0 && jaBoundary > enBoundary, 'Both localized building copy sections must exist.')
+if (enBoundary >= 0 && jaBoundary > enBoundary) {
+  const enCopy = copySection.slice(enBoundary, jaBoundary)
+  const jaCopy = copySection.slice(jaBoundary)
+  for (const building of data.buildings ?? []) {
+    const key = `'${building.id}':`
+    assert(enCopy.includes(key), `${building.id}: English building copy is missing.`)
+    assert(jaCopy.includes(key), `${building.id}: Japanese building copy is missing.`)
+  }
+}
+
 const sourceFiles = ['../src/App.tsx', '../src/i18n.ts', '../src/main.tsx']
 for (const sourceFile of sourceFiles) {
   const content = await readFile(new URL(sourceFile, import.meta.url), 'utf8')

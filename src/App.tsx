@@ -441,6 +441,11 @@ function App() {
         building.name,
         ...building.architects,
         ...(building.aliases ?? []),
+        ...(building.pdaAwardYear != null ? [
+          'P*DA', 'PDA',
+          `P*DA ${building.pdaAwardYear}`, `PDA ${building.pdaAwardYear}`,
+          "President's Design Award",
+        ] : []),
         en.name, en.architectCredit,
         ja.name, ja.architectCredit,
       ]
