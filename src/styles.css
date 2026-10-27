@@ -181,6 +181,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
 .preview-meta { display: flex; justify-content: space-between; align-items: baseline; gap: 18px; padding-right: 52px; }
 .preview-meta .eyebrow { margin-bottom: 8px; color: var(--muted); }
 .preview-card h1, .detail-content h1 { margin: 0; padding-right: 34px; font: 500 24px/var(--heading-leading) var(--font-display); letter-spacing: var(--heading-tracking); }
+.preview-card h1 { color: var(--ink); }
 .architects { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 16px; margin: 8px 40px 14px 0; color: var(--muted); font-size: var(--vs-meta-size); font-weight: var(--vs-meta-weight); line-height: var(--vs-meta-line); letter-spacing: var(--vs-meta-tracking); }
 .preview-year { white-space: nowrap; }
 .preview-details { width: 100%; min-height: var(--control-min); display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 0; color: var(--ink); background: transparent; border: 0; border-top: 1px solid var(--line); font-size: 15px; font-weight: 500; line-height: 20px; text-align: left; cursor: pointer; }
