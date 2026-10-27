@@ -10,6 +10,14 @@ import { parseWeatherPayloads } from './weather'
 import type { WeatherState } from './weather'
 
 type Coordinates = [number, number]
+type Appearance = 'system' | 'day' | 'night'
+const appearanceKey = 'sgm-appearance'
+const readAppearance = (): Appearance => {
+  try {
+    const value = window.localStorage.getItem(appearanceKey)
+    return value === 'day' || value === 'night' ? value : 'system'
+  } catch { return 'system' }
+}
 const weatherPortalUrl = 'https://www.weather.gov.sg/'
 const weatherTemperatureUrl = 'https://api-open.data.gov.sg/v2/real-time/api/air-temperature'
 const weatherForecastUrl = 'https://api-open.data.gov.sg/v2/real-time/api/twenty-four-hr-forecast'
@@ -519,7 +527,10 @@ function App() {
   const [mapBearing, setMapBearing] = useState(restoredState?.bearing ?? 0)
   const [notice, setNotice] = useState<string | null>(null)
   const [languageOpen, setLanguageOpen] = useState(false)
-  const [nightPreview, setNightPreview] = useState(false)
+  const [appearance, setAppearance] = useState<Appearance>(readAppearance)
+  const [appearanceOpen, setAppearanceOpen] = useState(false)
+  const [systemDark, setSystemDark] = useState(() => window.matchMedia('(prefers-color-scheme: dark)').matches)
+  const nightPreview = appearance === 'night' || (appearance === 'system' && systemDark)
   // Async MapLibre style/image loading must use the latest requested appearance.
   const nightPreviewRef = useRef(nightPreview)
   nightPreviewRef.current = nightPreview
@@ -572,6 +583,19 @@ function App() {
     const timer = window.setInterval(loadWeather, 5 * 60 * 1000)
     return () => { cancelled = true; window.clearInterval(timer) }
   }, [])
+
+  useEffect(() => {
+    const preference = window.matchMedia('(prefers-color-scheme: dark)')
+    const sync = () => setSystemDark(preference.matches)
+    preference.addEventListener('change', sync)
+    return () => preference.removeEventListener('change', sync)
+  }, [])
+
+  const chooseAppearance = (value: Appearance) => {
+    setAppearance(value)
+    setAppearanceOpen(false)
+    try { window.localStorage.setItem(appearanceKey, value) } catch { /* Private browsing can restrict storage. */ }
+  }
 
   useEffect(() => {
     const map = mapRef.current
@@ -884,9 +908,23 @@ function App() {
               {weather.temperature !== null && <span>{weather.temperature}°</span>}
             </a>
           </WeatherBoundary>
-          <button type="button" className="appearance-preview-trigger" aria-label={nightPreview ? 'Switch to light map preview' : 'Switch to night map preview'} aria-pressed={nightPreview} onClick={() => setNightPreview(value => !value)}>{nightPreview ? 'Day' : 'Night'}</button>
+          <div className="appearance-menu">
+            <button type="button" className="appearance-preview-trigger" aria-label={locale === 'ja' ? '外観設定' : 'Appearance'} aria-haspopup="menu" aria-expanded={appearanceOpen} onClick={() => { setAppearanceOpen(open => !open); setLanguageOpen(false) }}>
+              {locale === 'ja' ? '外観' : 'Theme'} <CaretDown aria-hidden="true" size={16} weight="regular" />
+            </button>
+            {appearanceOpen && (
+              <div className="appearance-popover" role="menu" aria-label={locale === 'ja' ? '外観設定' : 'Appearance'}>
+                {(['system', 'day', 'night'] as const).map(value => (
+                  <button key={value} type="button" role="menuitemradio" aria-checked={appearance === value} onClick={() => chooseAppearance(value)}>
+                    <span>{value === 'system' ? (locale === 'ja' ? 'システム' : 'System') : value === 'day' ? (locale === 'ja' ? 'ライト' : 'Day') : (locale === 'ja' ? 'ダーク' : 'Night')}</span>
+                    {appearance === value && <Check aria-hidden="true" size={16} weight="bold" />}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
           <div className="language-menu">
-            <button type="button" className="language-trigger" aria-label={t.languageSwitcher} aria-haspopup="menu" aria-expanded={languageOpen} onClick={() => setLanguageOpen((open) => !open)}>
+            <button type="button" className="language-trigger" aria-label={t.languageSwitcher} aria-haspopup="menu" aria-expanded={languageOpen} onClick={() => { setLanguageOpen(open => !open); setAppearanceOpen(false) }}>
               <span>{locale.toUpperCase()}</span>
               <CaretDown aria-hidden="true" size={16} weight="regular" />
             </button>
