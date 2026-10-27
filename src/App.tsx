@@ -940,7 +940,7 @@ function PreviewCard({ building, locale, t, onDetails, onClose }: LocalizedProps
       </div>
       <h1>{copy.name}</h1>
       <p className="architects">
-        <span>{copy.architectCredit}</span>
+        <span>{copy.previewArchitectCredit ?? copy.architectCredit}</span>
         {primaryYear && <span className="preview-year">{primaryYear}</span>}
       </p>
       <button className="preview-details" onClick={onDetails}>
