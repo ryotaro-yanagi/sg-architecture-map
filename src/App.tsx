@@ -260,7 +260,20 @@ const applyMapStructure = (map: MapLibreMap) => {
   if (map.getLayer('landuse_residential')) map.setLayoutProperty('landuse_residential', 'visibility', 'none')
   // Local administrative boundaries are visual clutter in the architecture map.
   // Preserve national and disputed boundaries as separate semantic layers.
-  if (map.getLayer('boundary_3')) map.setLayoutProperty('boundary_3', 'visibility', 'none')
+  // Preserve only broad administrative boundaries as quiet solid geography.
+  // Liberty's default boundary_3 includes fine divisions and conspicuous dashes.
+  if (map.getLayer('boundary_3')) {
+    map.setFilter('boundary_3', ['all',
+      ['>=', ['get', 'admin_level'], 3],
+      ['<=', ['get', 'admin_level'], 4],
+      ['!=', ['get', 'maritime'], 1],
+      ['!=', ['get', 'disputed'], 1],
+      ['!', ['has', 'claimed_by']],
+    ])
+    map.setLayerZoomRange('boundary_3', 5, 13)
+    map.setPaintProperty('boundary_3', 'line-dasharray', [1, 0])
+    map.setPaintProperty('boundary_3', 'line-width', 0.8)
+  }
   // Liberty's 2D buildings otherwise stop at z14 when 3D buildings begin.
   if (map.getLayer('building')) map.setLayerZoomRange('building', 14, 24)
   // Reveal building footprints gradually as the viewer zooms into street scale.
@@ -273,7 +286,15 @@ const applyMapStructure = (map: MapLibreMap) => {
 
   // City labels orient the overview; district and architecture labels lead closer in.
   ;['label_city', 'label_city_capital'].forEach((id) => {
-    if (map.getLayer(id)) map.setLayerZoomRange(id, 3, 12.5)
+    if (!map.getLayer(id)) return
+    map.setLayerZoomRange(id, 3, 12.5)
+    // Only Singapore is emphasized; other cities retain the Liberty size scale.
+    const singapore = ['==', ['coalesce', ['get', 'name_en'], ['get', 'name'], ''], 'Singapore']
+    map.setLayoutProperty(id, 'text-size', ['interpolate', ['linear'], ['zoom'],
+      4, ['case', singapore, 15, id === 'label_city_capital' ? 12 : 11],
+      7, ['case', singapore, 19, id === 'label_city_capital' ? 14 : 13],
+      11, ['case', singapore, 26, id === 'label_city_capital' ? 20 : 18],
+    ])
   })
 
   // Let district names lead until the viewer zooms closer to street level.
@@ -360,6 +381,7 @@ const applyProductionMapTheme = (map: MapLibreMap, nightPreview = false) => {
     map.setLayoutProperty('building-pins', 'icon-image', ['concat', nightPreview ? 'building-pin-night-' : 'building-pin-day-', ['coalesce', ['get', 'mapCategory'], 'fallback']])
   }
   // Dark-only overrides for Liberty layers that still have light original paints.
+  setPaint(map, 'boundary_3', 'line-color', nightPreview ? '#626A65' : '#B7BBB5')
   if (nightPreview) {
     ;['aeroway_fill', 'landcover_sand', 'landcover_ice'].forEach(id => setPaint(map, id, 'fill-color', '#35413C'))
     ;['aeroway_runway', 'aeroway_taxiway'].forEach(id => setPaint(map, id, 'line-color', '#54605B'))
