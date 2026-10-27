@@ -1,7 +1,7 @@
 import { Component, useEffect, useMemo, useRef, useState } from 'react'
 import { ArrowLeft, ArrowRight, ArrowSquareOut, CaretDown, Check, Cloud, CloudRain, CloudSun, Compass, Crosshair, Lightning, MagnifyingGlass, NavigationArrow, Sun, X } from '@phosphor-icons/react'
 import * as maplibregl from 'maplibre-gl'
-import type { GeoJSONSource, Map as MapLibreMap } from 'maplibre-gl'
+import type { ExpressionSpecification, GeoJSONSource, Map as MapLibreMap } from 'maplibre-gl'
 import data from './data/buildings.json'
 import { getBuildingCopy, getLocaleFromPath, localeHref, translations } from './i18n'
 import type { ErrorInfo, ReactNode, RefObject } from 'react'
@@ -289,7 +289,7 @@ const applyMapStructure = (map: MapLibreMap) => {
     if (!map.getLayer(id)) return
     map.setLayerZoomRange(id, 3, 12.5)
     // Only Singapore is emphasized; other cities retain the Liberty size scale.
-    const singapore = ['==', ['coalesce', ['get', 'name_en'], ['get', 'name'], ''], 'Singapore']
+    const singapore: ExpressionSpecification = ['==', ['coalesce', ['get', 'name_en'], ['get', 'name'], ''], 'Singapore']
     map.setLayoutProperty(id, 'text-size', ['interpolate', ['linear'], ['zoom'],
       4, ['case', singapore, 15, id === 'label_city_capital' ? 12 : 11],
       7, ['case', singapore, 19, id === 'label_city_capital' ? 14 : 13],
