@@ -53,15 +53,17 @@
 .appearance-preview-trigger {
   min-height: var(--control-min);
   padding: 0 10px;
-  border: 1px solid var(--line);
-  border-radius: 5px;
-  background: var(--paper-strong);
+  border: 0;
+  border-radius: 3px;
+  background: transparent;
   color: var(--ink);
   font: inherit;
   font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
   cursor: pointer;
 }
-.appearance-menu { position: relative; }
+.appearance-menu { position: relative; display: flex; border-left: 1px solid var(--line); }
 .appearance-preview-trigger { display: inline-flex; align-items: center; gap: 5px; }
 .appearance-popover { position: absolute; top: calc(100% + 6px); right: 0; z-index: 20; width: 148px; padding: 4px; background: var(--paper-strong); border: 1px solid var(--line); border-radius: 5px; box-shadow: 0 5px 18px rgba(0,0,0,.12); }
 .appearance-popover button { width: 100%; min-height: var(--control-min); padding: 0 10px; display: flex; justify-content: space-between; align-items: center; gap: 8px; border: 0; border-radius: 3px; background: transparent; color: var(--ink); cursor: pointer; text-align: left; font-size: 14px; }
@@ -70,7 +72,6 @@
 .appearance-popover button[aria-checked="true"] { font-weight: 600; }
 .appearance-preview-trigger:hover { background: var(--interaction-hover); }
 .appearance-preview-trigger:active { background: var(--interaction-pressed); }
-/* Inline selected-pin SVG follows the same Day/Night glyph contrast as map symbols. */
 .app.night-preview .primary-button { color: #1B211F; }
 .app.night-preview .notice { color: #F2F4F0; background: #333C38; }
 .app.night-preview .maplibregl-ctrl-group { background: var(--paper-strong); }
@@ -112,14 +113,13 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
 .brand { pointer-events: auto; width: 50px; height: 50px; display: grid; place-items: center; padding: 5px; color: var(--paper-strong); background: var(--ink); border: 1px solid var(--ink); border-radius: 5px; box-shadow: none; cursor: pointer; }
 .brand-mark { display: grid; place-items: center; width: 38px; height: 38px; color: currentColor; background: transparent; border-radius: 0; }
 .brand-mark svg { width: 25px; height: 25px; }
-.top-controls { pointer-events: auto; display: flex; align-items: stretch; gap: 0; min-height: 50px; padding: 3px; color: var(--ink); background: var(--paper-strong); border: 1px solid var(--line); border-radius: 4px; box-shadow: none; }
-.top-controls { display: flex; align-items: flex-start; gap: 8px; pointer-events: auto; }
-.weather-chip, .language-trigger { min-height: var(--control-min); display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 0 10px; color: var(--ink); background: var(--paper-strong); border: 1px solid var(--line); border-radius: 5px; font-size: 15px; font-weight: 500; line-height: 20px; text-decoration: none; }
+.top-controls { pointer-events: auto; display: flex; align-items: stretch; gap: 0; min-height: 50px; padding: 3px; color: var(--ink); background: var(--paper-strong); border: 1px solid var(--line); border-radius: 5px; box-shadow: none; }
+.weather-chip, .language-trigger { min-height: var(--control-min); display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 0 10px; color: var(--ink); background: transparent; border: 0; border-radius: 3px; font-size: 14px; font-weight: 500; line-height: 20px; text-decoration: none; }
 .weather-chip:hover, .language-trigger:hover { background: var(--interaction-hover); }
 .weather-chip:active, .language-trigger:active { background: var(--interaction-pressed); }
 .weather-chip { min-width: var(--control-min); }
 .weather-chip svg { width: 20px; height: 20px; }
-.language-menu { position: relative; }
+.language-menu { position: relative; display: flex; border-left: 1px solid var(--line); }
 .language-trigger { min-width: 58px; cursor: pointer; }
 .language-popover { position: absolute; top: calc(100% + 6px); right: 0; width: 112px; padding: 4px; background: var(--paper-strong); border: 1px solid var(--line); border-radius: 5px; }
 .language-popover a { min-height: var(--control-min); display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0 10px; color: var(--ink); font-size: 15px; font-weight: 500; line-height: 20px; text-decoration: none; }
