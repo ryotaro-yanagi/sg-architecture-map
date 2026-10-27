@@ -223,6 +223,9 @@ const markerSwitchZoom = 13.5
 const markerIcon = '#ffffff'
 const categoryMarkerIcon = '#212121' // Night preview keeps the existing dark pictogram ink.
 const dayCategoryMarkerIcon = '#FFFFFF'
+const singaporeLabelCoordinates: Coordinates = [103.82, 1.36]
+const singaporeLabelSourceId = 'singapore-city-label'
+const singaporeLabelLayerId = 'label_city_singapore'
 const phosphorBuildingFillPath = 'M232,224H208V32h8a8,8,0,0,0,0-16H40a8,8,0,0,0,0,16h8V224H24a8,8,0,0,0,0,16H232a8,8,0,0,0,0-16ZM88,56h24a8,8,0,0,1,0,16H88a8,8,0,0,1,0-16Zm0,40h24a8,8,0,0,1,0,16H88a8,8,0,0,1,0-16Zm-8,48a8,8,0,0,1,8-8h24a8,8,0,0,1,0,16H88A8,8,0,0,1,80,144Zm72,80H104V184h48Zm16-72H144a8,8,0,0,1,0-16h24a8,8,0,0,1,0,16Zm0-40H144a8,8,0,0,1,0-16h24a8,8,0,0,1,0,16Zm0-40H144a8,8,0,0,1,0-16h24a8,8,0,0,1,0,16Z'
 // Restrained line pictograms keep category meaning readable without changing pin shape.
 const categoryIconPaths: Record<MapCategory, string> = {
@@ -260,6 +263,57 @@ const legacyComparisonParams = ['ui', 'font', 'visual', 'map', 'scale', 'preset'
 
 const setPaint = (map: MapLibreMap, layerId: string, property: string, value: unknown) => {
   if (map.getLayer(layerId)) map.setPaintProperty(layerId, property as never, value as never)
+}
+
+const addSingaporeCityLabel = (map: MapLibreMap) => {
+  const excludeSingapore: maplibregl.FilterSpecification = [
+    '!=',
+    ['coalesce', ['get', 'name_en'], ['get', 'name'], ''],
+    'Singapore',
+  ]
+  ;['label_city', 'label_city_capital', 'label_other'].forEach((id) => {
+    if (!map.getLayer(id)) return
+    const libertyFilter = map.getFilter(id)
+    const filter = (libertyFilter
+      ? ['all', libertyFilter, excludeSingapore]
+      : excludeSingapore) as maplibregl.FilterSpecification
+    map.setFilter(id, filter)
+  })
+
+  map.addSource(singaporeLabelSourceId, {
+    type: 'geojson',
+    data: {
+      type: 'Feature',
+      properties: { name: 'Singapore' },
+      geometry: { type: 'Point', coordinates: singaporeLabelCoordinates },
+    },
+  })
+  map.addLayer({
+    id: singaporeLabelLayerId,
+    type: 'symbol',
+    source: singaporeLabelSourceId,
+    // Liberty's country label ends at z9, where this visual-center label takes over.
+    minzoom: 9,
+    maxzoom: 12.5,
+    layout: {
+      'text-field': ['get', 'name'],
+      'text-font': ['Noto Sans Bold'],
+      'text-size': ['interpolate', ['linear'], ['zoom'], 9, 18, 10, 22, 11, 26, 12, 28, 12.5, 30],
+      'text-anchor': 'center',
+      'text-justify': 'center',
+      'text-max-width': 8,
+      'text-padding': 8,
+      'text-allow-overlap': true,
+      'text-ignore-placement': false,
+    },
+    paint: {
+      'text-color': productionMapPalette.label,
+      'text-halo-color': productionMapPalette.labelHalo,
+      'text-halo-width': 1.25,
+      'text-halo-blur': 1,
+      'text-opacity': ['interpolate', ['linear'], ['zoom'], 9, 0.9, 9.35, 1, 12, 1, 12.5, 0],
+    },
+  }, map.getLayer('label_city') ? 'label_city' : undefined)
 }
 
 const applyMapStructure = (map: MapLibreMap) => {
@@ -422,7 +476,7 @@ const applyProductionMapTheme = (map: MapLibreMap, nightPreview = false) => {
   // Night: quieter halos by semantic text role, not one size for every label.
   // Explicit Day values restore the existing cartography when switching back.
   if (nightPreview) {
-    ;['label_city', 'label_city_capital'].forEach(id => {
+    ;['label_city', 'label_city_capital', singaporeLabelLayerId].forEach(id => {
       setPaint(map, id, 'text-halo-width', 1.1)
       setPaint(map, id, 'text-halo-blur', 0.5)
     })
@@ -435,7 +489,7 @@ const applyProductionMapTheme = (map: MapLibreMap, nightPreview = false) => {
       setPaint(map, id, 'text-halo-blur', 0.3)
     })
   } else {
-    ;['label_city', 'label_city_capital', 'label_town', 'label_village',
+    ;['label_city', 'label_city_capital', singaporeLabelLayerId, 'label_town', 'label_village',
       'label_neighbourhood', 'label_suburb', 'label_state', 'highway-name',
       'railway', 'airport'].forEach(id => {
       setPaint(map, id, 'text-halo-width', 1.25)
@@ -645,6 +699,7 @@ function App() {
       // Apply geographic styling before asynchronous marker SVG decoding.
       // Otherwise Liberty's original buildings and linework can briefly appear.
       applyMapStructure(map)
+      addSingaporeCityLabel(map)
       applyMapColors(map, productionMapPalette)
       const [normalPin, selectedPin] = await Promise.all([
         loadSvgMarker(createBuildingPinSvg(28, 31, 1.5, 13)),
