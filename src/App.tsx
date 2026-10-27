@@ -121,8 +121,8 @@ const prefersReducedMotion = () =>
 const motionDuration = (duration: number) =>
   prefersReducedMotion() ? 0 : duration
 
-// Preserve the user's camera when selecting a building. Only pan when the
-// selected pin would overlap the visible UI or approach the viewport edge.
+// Preserve the user's camera when selecting a building. The selected pin
+// stays inside the map area that is actually visible around SGM's UI.
 const revealBuilding = (map: MapLibreMap | null, coordinates: Coordinates) => {
   if (!map) return
   const canvas = map.getCanvas()
@@ -131,42 +131,79 @@ const revealBuilding = (map: MapLibreMap | null, coordinates: Coordinates) => {
   const pinHalfWidth = 26
   const pinHeight = 56
   const margin = 24
-  const search = document.querySelector<HTMLElement>('.search-shell')
-  const searchBounds = search?.getBoundingClientRect()
-  const top = searchBounds && searchBounds.bottom > bounds.top && searchBounds.top < bounds.bottom
-    ? searchBounds.bottom - bounds.top + margin
-    : 24
-  // Wider comfort zone: do not park a selected pin against the edge.
-  const left = Math.max(pinHalfWidth + margin, bounds.width * 0.22)
-  const right = Math.min(bounds.width - pinHalfWidth - margin, bounds.width * 0.78)
-  let bottom = Math.min(bounds.height - margin, bounds.height * 0.76)
-  const card = document.querySelector<HTMLElement>('.preview-card')
-  const cardBounds = card?.getBoundingClientRect()
-  // On desktop the card occupies only the lower-left portion of the map.
-  if (cardBounds && point.x + bounds.left >= cardBounds.left - pinHalfWidth - margin
-    && point.x + bounds.left <= cardBounds.right + pinHalfWidth + margin) {
-    bottom = Math.min(bottom, cardBounds.top - bounds.top - margin)
+
+  // Start with a generous comfort zone so a selected building does not sit
+  // against the viewport edge even when no surface overlaps it.
+  let left = Math.max(pinHalfWidth + margin, bounds.width * 0.18)
+  let right = Math.min(bounds.width - pinHalfWidth - margin, bounds.width * 0.82)
+  let top = Math.max(pinHeight + margin, bounds.height * 0.16)
+  let bottom = Math.min(bounds.height - margin, bounds.height * 0.84)
+
+  // Keep the pin below persistent top controls. The topbar itself spans the
+  // viewport, so use the visible controls rather than its full bounding box.
+  const topControls = Array.from(document.querySelectorAll<HTMLElement>('.brand, .top-controls'))
+    .map(element => element.getBoundingClientRect())
+    .filter(rect => rect.bottom > bounds.top && rect.top < bounds.bottom)
+  if (topControls.length) {
+    const controlsBottom = Math.max(...topControls.map(rect => rect.bottom - bounds.top))
+    top = Math.max(top, controlsBottom + margin + pinHeight)
   }
-  const safeTop = Math.min(Math.max(top + pinHeight, bounds.height * 0.22), bottom)
-  // If the pin falls outside the comfort zone, move it toward the usable
-  // center, not merely to the nearest edge of the zone.
-  const outside = point.x < left || point.x > right || point.y < safeTop || point.y > bottom
+
+  const surface = document.querySelector<HTMLElement>('.bottom-surface')
+  const surfaceBounds = surface?.getBoundingClientRect()
+  if (surfaceBounds) {
+    const surfaceLeft = surfaceBounds.left - bounds.left
+    const surfaceRight = surfaceBounds.right - bounds.left
+    const surfaceTop = surfaceBounds.top - bounds.top
+    const surfaceWidth = surfaceBounds.width
+    const surfaceHeight = surfaceBounds.height
+
+    // Mobile Preview/Detail behaves as a bottom inset across almost the full
+    // map. Desktop Detail behaves as a side inset. Desktop Preview only
+    // constrains the lower map when the selected pin is horizontally above it.
+    if (surfaceWidth >= bounds.width * 0.72) {
+      bottom = Math.min(bottom, surfaceTop - margin)
+    } else if (surfaceHeight >= bounds.height * 0.72 && surfaceLeft > bounds.width / 2) {
+      right = Math.min(right, surfaceLeft - margin - pinHalfWidth)
+    } else {
+      const pinOverSurfaceX =
+        point.x + pinHalfWidth + margin >= surfaceLeft &&
+        point.x - pinHalfWidth - margin <= surfaceRight
+      if (pinOverSurfaceX) bottom = Math.min(bottom, surfaceTop - margin)
+    }
+  }
+
+  // Guard very small viewports from an inverted safe region.
+  if (right < left) {
+    const centerX = (left + right) / 2
+    left = centerX
+    right = centerX
+  }
+  if (bottom < top) {
+    const centerY = Math.max(pinHeight + margin, Math.min(bounds.height - margin, (top + bottom) / 2))
+    top = centerY
+    bottom = centerY
+  }
+
+  const outside = point.x < left || point.x > right || point.y < top || point.y > bottom
   if (!outside) return
-  const targetX = bounds.width / 2
-  const targetY = Math.max(safeTop, Math.min(bottom, (safeTop + bottom) / 2))
+
+  // Reframe toward the visual center of the remaining map, preserving zoom,
+  // bearing and pitch instead of resetting the user's camera.
+  const targetX = (left + right) / 2
+  const targetY = (top + bottom) / 2
   const dx = point.x - targetX
   const dy = point.y - targetY
   const distance = Math.hypot(dx, dy)
-  // The new center is the geographic point currently under the displaced
-  // viewport center. This preserves zoom, bearing, and pitch.
   const center = map.unproject([bounds.width / 2 + dx, bounds.height / 2 + dy])
+
   if (prefersReducedMotion()) {
     map.jumpTo({ center })
     return
   }
   map.easeTo({
     center,
-    duration: Math.min(1100, Math.max(520, distance * 1.5)),
+    duration: Math.min(900, Math.max(420, distance * 1.25)),
     easing: t => t * t * (3 - 2 * t),
     essential: false,
   })
