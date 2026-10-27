@@ -679,6 +679,7 @@ function App() {
       return normalizeSearch(searchable.join(' ')).includes(normalized)
     })
   }, [locale, query])
+  const hasSearchQuery = query.trim().length > 0
 
   useEffect(() => {
     let cancelled = false
@@ -1070,14 +1071,17 @@ function App() {
       <div className={`bottom-surface ${surfaceState}`}>
         {!selected ? (
           <search className={`search-shell ${searchOpen ? 'open' : ''}`}>
-            <div className="search-input-wrap">
-              <MagnifyingGlass aria-hidden="true" size={20} weight="regular" />
-              <input ref={searchInputRef} type="search" value={query} onChange={(event) => { setQuery(event.target.value); setSearchOpen(true) }} onFocus={() => setSearchOpen(true)} aria-label={t.searchLabel} aria-expanded={searchOpen} aria-controls="search-results" autoComplete="off" placeholder={t.searchPlaceholder} />
-              {searchOpen && <button className="icon-button small" onClick={() => { setSearchOpen(false); setQuery('') }} aria-label={t.closeSearch}><X aria-hidden="true" size={16} weight="regular" /></button>}
+            <div className="search-bar">
+              <div className="search-input-wrap">
+                <MagnifyingGlass aria-hidden="true" size={20} weight="regular" />
+                <input ref={searchInputRef} type="search" value={query} onChange={(event) => { setQuery(event.target.value); setSearchOpen(true) }} onFocus={() => setSearchOpen(true)} aria-label={t.searchLabel} aria-expanded={searchOpen} aria-controls="search-results" autoComplete="off" placeholder={t.searchPlaceholder} />
+                {hasSearchQuery && <button className="icon-button small" onClick={() => { setQuery(''); searchInputRef.current?.focus() }} aria-label={t.clearSearch}><X aria-hidden="true" size={16} weight="regular" /></button>}
+              </div>
+              {searchOpen && <button className="search-cancel" type="button" onClick={() => { setSearchOpen(false); setQuery(''); searchInputRef.current?.blur() }}>{t.cancelSearch}</button>}
             </div>
             {searchOpen && (
               <div className="search-results" id="search-results" aria-label={t.searchResults}>
-                <p className="result-count" aria-live="polite">{results.length ? t.resultCount(results.length) : t.noResults}</p>
+                {hasSearchQuery && <p className="result-count" role="status" aria-atomic="true">{results.length ? t.resultCount(results.length) : t.noResults}</p>}
                 {results.map((building) => {
                   const copy = getBuildingCopy(locale, building.id, building.name)
                   return (

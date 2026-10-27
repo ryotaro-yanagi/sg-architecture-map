@@ -13,7 +13,8 @@ export type Translation = {
   languageSwitcher: string
   searchLabel: string
   searchPlaceholder: string
-  closeSearch: string
+  clearSearch: string
+  cancelSearch: string
   searchResults: string
   resultCount: (count: number) => string
   noResults: string
@@ -61,7 +62,8 @@ export const translations: Record<Locale, Translation> = {
     languageSwitcher: 'Switch language',
     searchLabel: 'Search by building or architect',
     searchPlaceholder: 'Search buildings or architects',
-    closeSearch: 'Close search',
+    clearSearch: 'Clear search',
+    cancelSearch: 'Cancel',
     searchResults: 'Search results',
     resultCount: (count) => `${count} ${count === 1 ? 'building' : 'buildings'}`,
     noResults: 'No matching buildings',
@@ -123,7 +125,8 @@ export const translations: Record<Locale, Translation> = {
     languageSwitcher: '言語を切り替える',
     searchLabel: '建築名または設計者で検索',
     searchPlaceholder: '建築名・設計者を検索',
-    closeSearch: '検索を閉じる',
+    clearSearch: '検索語を消去',
+    cancelSearch: 'キャンセル',
     searchResults: '検索結果',
     resultCount: (count) => `${count}件の建築`,
     noResults: '一致する建築はありません',
