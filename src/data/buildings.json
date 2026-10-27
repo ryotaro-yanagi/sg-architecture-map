@@ -1518,6 +1518,42 @@
       "scopeGroups": [
         "PDA Design of the Year"
       ]
+    },
+    {
+      "id": "SGM-0146",
+      "name": "Bird Paradise",
+      "aliases": [
+        "Mandai Bird Paradise"
+      ],
+      "architects": [
+        "Mandai Wildlife Group",
+        "RSP Architects Planners & Engineers"
+      ],
+      "architectCredit": "Mandai Wildlife Group · RSP Architects (experience design collaboration)",
+      "buildingType": "civic_cultural",
+      "completionYear": null,
+      "openingYear": 2023,
+      "openingSource": "https://pda.designsingapore.org/award-recipients/2025/bird-paradise/",
+      "pdaAwardYear": 2025,
+      "pdaAwardDiscipline": "Experience Design",
+      "pdaAwardSource": "https://pda.designsingapore.org/award-recipients/2025/bird-paradise/",
+      "address": "20 Mandai Lake Road, Singapore 729825",
+      "addressSource": "https://www.mandai.com/en/plan-your-visit/maps.html",
+      "coordinates": [
+        103.78143,
+        1.40547
+      ],
+      "coordinatePrecision": "park_site_representative_point_approximate",
+      "coordinateSource": "https://mapcarta.com/W767316592",
+      "officialSource": "https://pda.designsingapore.org/award-recipients/2025/bird-paradise/",
+      "coordinateReviewNote": "The 17-hectare bird park is a landscape-scale destination. This is a park-level representative point, not an entrance, visitor drop-off, or single architectural building.",
+      "yearNote": "2023 is public opening; 2025 is P*DA Design of the Year in Experience Design, not the completion year or an Architecture-discipline award.",
+      "photo": null,
+      "publicAccess": "unverified",
+      "editorialStatus": "needs_review",
+      "scopeGroups": [
+        "PDA Design of the Year"
+      ]
     }
   ]
 }

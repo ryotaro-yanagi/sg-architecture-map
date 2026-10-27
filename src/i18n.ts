@@ -228,6 +228,7 @@ const buildingCopy: Record<Locale, Record<string, BuildingCopy>> = {
     'SGM-0006': { name: 'Dairy Farm Residences', architectCredit: 'DP Architects' },
     'SGM-0144': { name: 'Khoo Teck Puat Hospital', architectCredit: 'CPG Consultants' },
     'SGM-0145': { name: 'Marina Bay Sands Integrated Resort', architectCredit: 'Safdie Architects · Aedas (executive architect)' },
+    'SGM-0146': { name: 'Bird Paradise', architectCredit: 'Mandai Wildlife Group · RSP Architects' },
   },
   ja: {
     'dpa-esplanade': { name: 'Esplanade – Theatres on the Bay', architectCredit: 'DP Architects、Michael Wilford & Partners（英国）による協働' },
@@ -284,6 +285,7 @@ const buildingCopy: Record<Locale, Record<string, BuildingCopy>> = {
     'SGM-0006': { name: 'Dairy Farm Residences', architectCredit: 'DP Architects' },
     'SGM-0144': { name: 'Khoo Teck Puat Hospital', architectCredit: 'CPG Consultants' },
     'SGM-0145': { name: 'Marina Bay Sands Integrated Resort', architectCredit: 'Safdie Architects · Aedas (executive architect)' },
+    'SGM-0146': { name: 'Bird Paradise', architectCredit: 'Mandai Wildlife Group · RSP Architects' },
   },
 }
 
