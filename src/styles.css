@@ -1,7 +1,7 @@
 :root {
-  --font-ui: 'Hanken Grotesk', 'Hiragino Sans', 'Yu Gothic', system-ui, -apple-system, sans-serif;
+  --font-ui: 'Source Sans 3', 'Hiragino Sans', 'Yu Gothic', system-ui, -apple-system, sans-serif;
   --font-display: var(--font-ui);
-  --font-attribution: 'Newsreader', Georgia, serif;
+  --font-attribution: 'Source Serif 4', Georgia, serif;
   font-family: var(--font-ui);
   color: #212121;
   background: #fafafa;
@@ -76,8 +76,8 @@
 .app.locale-ja {
   --heading-leading: 1.26;
   --heading-tracking: 0em;
-  --font-attribution: 'BIZ UDPMincho', 'Yu Mincho', 'Hiragino Mincho ProN', serif;
-  --font-ui: 'LINE Seed JP', 'Hiragino Sans', 'Yu Gothic', 'YuGothic', 'Noto Sans JP', system-ui, -apple-system, sans-serif;
+  --font-attribution: 'Source Serif 4', 'BIZ UDPMincho', 'Yu Mincho', 'Hiragino Mincho ProN', serif;
+  --font-ui: 'Source Sans 3', 'LINE Seed JP', 'Hiragino Sans', 'Yu Gothic', 'YuGothic', 'Noto Sans JP', system-ui, -apple-system, sans-serif;
   --font-display: var(--font-ui);
 }
 
