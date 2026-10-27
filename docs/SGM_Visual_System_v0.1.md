@@ -37,8 +37,8 @@ Use **Context → Phenomenon → Quality → Principle → Decision → Test**.
 ## 4. Decisions and Open Questions
 
 - **Adopted:** Full-viewport map as spatial ground; Square / Flat material direction; opaque surfaces with line-based separation and no default decorative shadow; one Bottom Surface grammar for Explore / Search / Preview / Detail; content-fit Compact Preview; preservation of map context during selection; production UI remains free of comparison controls.
-- **Provisional:** Exact mobile and desktop surface geometry; current Search and Detail extents; map-control displacement; camera safe-area calculations; transition timing; desktop Detail as a right-side reading surface; optical integration of Day/Night surfaces.
-- **Open:** Whether Preview ↔ Detail should support drag/swipe; final nonmodal behavior while Detail is open; tablet/intermediate layouts; final camera coordination across all surface states; whether any additional material depth is ever necessary.
+- **Provisional:** Exact mobile and desktop surface geometry; current Search and Detail extents; map-control displacement; camera safe-area calculations; transition timing; desktop Detail as a right-side reading surface; **Detail as a nonmodal reading state where map navigation does not dismiss the record and selecting another building returns to Preview**; optical integration of Day/Night surfaces.
+- **Open:** Whether Preview ↔ Detail should support drag/swipe; tablet/intermediate layouts; final camera coordination across all surface states; whether any additional material depth is ever necessary.
 
 ## 5. Validation and Handoff
 

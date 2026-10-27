@@ -635,6 +635,10 @@ function App() {
   const searchInputRef = useRef<HTMLInputElement>(null)
   const [selectedId, setSelectedId] = useState<string | null>(requestedSelectedId ?? restoredState?.selectedId ?? null)
   const [expanded, setExpanded] = useState(getRequestedExpandedState() ?? restoredState?.expanded ?? false)
+  const selectedIdRef = useRef(selectedId)
+  const expandedRef = useRef(expanded)
+  selectedIdRef.current = selectedId
+  expandedRef.current = expanded
   const [query, setQuery] = useState('')
   const [searchOpen, setSearchOpen] = useState(false)
   const [locating, setLocating] = useState(false)
@@ -826,11 +830,17 @@ function App() {
           .filter(({ distance }) => distance <= 26)
           .sort((a, b) => a.distance - b.distance)[0]?.building
         if (nearest) {
+          // Detail remains nonmodal: map gestures and the current pin keep the
+          // record open. Choosing a different building returns to Preview so
+          // the new place is identified before deeper reading.
+          if (expandedRef.current && nearest.id === selectedIdRef.current) return
           setSelectedId(nearest.id)
           setExpanded(false)
           setSearchOpen(false)
           window.requestAnimationFrame(() => revealBuilding(map, nearest.coordinates))
-        } else {
+        } else if (!expandedRef.current) {
+          // Compact Preview is transient and can be cleared from the map.
+          // Detail is persistent until Back/Escape/Home or another building.
           setSelectedId(null)
           setExpanded(false)
           setSearchOpen(false)
