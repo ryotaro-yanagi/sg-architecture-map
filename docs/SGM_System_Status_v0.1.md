@@ -2,7 +2,7 @@
 
 **Version:** v0.1  
 **Status:** Cross-system integration ledger — not a specialist specification  
-**Implementation snapshot:** main at `29878cd`  
+**Implementation snapshot:** main at `77ecced`  
 **Scope:** Reconcile documented decision status with current production use. Detailed tokens and domain decisions remain in each specialist System MD.
 
 ## 1. Status Rule
@@ -20,7 +20,7 @@
 | **Typography** | Sans identity/actions; Serif attribution/records; shared Latin typography across EN/JA; Compact vs Detail reading roles | Source Sans 3 / Source Serif 4 and Japanese Source Han subsets are active; light Serif metadata and edited Compact credits are in use | **Aligned.** Exact light weights, micro-spacing and Compact credit editing remain **Provisional** despite production use |
 | **Cartography** | Map-first, flat/borderless ground; zoom-based disclosure; architecture over geographic detail | Warm Day palette, restrained boundaries, staged road/building/label disclosure and Singapore overview label are active; Day/Night switching exists | **Mostly aligned.** Current palettes, label balance, footprint prominence and Night treatment remain **Provisional** |
 | **Color** | Neutral UI / Responsive Interaction / Gentle Architecture / Illustrated Geography | Neutral + interaction roles are active; six architecture category hues are mapped to categories; illustrated geographic palette is active; Day/Night UI tokens exist | **Documentation lags production.** Category mapping, geographic palette and Night palette should be recorded as **Provisional production baselines**, not yet Adopted |
-| **Visual System** | Full-viewport map ground; Square / Flat materiality; one Bottom Surface grammar; content-fit Preview; map context retained | Explore / Search / Preview / Detail are integrated into one surface system; mobile bottom geometry and desktop lateral Detail are active | **Aligned.** Exact geometry, camera coordination, transition timing and Detail modality remain **Provisional / Open** |
+| **Visual System** | Full-viewport map ground; Square / Flat materiality; one Bottom Surface grammar; content-fit Preview; map context retained | Explore / Search / Preview / Detail are integrated into one surface system; camera coordination and nonmodal Detail are active; drag/grabber is intentionally omitted in v0.1 | **Aligned.** Exact geometry, optical balance and remaining camera details stay **Provisional / Open** |
 | **Iconography** | Specialist status not available in the provided System MD set | Category pictograms, marker shape/state hierarchy and category-colored pins are active | **Needs specialist sync.** Do not infer Adopted status from code alone |
 | **Fundamentals / Refinement** | Specialist status not available in the provided System MD set | 44px minimum controls, focus states, reduced motion and responsive rules are present | **Needs specialist audit** rather than status promotion here |
 
@@ -37,7 +37,7 @@
 1. **Color System:** change category mapping, illustrated geographic palette and Day/Night from “Open production adoption” to **Provisional production baseline**; keep final contrast and mapping validation open.
 2. **Cartography System:** record that Day/Night, Singapore-label treatment and current zoom disclosure are implemented baselines, while their optical values remain provisional.
 3. **Iconography System:** reconcile the live category pictograms, pin geometry and selected-state behavior with its own Adopted / Provisional / Open decisions.
-4. **Visual System:** continue geometry + camera coordination before motion or drag; no new visual direction is required.
+4. **Visual System:** move from interaction-model decisions to a cross-system optical audit; keep tap-driven Preview ↔ Detail as the v0.1 baseline unless real mobile use demonstrates a need for drag.
 5. **Integration review:** validate one complete flow — **Explore → Search → Preview → Detail → Map** — in EN/JA, Day/Night and mobile/desktop before promoting provisional values.
 
 ## 5. Working Principle
