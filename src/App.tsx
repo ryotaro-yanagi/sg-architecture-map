@@ -495,6 +495,9 @@ function App() {
   const [notice, setNotice] = useState<string | null>(null)
   const [languageOpen, setLanguageOpen] = useState(false)
   const [nightPreview, setNightPreview] = useState(false)
+  // Async MapLibre style/image loading must use the latest requested appearance.
+  const nightPreviewRef = useRef(nightPreview)
+  nightPreviewRef.current = nightPreview
   const [weather, setWeather] = useState<WeatherState>({ temperature: null, condition: null })
 
   const selected = buildings.find((building) => building.id === selectedId) ?? null
@@ -547,7 +550,7 @@ function App() {
 
   useEffect(() => {
     const map = mapRef.current
-    if (!map || !map.isStyleLoaded()) return
+    if (!map || !map.getLayer('building-pins')) return
     applyProductionMapTheme(map, nightPreview)
   }, [nightPreview])
 
@@ -643,7 +646,7 @@ function App() {
         layout: { 'text-field': ['get', 'name'], 'text-size': 13, 'text-anchor': 'left', 'text-justify': 'auto', 'text-variable-anchor-offset': ['left', [1.55, -1.3], 'right', [-1.55, -1.3]], 'text-max-width': 12 },
         paint: { 'text-color': '#282724', 'text-halo-color': '#f8f4ec', 'text-halo-width': 1 },
       })
-      applyProductionMapTheme(map)
+      applyProductionMapTheme(map, nightPreviewRef.current)
       applyProductionTypeScaleToMap(map, locale)
       const deepLinkedBuilding = buildings.find((building) => building.id === requestedSelectedId)
       if (deepLinkedBuilding && !restoredState) {
