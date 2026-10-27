@@ -76,8 +76,8 @@
 .app.locale-ja {
   --heading-leading: 1.26;
   --heading-tracking: 0em;
-  --font-attribution: 'Source Serif 4', 'BIZ UDPMincho', 'Yu Mincho', 'Hiragino Mincho ProN', serif;
-  --font-ui: 'Source Sans 3', 'LINE Seed JP', 'Hiragino Sans', 'Yu Gothic', 'YuGothic', 'Noto Sans JP', system-ui, -apple-system, sans-serif;
+  --font-attribution: 'Source Serif 4', 'SGM Han Serif JP', 'BIZ UDPMincho', 'Yu Mincho', 'Hiragino Mincho ProN', serif;
+  --font-ui: 'Source Sans 3', 'SGM Han Sans JP', 'LINE Seed JP', 'Hiragino Sans', 'Yu Gothic', 'YuGothic', 'Noto Sans JP', system-ui, -apple-system, sans-serif;
   --font-display: var(--font-ui);
 }
 
