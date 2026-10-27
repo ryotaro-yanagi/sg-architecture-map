@@ -411,9 +411,34 @@ const applyProductionMapTheme = (map: MapLibreMap, nightPreview = false) => {
     setPaint(map, 'landcover_wetland', 'fill-opacity', 0.8)
     setPaint(map, 'road_area_pattern', 'fill-opacity', 1)
   }
+  // Night: quieter halos by semantic text role, not one size for every label.
+  // Explicit Day values restore the existing cartography when switching back.
+  if (nightPreview) {
+    ;['label_city', 'label_city_capital'].forEach(id => {
+      setPaint(map, id, 'text-halo-width', 1.1)
+      setPaint(map, id, 'text-halo-blur', 0.5)
+    })
+    ;['label_town', 'label_village', 'label_neighbourhood', 'label_suburb', 'label_state'].forEach(id => {
+      setPaint(map, id, 'text-halo-width', 0.85)
+      setPaint(map, id, 'text-halo-blur', 0.4)
+    })
+    ;['highway-name', 'railway', 'airport'].forEach(id => {
+      setPaint(map, id, 'text-halo-width', 0.7)
+      setPaint(map, id, 'text-halo-blur', 0.3)
+    })
+  } else {
+    ;['label_city', 'label_city_capital', 'label_town', 'label_village',
+      'label_neighbourhood', 'label_suburb', 'label_state', 'highway-name',
+      'railway', 'airport'].forEach(id => {
+      setPaint(map, id, 'text-halo-width', 1.25)
+      setPaint(map, id, 'text-halo-blur', 1)
+    })
+  }
   if (!map.getLayer('building-labels')) return
   map.setPaintProperty('building-labels', 'text-color', nightPreview ? '#F2F4F0' : markerStroke)
   map.setPaintProperty('building-labels', 'text-halo-color', palette.labelHalo)
+  map.setPaintProperty('building-labels', 'text-halo-width', nightPreview ? 0.85 : 1)
+  map.setPaintProperty('building-labels', 'text-halo-blur', nightPreview ? 0.35 : 0)
 }
 
 const applyProductionTypeScaleToMap = (map: MapLibreMap, locale: Locale) => {
