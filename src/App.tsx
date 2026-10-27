@@ -204,8 +204,8 @@ const productionMapPalette: MapPalette = {
 // N1b is a comparison palette, not an adopted production Dark theme.
 const nightPreviewPalette: MapPalette = {
   background: '#202824', residential: '#202824', park: '#3E5645', wood: '#293D32', grass: '#2B3930',
-  water: '#365562', waterway: '#477687', roadMinor: '#4B5950', roadMajor: '#617267', roadMotorway: '#78867C', roadCasing: '#202824',
-  building: '#596157', buildingOutline: '#596157', label: '#D4DDD6', labelSecondary: '#A6B3AA', labelWater: '#85B6C7', labelHalo: '#202824', poiOpacity: .58,
+  water: '#365562', waterway: '#477687', roadMinor: '#46554D', roadMajor: '#586A5F', roadMotorway: '#6C7C72', roadCasing: '#202824',
+  building: '#4D5951', buildingOutline: '#4D5951', label: '#D4DDD6', labelSecondary: '#A6B3AA', labelWater: '#85B6C7', labelHalo: '#202824', poiOpacity: .58,
 }
 const markerFill = '#35946b'
 const markerStroke = '#242424'
