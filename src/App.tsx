@@ -123,7 +123,11 @@ const motionDuration = (duration: number) =>
 
 // Preserve the user's camera when selecting a building. The selected pin
 // stays inside the map area that is actually visible around SGM's UI.
-const revealBuilding = (map: MapLibreMap | null, coordinates: Coordinates) => {
+const revealBuilding = (
+  map: MapLibreMap | null,
+  coordinates: Coordinates,
+  targetSurface: 'current' | 'detail' = 'current',
+) => {
   if (!map) return
   const canvas = map.getCanvas()
   const bounds = canvas.getBoundingClientRect()
@@ -149,27 +153,39 @@ const revealBuilding = (map: MapLibreMap | null, coordinates: Coordinates) => {
     top = Math.max(top, controlsBottom + margin + pinHeight)
   }
 
-  const surface = document.querySelector<HTMLElement>('.bottom-surface')
-  const surfaceBounds = surface?.getBoundingClientRect()
-  if (surfaceBounds) {
-    const surfaceLeft = surfaceBounds.left - bounds.left
-    const surfaceRight = surfaceBounds.right - bounds.left
-    const surfaceTop = surfaceBounds.top - bounds.top
-    const surfaceWidth = surfaceBounds.width
-    const surfaceHeight = surfaceBounds.height
-
-    // Mobile Preview/Detail behaves as a bottom inset across almost the full
-    // map. Desktop Detail behaves as a side inset. Desktop Preview only
-    // constrains the lower map when the selected pin is horizontally above it.
-    if (surfaceWidth >= bounds.width * 0.72) {
-      bottom = Math.min(bottom, surfaceTop - margin)
-    } else if (surfaceHeight >= bounds.height * 0.72 && surfaceLeft > bounds.width / 2) {
-      right = Math.min(right, surfaceLeft - margin - pinHalfWidth)
+  if (targetSurface === 'detail') {
+    // Coordinate the camera with the final Detail geometry from the same click
+    // that starts the surface transition. Mobile keeps the upper 38dvh as map;
+    // desktop turns Detail into a right-side reading surface.
+    if (bounds.width < 720) {
+      bottom = Math.min(bottom, bounds.height * 0.38 - margin)
     } else {
-      const pinOverSurfaceX =
-        point.x + pinHalfWidth + margin >= surfaceLeft &&
-        point.x - pinHalfWidth - margin <= surfaceRight
-      if (pinOverSurfaceX) bottom = Math.min(bottom, surfaceTop - margin)
+      const detailWidth = Math.min(470, bounds.width * 0.42)
+      right = Math.min(right, bounds.width - detailWidth - margin - pinHalfWidth)
+    }
+  } else {
+    const surface = document.querySelector<HTMLElement>('.bottom-surface')
+    const surfaceBounds = surface?.getBoundingClientRect()
+    if (surfaceBounds) {
+      const surfaceLeft = surfaceBounds.left - bounds.left
+      const surfaceRight = surfaceBounds.right - bounds.left
+      const surfaceTop = surfaceBounds.top - bounds.top
+      const surfaceWidth = surfaceBounds.width
+      const surfaceHeight = surfaceBounds.height
+
+      // Mobile Preview/Detail behaves as a bottom inset across almost the full
+      // map. Desktop Detail behaves as a side inset. Desktop Preview only
+      // constrains the lower map when the selected pin is horizontally above it.
+      if (surfaceWidth >= bounds.width * 0.72) {
+        bottom = Math.min(bottom, surfaceTop - margin)
+      } else if (surfaceHeight >= bounds.height * 0.72 && surfaceLeft > bounds.width / 2) {
+        right = Math.min(right, surfaceLeft - margin - pinHalfWidth)
+      } else {
+        const pinOverSurfaceX =
+          point.x + pinHalfWidth + margin >= surfaceLeft &&
+          point.x - pinHalfWidth - margin <= surfaceRight
+        if (pinOverSurfaceX) bottom = Math.min(bottom, surfaceTop - margin)
+      }
     }
   }
 
@@ -203,8 +219,10 @@ const revealBuilding = (map: MapLibreMap | null, coordinates: Coordinates) => {
   }
   map.easeTo({
     center,
-    duration: Math.min(900, Math.max(420, distance * 1.25)),
-    easing: t => t * t * (3 - 2 * t),
+    duration: targetSurface === 'detail' ? 400 : Math.min(900, Math.max(420, distance * 1.25)),
+    easing: targetSurface === 'detail'
+      ? t => 1 - Math.pow(1 - t, 3)
+      : t => t * t * (3 - 2 * t),
     essential: false,
   })
 }
@@ -1065,7 +1083,16 @@ function App() {
         ) : (
           <aside className="place-surface" aria-label={expanded ? t.detailLabel(getBuildingCopy(locale, selected.id, selected.name).name) : t.previewLabel(getBuildingCopy(locale, selected.id, selected.name).name)}>
             <div className="sheet-compact" aria-hidden={expanded}>
-              <PreviewCard building={selected} locale={locale} t={t} onDetails={() => setExpanded(true)} onClose={() => setSelectedId(null)} />
+              <PreviewCard
+                building={selected}
+                locale={locale}
+                t={t}
+                onDetails={() => {
+                  setExpanded(true)
+                  revealBuilding(mapRef.current, selected.coordinates, 'detail')
+                }}
+                onClose={() => setSelectedId(null)}
+              />
             </div>
             <div className="sheet-expanded" aria-hidden={!expanded}>
               <DetailContent building={selected} locale={locale} t={t} onClose={() => setExpanded(false)} backRef={detailBackRef} />
