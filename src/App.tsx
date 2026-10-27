@@ -911,7 +911,6 @@ function App() {
           <Crosshair aria-hidden="true" size={20} weight="regular" />
         </button>
       </div>
-      <div className="data-note">{t.dataNote(buildings.length)}</div>
 
       {notice && <div className="notice" role="status">{notice}</div>}
     </main>
