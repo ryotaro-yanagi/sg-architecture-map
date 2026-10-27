@@ -213,7 +213,8 @@ const markerOutline = '#ffffff'
 const markerPixelRatio = 3
 const markerSwitchZoom = 13.5
 const markerIcon = '#ffffff'
-const categoryMarkerIcon = '#212121'
+const categoryMarkerIcon = '#212121' // Night preview keeps the existing dark pictogram ink.
+const dayCategoryMarkerIcon = '#FFFFFF'
 const phosphorBuildingFillPath = 'M232,224H208V32h8a8,8,0,0,0,0-16H40a8,8,0,0,0,0,16h8V224H24a8,8,0,0,0,0,16H232a8,8,0,0,0,0-16ZM88,56h24a8,8,0,0,1,0,16H88a8,8,0,0,1,0-16Zm0,40h24a8,8,0,0,1,0,16H88a8,8,0,0,1,0-16Zm-8,48a8,8,0,0,1,8-8h24a8,8,0,0,1,0,16H88A8,8,0,0,1,80,144Zm72,80H104V184h48Zm16-72H144a8,8,0,0,1,0-16h24a8,8,0,0,1,0,16Zm0-40H144a8,8,0,0,1,0-16h24a8,8,0,0,1,0,16Zm0-40H144a8,8,0,0,1,0-16h24a8,8,0,0,1,0,16Z'
 // Restrained line pictograms keep category meaning readable without changing pin shape.
 const categoryIconPaths: Record<MapCategory, string> = {
@@ -225,7 +226,7 @@ const categoryIconPaths: Record<MapCategory, string> = {
   residential: 'M160-200v-360q0-19 8.5-36t23.5-28l240-180q21-16 48-16t48 16l240 180q15 11 23.5 28t8.5 36v360q0 33-23.5 56.5T720-120H600q-17 0-28.5-11.5T560-160v-200q0-17-11.5-28.5T520-400h-80q-17 0-28.5 11.5T400-360v200q0 17-11.5 28.5T360-120H240q-33 0-56.5-23.5T160-200Z', // Material Symbols Rounded Filled: home
 }
 
-const createBuildingPinSvg = (width: number, height: number, strokeWidth: number, iconSize: number, fill = markerFill, category: MapCategory | null = null) => {
+const createBuildingPinSvg = (width: number, height: number, strokeWidth: number, iconSize: number, fill = markerFill, category: MapCategory | null = null, glyphColor = categoryMarkerIcon) => {
   const cx = width / 2
   const iconX = (width - iconSize) / 2
   const iconY = (width <= 28 ? 5 : 9) + (width <= 28 ? 1 : 2)
@@ -238,7 +239,7 @@ const createBuildingPinSvg = (width: number, height: number, strokeWidth: number
   ].join(' ')
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${width * markerPixelRatio}" height="${height * markerPixelRatio}" viewBox="0 0 ${width} ${height}">
     <path d="${path}" fill="${fill}" stroke="${markerOutline}" stroke-width="${strokeWidth}" stroke-linejoin="round"/>
-    ${category ? `<svg x="${iconX}" y="${iconY}" width="${iconSize}" height="${iconSize}" viewBox="0 -960 960 960" fill="${categoryMarkerIcon}"><path d="${categoryIconPaths[category]}"/></svg>` : `<svg x="${iconX}" y="${iconY}" width="${iconSize}" height="${iconSize}" viewBox="0 0 256 256" fill="${markerIcon}"><path d="${phosphorBuildingFillPath}"/></svg>`}
+    ${category ? `<svg x="${iconX}" y="${iconY}" width="${iconSize}" height="${iconSize}" viewBox="0 -960 960 960" fill="${glyphColor}"><path d="${categoryIconPaths[category]}"/></svg>` : `<svg x="${iconX}" y="${iconY}" width="${iconSize}" height="${iconSize}" viewBox="0 0 256 256" fill="${markerIcon}"><path d="${phosphorBuildingFillPath}"/></svg>`}
   </svg>`
 }
 const loadSvgMarker = (svg: string) => new Promise<HTMLImageElement>((resolve, reject) => {
@@ -355,6 +356,9 @@ const applyMapColors = (map: MapLibreMap, palette: MapPalette) => {
 const applyProductionMapTheme = (map: MapLibreMap, nightPreview = false) => {
   const palette = nightPreview ? nightPreviewPalette : productionMapPalette
   applyMapColors(map, palette)
+  if (map.getLayer('building-pins')) {
+    map.setLayoutProperty('building-pins', 'icon-image', ['concat', nightPreview ? 'building-pin-night-' : 'building-pin-day-', ['coalesce', ['get', 'mapCategory'], 'fallback']])
+  }
   // Dark-only overrides for Liberty layers that still have light original paints.
   if (nightPreview) {
     ;['aeroway_fill', 'landcover_sand', 'landcover_ice'].forEach(id => setPaint(map, id, 'fill-color', '#35413C'))
@@ -565,8 +569,12 @@ function App() {
       map.addImage('building-pin-normal', normalPin, { pixelRatio: markerPixelRatio })
       map.addImage('building-pin-selected', selectedPin, { pixelRatio: markerPixelRatio })
       await Promise.all(Object.entries(mapCategoryStyle).map(async ([category, style]) => {
-        const normal = await loadSvgMarker(createBuildingPinSvg(28, 31, 1.5, 13, style.color, category as MapCategory))
-        map.addImage(`building-pin-normal-${category}`, normal, { pixelRatio: markerPixelRatio })
+        const [day, night] = await Promise.all([
+          loadSvgMarker(createBuildingPinSvg(28, 31, 1.5, 13, style.color, category as MapCategory, dayCategoryMarkerIcon)),
+          loadSvgMarker(createBuildingPinSvg(28, 31, 1.5, 13, style.color, category as MapCategory, categoryMarkerIcon)),
+        ])
+        map.addImage(`building-pin-day-${category}`, day, { pixelRatio: markerPixelRatio })
+        map.addImage(`building-pin-night-${category}`, night, { pixelRatio: markerPixelRatio })
       }))
       map.addSource('buildings', { type: 'geojson', data: featureCollection(selectedId, locale) })
       map.addLayer({
@@ -588,7 +596,7 @@ function App() {
       map.addLayer({
         id: 'building-pins', type: 'symbol', source: 'buildings', minzoom: markerSwitchZoom,
         filter: ['==', ['get', 'selected'], false],
-        layout: { 'icon-image': ['concat', 'building-pin-normal-', ['coalesce', ['get', 'mapCategory'], 'fallback']], 'icon-anchor': 'bottom', 'icon-overlap': 'always', 'icon-ignore-placement': true },
+        layout: { 'icon-image': ['concat', 'building-pin-day-', ['coalesce', ['get', 'mapCategory'], 'fallback']], 'icon-anchor': 'bottom', 'icon-overlap': 'always', 'icon-ignore-placement': true },
         paint: { 'icon-opacity': 1 },
       })
       map.addLayer({
@@ -660,6 +668,7 @@ function App() {
     // is filtered out on selection, so this temporary copy fades out in its
     // place while the selected pin responds immediately.
     const element = document.createElement('div')
+    element.className = 'sgm-selected-pin'
     element.style.width = '52px'
     element.style.height = '56px'
     element.style.pointerEvents = 'none'
