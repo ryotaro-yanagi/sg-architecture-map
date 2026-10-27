@@ -66,7 +66,6 @@
 /* Inline selected-pin SVG follows the same Day/Night glyph contrast as map symbols. */
 .app:not(.night-preview) .sgm-selected-pin svg svg { fill: #FFFFFF; }
 .app.night-preview .primary-button { color: #1B211F; }
-.app.night-preview .data-note { color: #B3BDB7; text-shadow: none; }
 .app.night-preview .notice { color: #F2F4F0; background: #333C38; }
 .app.night-preview .maplibregl-ctrl-group { background: var(--paper-strong); }
 .app.night-preview .maplibregl-ctrl-group button { background-color: var(--paper-strong); }
@@ -157,15 +156,10 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
 .locate-button:active { background: var(--interaction-pressed); }
 .locate-button:disabled { opacity: .7; cursor: wait; }
 .locate-button svg { width: 20px; height: 20px; }
-.data-note { position: absolute; z-index: 6; right: 15px; bottom: max(70px, calc(env(safe-area-inset-bottom) + 60px)); max-width: calc(100% - 30px); color: #4f514d; font-size: 14px; line-height: 20px; letter-spacing: 0; text-shadow: 0 1px 2px #fff; }
 .state-search .map-tools,
-.state-search .data-note,
-.state-preview .data-note,
 .details-expanded .map-tools,
-.details-expanded .data-note,
 .details-expanded .maplibregl-ctrl-bottom-right { visibility: hidden; }
 .state-preview .map-tools { visibility: visible; bottom: max(214px, calc(env(safe-area-inset-bottom) + 204px)); }
-.state-explore .data-note { bottom: max(88px, calc(env(safe-area-inset-bottom) + 78px)); }
 .user-location-marker { width: 17px; height: 17px; background: #3e7e91; border: 3px solid #fff; border-radius: 50%; box-shadow: 0 0 0 5px rgba(62,126,145,.22), 0 2px 6px rgba(0,0,0,.25); }
 
 .place-surface, .sheet-compact, .sheet-expanded { width: 100%; height: 100%; }
@@ -238,7 +232,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
   .preview-card h1 { font-size: 24px; }
   .detail-content { padding: 24px 28px 38px; }
   .map-tools, .state-preview .map-tools { right: 22px; bottom: 98px; }
-  .data-note { right: 24px; bottom: 75px; }
   .maplibregl-ctrl-bottom-right { right: 14px; bottom: 152px; }
 }
 
