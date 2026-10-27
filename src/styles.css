@@ -71,7 +71,6 @@
 .appearance-preview-trigger:hover { background: var(--interaction-hover); }
 .appearance-preview-trigger:active { background: var(--interaction-pressed); }
 /* Inline selected-pin SVG follows the same Day/Night glyph contrast as map symbols. */
-.app:not(.night-preview) .sgm-selected-pin svg svg { fill: #FFFFFF; }
 .app.night-preview .primary-button { color: #1B211F; }
 .app.night-preview .notice { color: #F2F4F0; background: #333C38; }
 .app.night-preview .maplibregl-ctrl-group { background: var(--paper-strong); }
