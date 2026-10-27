@@ -1081,7 +1081,7 @@ function App() {
                 {results.map((building) => {
                   const copy = getBuildingCopy(locale, building.id, building.name)
                   return (
-                    <button key={building.id} className={building.id === selectedId ? 'selected' : ''} aria-current={building.id === selectedId ? 'true' : undefined} onClick={() => chooseBuilding(building, true)}>
+                    <button key={building.id} onClick={() => chooseBuilding(building, true)}>
                       <span><strong>{copy.name}</strong><small>{copy.architectCredit}</small></span>
                       <ArrowRight aria-hidden="true" size={20} weight="regular" />
                     </button>

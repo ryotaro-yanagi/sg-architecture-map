@@ -150,8 +150,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
 .search-results button:first-of-type { border-top: 0; }
 .search-results button:hover { background: var(--interaction-hover); border-radius: 2px; }
 .search-results button:active { background: var(--interaction-pressed); }
-.search-results button.selected { background: var(--system-soft); border-radius: 10px; box-shadow: inset 3px 0 0 var(--accent); }
-.search-results button.selected:active { background: var(--interaction-pressed); }
 .search-results button span { display: grid; gap: 3px; }
 .search-results strong { font: 500 16px/25px var(--font-display); }
 .search-results small { color: var(--muted); font-size: 14px; line-height: 20px; }
