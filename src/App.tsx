@@ -1169,9 +1169,9 @@ function DetailContent({ building, locale, t, onClose, backRef }: LocalizedProps
   return (
     <div className="detail-content">
       <div className="detail-heading">
-        <button ref={backRef} className="back-button" onClick={onClose}>
+        <button ref={backRef} className="back-button" onClick={onClose} aria-label={t.backToOverviewLabel(copy.name)}>
           <ArrowLeft aria-hidden="true" size={16} weight="regular" />
-          {t.backToMap}
+          {t.back}
         </button>
         <span className="record-index">SGM / {String(buildings.indexOf(building) + 1).padStart(2, '0')}</span>
       </div>

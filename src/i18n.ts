@@ -28,7 +28,8 @@ export type Translation = {
   viewDetails: string
   previewLabel: (name: string) => string
   detailLabel: (name: string) => string
-  backToMap: string
+  back: string
+  backToOverviewLabel: (name: string) => string
   photoNotPublished: string
   photoOverlay: string
   photoPlaceholder: string
@@ -73,9 +74,10 @@ export const translations: Record<Locale, Translation> = {
     dataNote: (count) => `${count} places · approximate coordinates`,
     clearSelection: 'Clear selection',
     viewDetails: 'View details',
-    previewLabel: (name) => `${name} preview`,
+    previewLabel: (name) => `${name} overview`,
     detailLabel: (name) => `${name} details`,
-    backToMap: 'Back to map',
+    back: 'Back',
+    backToOverviewLabel: (name) => `Back to ${name} overview`,
     photoNotPublished: 'Photo not published',
     photoOverlay: 'PHOTO · NOT ADDED',
     photoPlaceholder: 'A photo may be added after verification',
@@ -134,9 +136,10 @@ export const translations: Record<Locale, Translation> = {
     dataNote: (count) => `${count}件 · 座標は暫定`,
     clearSelection: '選択を解除',
     viewDetails: '詳しく見る',
-    previewLabel: (name) => `${name}のプレビュー`,
+    previewLabel: (name) => `${name}の概要`,
     detailLabel: (name) => `${name}の詳細`,
-    backToMap: '地図へ戻る',
+    back: '戻る',
+    backToOverviewLabel: (name) => `${name}の概要に戻る`,
     photoNotPublished: '写真は未掲載',
     photoOverlay: '写真 · 未掲載',
     photoPlaceholder: '写真は検証後に掲載予定',
