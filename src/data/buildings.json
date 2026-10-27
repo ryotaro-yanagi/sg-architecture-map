@@ -1397,6 +1397,127 @@
       "scopeGroups": [
         "Kerry Hill Architects"
       ]
+    },
+    {
+      "id": "SGM-0003",
+      "name": "Pullman Singapore Hill Street",
+      "architects": [
+        "DP Architects"
+      ],
+      "architectCredit": "DP Architects",
+      "buildingType": "hospitality",
+      "completionYear": null,
+      "address": "1 Hill Street, Singapore 179949",
+      "coordinates": [
+        103.85061,
+        1.29368
+      ],
+      "coordinatePrecision": "hotel_building_footprint_approximate",
+      "coordinateSource": "https://mapcarta.com/W103110146",
+      "officialSource": "https://www.dpa.com.sg/projects/pullman-singapore-hill-street/",
+      "addressSource": "https://www.pullmansingaporehillstreet.com/inspiring-stays-the-pullman-way/location/",
+      "coordinateReviewNote": "OSM hotel building footprint representative point rather than the operating hotel's published GPS reference.",
+      "photo": null,
+      "publicAccess": "unverified",
+      "editorialStatus": "needs_review",
+      "scopeGroups": [
+        "DP Architects"
+      ]
+    },
+    {
+      "id": "SGM-0006",
+      "name": "Dairy Farm Residences",
+      "architects": [
+        "DP Architects"
+      ],
+      "architectCredit": "DP Architects",
+      "buildingType": "residential",
+      "completionYear": null,
+      "address": "8 Dairy Farm Lane, Singapore 677624",
+      "coordinates": [
+        103.77469,
+        1.36602
+      ],
+      "coordinatePrecision": "multi_block_residential_site_approximate",
+      "coordinateSource": "https://mapcarta.com/W589837961",
+      "officialSource": "https://www.dpa.com.sg/projects/dairy-farm-residences/",
+      "coordinateReviewNote": "OSM residential development footprint, includes residential buildings and retail component; not a unit entrance.",
+      "photo": null,
+      "publicAccess": "unverified",
+      "editorialStatus": "needs_review",
+      "scopeGroups": [
+        "DP Architects"
+      ]
+    },
+    {
+      "id": "SGM-0144",
+      "name": "Khoo Teck Puat Hospital",
+      "aliases": [
+        "KTPH"
+      ],
+      "architects": [
+        "CPG Consultants"
+      ],
+      "architectCredit": "CPG Consultants",
+      "buildingType": "civic_cultural",
+      "completionYear": 2010,
+      "yearSource": "https://pda.designsingapore.org/award-recipients/2011/khoo-teck-puat-hospital/",
+      "openingYear": 2010,
+      "openingSource": "https://pda.designsingapore.org/award-recipients/2011/khoo-teck-puat-hospital/",
+      "pdaAwardYear": 2011,
+      "pdaAwardDiscipline": "Architecture",
+      "pdaAwardSource": "https://pda.designsingapore.org/award-recipients/2011/khoo-teck-puat-hospital/",
+      "address": "90 Yishun Central, Singapore 768828",
+      "coordinates": [
+        103.83865,
+        1.42427
+      ],
+      "coordinatePrecision": "hospital_site_polygon_representative_approximate",
+      "coordinateSource": "https://mapcarta.com/W746034993",
+      "officialSource": "https://pda.designsingapore.org/award-recipients/2011/khoo-teck-puat-hospital/",
+      "addressSource": "https://www.nhghealth.com.sg/ktph/i-want-to/find-directions",
+      "coordinateReviewNote": "Hospital site-level OSM polygon; avoid confusing with nearby similarly named bus stop or the adjacent community hospital.",
+      "photo": null,
+      "publicAccess": "unverified",
+      "editorialStatus": "needs_review",
+      "scopeGroups": [
+        "PDA Design of the Year"
+      ]
+    },
+    {
+      "id": "SGM-0145",
+      "name": "Marina Bay Sands Integrated Resort",
+      "aliases": [
+        "Marina Bay Sands",
+        "MBS"
+      ],
+      "architects": [
+        "Safdie Architects",
+        "Aedas"
+      ],
+      "architectCredit": "Safdie Architects · Aedas (executive architect)",
+      "buildingType": "mixed_use",
+      "completionYear": null,
+      "pdaAwardYear": 2011,
+      "pdaAwardDiscipline": "Architecture",
+      "pdaAwardSource": "https://pda.designsingapore.org/award-recipients/2011/marina-bay-sands-integrated-resort-singapore/",
+      "address": "10 Bayfront Avenue, Singapore 018956",
+      "coordinates": [
+        103.86072,
+        1.2837
+      ],
+      "coordinatePrecision": "integrated_resort_hotel_poi_approximate",
+      "coordinateSource": "https://mapcarta.com/32111032",
+      "officialSource": "https://pda.designsingapore.org/award-recipients/2011/marina-bay-sands-integrated-resort-singapore/",
+      "addressSource": "https://www.marinabaysands.com/company-information/directions-to-marina-bay-sands.html",
+      "coordinateReviewNote": "POI anchor within integrated resort; hotel, convention centre, theatres and museum form a broad development, not a single-point building.",
+      "yearNote": "2011 is the P*DA award year; the source describes staged early openings, not one unambiguous completion year.",
+      "photo": null,
+      "publicAccess": "unverified",
+      "editorialStatus": "needs_review",
+      "scopeGroups": [
+        "PDA Design of the Year"
+      ]
     }
   ]
 }

@@ -223,6 +223,10 @@ const buildingCopy: Record<Locale, Record<string, BuildingCopy>> = {
     'SGM-0141': { name: 'Crescent and Pioneer Halls (NTU)', architectCredit: 'Toyo Ito & Associates · RSP Architects' },
     'SGM-0142': { name: 'The Beaufort Sentosa (now Sofitel Singapore Sentosa)', architectCredit: 'Kerry Hill Architects (original Beaufort resort)' },
     'SGM-0143': { name: 'Genesis Building', architectCredit: 'Kerry Hill Architects' },
+    'SGM-0003': { name: 'Pullman Singapore Hill Street', architectCredit: 'DP Architects' },
+    'SGM-0006': { name: 'Dairy Farm Residences', architectCredit: 'DP Architects' },
+    'SGM-0144': { name: 'Khoo Teck Puat Hospital', architectCredit: 'CPG Consultants' },
+    'SGM-0145': { name: 'Marina Bay Sands Integrated Resort', architectCredit: 'Safdie Architects · Aedas (executive architect)' },
   },
   ja: {
     'dpa-esplanade': { name: 'Esplanade – Theatres on the Bay', architectCredit: 'DP Architects、Michael Wilford & Partners（英国）による協働' },
@@ -275,6 +279,10 @@ const buildingCopy: Record<Locale, Record<string, BuildingCopy>> = {
     'SGM-0141': { name: 'Crescent and Pioneer Halls (NTU)', architectCredit: '伊東豊雄建築設計事務所 · RSP Architects' },
     'SGM-0142': { name: 'The Beaufort Sentosa（現 Sofitel Singapore Sentosa）', architectCredit: 'Kerry Hill Architects（旧Beaufortの設計）' },
     'SGM-0143': { name: 'Genesis Building', architectCredit: 'Kerry Hill Architects' },
+    'SGM-0003': { name: 'Pullman Singapore Hill Street', architectCredit: 'DP Architects' },
+    'SGM-0006': { name: 'Dairy Farm Residences', architectCredit: 'DP Architects' },
+    'SGM-0144': { name: 'Khoo Teck Puat Hospital', architectCredit: 'CPG Consultants' },
+    'SGM-0145': { name: 'Marina Bay Sands Integrated Resort', architectCredit: 'Safdie Architects · Aedas (executive architect)' },
   },
 }
 
