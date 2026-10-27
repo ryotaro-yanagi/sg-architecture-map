@@ -2,7 +2,7 @@
 
 **Version:** v0.1  
 **Status:** Cross-system integration ledger — not a specialist specification  
-**Implementation snapshot:** main at `0fc23ba`  
+**Implementation snapshot:** main at `95b28e9`  
 **Scope:** Reconcile documented decision status with current production use. Detailed tokens and domain decisions remain in each specialist System MD.
 
 ## 1. Status Rule
