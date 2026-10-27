@@ -61,6 +61,13 @@
   font-size: 14px;
   cursor: pointer;
 }
+.appearance-menu { position: relative; }
+.appearance-preview-trigger { display: inline-flex; align-items: center; gap: 5px; }
+.appearance-popover { position: absolute; top: calc(100% + 6px); right: 0; z-index: 20; width: 148px; padding: 4px; background: var(--paper-strong); border: 1px solid var(--line); border-radius: 5px; box-shadow: 0 5px 18px rgba(0,0,0,.12); }
+.appearance-popover button { width: 100%; min-height: var(--control-min); padding: 0 10px; display: flex; justify-content: space-between; align-items: center; gap: 8px; border: 0; border-radius: 3px; background: transparent; color: var(--ink); cursor: pointer; text-align: left; font-size: 14px; }
+.appearance-popover button:hover { background: var(--interaction-hover); }
+.appearance-popover button:active { background: var(--interaction-pressed); }
+.appearance-popover button[aria-checked="true"] { font-weight: 600; }
 .appearance-preview-trigger:hover { background: var(--interaction-hover); }
 .appearance-preview-trigger:active { background: var(--interaction-pressed); }
 /* Inline selected-pin SVG follows the same Day/Night glyph contrast as map symbols. */
