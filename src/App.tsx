@@ -380,6 +380,16 @@ const applyProductionMapTheme = (map: MapLibreMap, nightPreview = false) => {
   if (map.getLayer('building-pins')) {
     map.setLayoutProperty('building-pins', 'icon-image', ['concat', nightPreview ? 'building-pin-night-' : 'building-pin-day-', ['coalesce', ['get', 'mapCategory'], 'fallback']])
   }
+  // Keep transport geometry legible while reducing fine-pattern noise in Night.
+  // Restore the original visibility hierarchy when returning to Day.
+  const railLines = ['road_major_rail', 'road_transit_rail', 'bridge_major_rail', 'bridge_transit_rail', 'tunnel_major_rail', 'tunnel_transit_rail']
+  railLines.forEach(id => {
+    setPaint(map, id, 'line-opacity', nightPreview ? 0.72 : 1)
+    setPaint(map, `${id}_hatching`, 'line-opacity', nightPreview ? 0.16 : 0.4)
+  })
+  ;['road_path_pedestrian', 'bridge_path_pedestrian'].forEach(id =>
+    setPaint(map, id, 'line-opacity', nightPreview ? 0.28 : 0.45))
+  setPaint(map, 'tunnel_path_pedestrian', 'line-opacity', nightPreview ? 0.3 : 0.45)
   // Dark-only overrides for Liberty layers that still have light original paints.
   setPaint(map, 'boundary_3', 'line-color', nightPreview ? '#626A65' : '#B7BBB5')
   if (nightPreview) {
