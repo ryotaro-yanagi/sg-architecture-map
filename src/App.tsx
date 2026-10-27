@@ -452,25 +452,30 @@ const applyProductionMapTheme = (map: MapLibreMap, nightPreview = false) => {
   ;['road_path_pedestrian', 'bridge_path_pedestrian'].forEach(id =>
     setPaint(map, id, 'line-opacity', nightPreview ? 0.28 : 0.45))
   setPaint(map, 'tunnel_path_pedestrian', 'line-opacity', nightPreview ? 0.3 : 0.45)
+  // Replace Liberty's repeated wetland sprite with a quiet flat cartographic fill.
+  // Keep the wetland polygons intact in both modes, unlike hiding the layer at night.
+  setPaint(map, 'landcover_wetland', 'fill-pattern', null)
+  setPaint(map, 'landcover_wetland', 'fill-color', nightPreview ? '#33463A' : '#DCE7CF')
   // Dark-only overrides for Liberty layers that still have light original paints.
   setPaint(map, 'boundary_3', 'line-color', nightPreview ? '#626A65' : '#B7BBB5')
   if (nightPreview) {
-    ;['aeroway_fill', 'landcover_sand', 'landcover_ice'].forEach(id => setPaint(map, id, 'fill-color', '#35413C'))
+    ;['aeroway_fill', 'landcover_ice'].forEach(id => setPaint(map, id, 'fill-color', '#35413C'))
+    setPaint(map, 'landcover_sand', 'fill-color', '#343D37')
     ;['aeroway_runway', 'aeroway_taxiway'].forEach(id => setPaint(map, id, 'line-color', '#54605B'))
     ;['boundary_2', 'boundary_disputed'].forEach(id => setPaint(map, id, 'line-color', '#63736A'))
     ;['road_major_rail', 'road_transit_rail', 'bridge_major_rail', 'bridge_transit_rail', 'tunnel_major_rail', 'tunnel_transit_rail'].forEach(id => setPaint(map, id, 'line-color', '#748079'))
     ;['road_major_rail_hatching', 'road_transit_rail_hatching', 'bridge_major_rail_hatching', 'bridge_transit_rail_hatching', 'tunnel_major_rail_hatching', 'tunnel_transit_rail_hatching'].forEach(id => setPaint(map, id, 'line-color', '#748079'))
-    setPaint(map, 'landcover_wetland', 'fill-opacity', 0)
+    setPaint(map, 'landcover_wetland', 'fill-opacity', 1)
     setPaint(map, 'road_area_pattern', 'fill-opacity', 0)
   } else {
     setPaint(map, 'aeroway_fill', 'fill-color', 'rgba(229, 228, 224, 1)')
-    setPaint(map, 'landcover_sand', 'fill-color', 'rgba(247, 239, 195, 1)')
+    setPaint(map, 'landcover_sand', 'fill-color', '#EEE9DC')
     setPaint(map, 'landcover_ice', 'fill-color', 'rgba(224, 236, 236, 1)')
     ;['aeroway_runway', 'aeroway_taxiway'].forEach(id => setPaint(map, id, 'line-color', '#f0ede9'))
     ;['boundary_2', 'boundary_disputed'].forEach(id => setPaint(map, id, 'line-color', 'hsl(248,1%,41%)'))
     ;['road_major_rail', 'road_transit_rail', 'bridge_major_rail', 'bridge_transit_rail', 'tunnel_major_rail', 'tunnel_transit_rail',
       'road_major_rail_hatching', 'road_transit_rail_hatching', 'bridge_major_rail_hatching', 'bridge_transit_rail_hatching', 'tunnel_major_rail_hatching', 'tunnel_transit_rail_hatching'].forEach(id => setPaint(map, id, 'line-color', '#bbb'))
-    setPaint(map, 'landcover_wetland', 'fill-opacity', 0.8)
+    setPaint(map, 'landcover_wetland', 'fill-opacity', 1)
     setPaint(map, 'road_area_pattern', 'fill-opacity', 1)
   }
   // Night: quieter halos by semantic text role, not one size for every label.
