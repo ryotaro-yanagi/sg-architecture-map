@@ -5,7 +5,7 @@ import { flushSync } from 'react-dom'
 import type { ExpressionSpecification, GeoJSONSource, Map as MapLibreMap } from 'maplibre-gl'
 import data from './data/buildings.json'
 import { getBuildingCopy, getLocaleFromPath, localeHref, translations } from './i18n'
-import type { ErrorInfo, ReactNode, RefObject } from 'react'
+import type { ErrorInfo, PointerEvent as ReactPointerEvent, ReactNode, RefObject } from 'react'
 import type { Locale, Translation } from './i18n'
 import { parseWeatherPayloads } from './weather'
 import type { WeatherState } from './weather'
@@ -969,12 +969,62 @@ function App() {
     return () => window.clearTimeout(timer)
   }, [notice])
 
-  const activateSearch = () => {
-    if (searchOpen) return
-    // Commit the active Search layout before Safari performs its default
-    // pointer-to-focus action. This avoids focusing a field at the bottom edge
-    // and triggering Visual Viewport auto-pan.
+  const animateSearchSurface = (
+    surface: HTMLElement,
+    first: DOMRect,
+    last: DOMRect,
+  ) => {
+    const dx = first.left - last.left
+    const dy = first.top - last.top
+    if (prefersReducedMotion() || (Math.abs(dx) < 1 && Math.abs(dy) < 1)) return
+
+    surface.classList.add('search-transitioning')
+    const animation = surface.animate(
+      [
+        { transform: `translate(${dx}px, ${dy}px)` },
+        { transform: 'translate(0, 0)' },
+      ],
+      {
+        duration: 280,
+        easing: 'cubic-bezier(.22, 1, .36, 1)',
+        fill: 'both',
+      },
+    )
+    const cleanup = () => surface.classList.remove('search-transitioning')
+    animation.addEventListener('finish', cleanup, { once: true })
+    animation.addEventListener('cancel', cleanup, { once: true })
+  }
+
+  const activateSearch = (event: ReactPointerEvent<HTMLInputElement>) => {
+    if (searchOpen || !window.matchMedia('(max-width: 719px)').matches) return
+
+    const input = event.currentTarget
+    const surface = input.closest<HTMLElement>('.bottom-surface')
+    const first = surface?.getBoundingClientRect()
+    event.preventDefault()
+
     flushSync(() => setSearchOpen(true))
+
+    if (surface && first) {
+      animateSearchSurface(surface, first, surface.getBoundingClientRect())
+    }
+    input.focus({ preventScroll: true })
+  }
+
+  const deactivateSearch = () => {
+    const input = searchInputRef.current
+    const surface = input?.closest<HTMLElement>('.bottom-surface')
+    const first = surface?.getBoundingClientRect()
+
+    input?.blur()
+    flushSync(() => {
+      setSearchOpen(false)
+      setQuery('')
+    })
+
+    if (surface && first) {
+      animateSearchSurface(surface, first, surface.getBoundingClientRect())
+    }
   }
 
   const chooseBuilding = (building: Building, focusMap = false) => {
@@ -1087,7 +1137,7 @@ function App() {
                 <input ref={searchInputRef} type="search" value={query} onPointerDown={activateSearch} onChange={(event) => { setQuery(event.target.value); setSearchOpen(true) }} onFocus={() => setSearchOpen(true)} aria-label={t.searchLabel} aria-expanded={searchOpen} aria-controls="search-results" autoComplete="off" placeholder={t.searchPlaceholder} />
                 {hasSearchQuery && <button className="icon-button small" onClick={() => { setQuery(''); searchInputRef.current?.focus() }} aria-label={t.clearSearch}><X aria-hidden="true" size={16} weight="regular" /></button>}
               </div>
-              {searchOpen && <button className="search-cancel" type="button" onClick={() => { setSearchOpen(false); setQuery(''); searchInputRef.current?.blur() }}>{t.cancelSearch}</button>}
+              {searchOpen && <button className="search-cancel" type="button" onClick={deactivateSearch}>{t.cancelSearch}</button>}
             </div>
             {searchOpen && (
               <div className="search-results" id="search-results" aria-label={t.searchResults}>
