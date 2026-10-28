@@ -1,11 +1,10 @@
 import { Component, useEffect, useMemo, useRef, useState } from 'react'
-import { ArrowLeft, ArrowRight, ArrowSquareOut, CaretDown, Check, Cloud, CloudRain, CloudSun, Compass, Crosshair, Lightning, MagnifyingGlass, NavigationArrow, Sun, X } from '@phosphor-icons/react'
+import { ArrowLeft, ArrowRight, ArrowSquareOut, Cloud, CloudRain, CloudSun, Compass, Crosshair, Lightning, MagnifyingGlass, Moon, NavigationArrow, Sun, X } from '@phosphor-icons/react'
 import * as maplibregl from 'maplibre-gl'
-import { flushSync } from 'react-dom'
 import type { ExpressionSpecification, GeoJSONSource, Map as MapLibreMap } from 'maplibre-gl'
 import data from './data/buildings.json'
 import { getBuildingCopy, getLocaleFromPath, localeHref, translations } from './i18n'
-import type { ErrorInfo, PointerEvent as ReactPointerEvent, ReactNode, RefObject } from 'react'
+import type { ErrorInfo, ReactNode, RefObject } from 'react'
 import type { Locale, Translation } from './i18n'
 import { parseWeatherPayloads } from './weather'
 import type { WeatherState } from './weather'
@@ -114,7 +113,7 @@ const getMapCategory = (buildingType: string): MapCategory | null =>
 const buildings = data.buildings as unknown as Building[]
 // Main island, Sentosa and Pulau Ubin; peripheral southern islands are outside this overview.
 const overviewBounds: [[number, number], [number, number]] = [[103.62, 1.205], [104.085, 1.465]]
-const overviewPadding = { top: 54, right: 18, bottom: 100, left: 18 }
+const overviewPadding = { top: 132, right: 18, bottom: 100, left: 18 }
 const mapStateKey = 'sgm-language-map-state'
 
 const prefersReducedMotion = () =>
@@ -627,6 +626,7 @@ class WeatherBoundary extends Component<{ children: ReactNode }, { hasError: boo
 function App() {
   const locale = useMemo(getLocaleFromPath, [])
   const t = translations[locale]
+  const nextLocale: Locale = locale === 'en' ? 'ja' : 'en'
   const restoredState = useMemo(readRestoredMapState, [])
   const requestedSelectedId = useMemo(getRequestedSelectedId, [])
   const mapContainer = useRef<HTMLDivElement>(null)
@@ -646,9 +646,7 @@ function App() {
   const [locating, setLocating] = useState(false)
   const [mapBearing, setMapBearing] = useState(restoredState?.bearing ?? 0)
   const [notice, setNotice] = useState<string | null>(null)
-  const [languageOpen, setLanguageOpen] = useState(false)
   const [appearance, setAppearance] = useState<Appearance>(readAppearance)
-  const [appearanceOpen, setAppearanceOpen] = useState(false)
   const [systemDark, setSystemDark] = useState(() => window.matchMedia('(prefers-color-scheme: dark)').matches)
   const nightPreview = appearance === 'night' || (appearance === 'system' && systemDark)
   // Async MapLibre style/image loading must use the latest requested appearance.
@@ -712,10 +710,10 @@ function App() {
     return () => preference.removeEventListener('change', sync)
   }, [])
 
-  const chooseAppearance = (value: Appearance) => {
-    setAppearance(value)
-    setAppearanceOpen(false)
-    try { window.localStorage.setItem(appearanceKey, value) } catch { /* Private browsing can restrict storage. */ }
+  const toggleAppearance = () => {
+    const nextAppearance: Appearance = nightPreview ? 'day' : 'night'
+    setAppearance(nextAppearance)
+    try { window.localStorage.setItem(appearanceKey, nextAppearance) } catch { /* Private browsing can restrict storage. */ }
   }
 
   useEffect(() => {
@@ -840,6 +838,7 @@ function App() {
           setSelectedId(nearest.id)
           setExpanded(false)
           setSearchOpen(false)
+          setQuery('')
           window.requestAnimationFrame(() => revealBuilding(map, nearest.coordinates))
         } else if (!expandedRef.current) {
           // Compact Preview is transient and can be cleared from the map.
@@ -847,6 +846,7 @@ function App() {
           setSelectedId(null)
           setExpanded(false)
           setSearchOpen(false)
+          setQuery('')
         }
       })
       map.on('mouseenter', 'building-hit-targets', () => { map.getCanvas().style.cursor = 'pointer' })
@@ -954,7 +954,8 @@ function App() {
       if (event.key !== 'Escape') return
       if (searchOpen) {
         setSearchOpen(false)
-        searchInputRef.current?.focus()
+        setQuery('')
+        searchInputRef.current?.blur()
       } else if (expanded) {
         setExpanded(false)
       }
@@ -969,68 +970,24 @@ function App() {
     return () => window.clearTimeout(timer)
   }, [notice])
 
-  const animateSearchSurface = (
-    surface: HTMLElement,
-    first: DOMRect,
-    last: DOMRect,
-  ) => {
-    const dx = first.left - last.left
-    const dy = first.top - last.top
-    if (prefersReducedMotion() || (Math.abs(dx) < 1 && Math.abs(dy) < 1)) return
-
-    surface.classList.add('search-transitioning')
-    const animation = surface.animate(
-      [
-        { transform: `translate(${dx}px, ${dy}px)` },
-        { transform: 'translate(0, 0)' },
-      ],
-      {
-        duration: 280,
-        easing: 'cubic-bezier(.22, 1, .36, 1)',
-        fill: 'both',
-      },
-    )
-    const cleanup = () => surface.classList.remove('search-transitioning')
-    animation.addEventListener('finish', cleanup, { once: true })
-    animation.addEventListener('cancel', cleanup, { once: true })
-  }
-
-  const activateSearch = (event: ReactPointerEvent<HTMLInputElement>) => {
-    if (searchOpen || !window.matchMedia('(max-width: 719px)').matches) return
-
-    const input = event.currentTarget
-    const surface = input.closest<HTMLElement>('.bottom-surface')
-    const first = surface?.getBoundingClientRect()
-    event.preventDefault()
-
-    flushSync(() => setSearchOpen(true))
-
-    if (surface && first) {
-      animateSearchSurface(surface, first, surface.getBoundingClientRect())
-    }
-    input.focus({ preventScroll: true })
+  const openSearch = () => {
+    setSelectedId(null)
+    setExpanded(false)
+    setSearchOpen(true)
   }
 
   const deactivateSearch = () => {
-    const input = searchInputRef.current
-    const surface = input?.closest<HTMLElement>('.bottom-surface')
-    const first = surface?.getBoundingClientRect()
-
-    input?.blur()
-    flushSync(() => {
-      setSearchOpen(false)
-      setQuery('')
-    })
-
-    if (surface && first) {
-      animateSearchSurface(surface, first, surface.getBoundingClientRect())
-    }
+    searchInputRef.current?.blur()
+    setSearchOpen(false)
+    setQuery('')
   }
 
   const chooseBuilding = (building: Building, focusMap = false) => {
     setSelectedId(building.id)
     setExpanded(false)
     setSearchOpen(false)
+    setQuery('')
+    searchInputRef.current?.blur()
     if (focusMap) window.requestAnimationFrame(() => revealBuilding(mapRef.current, building.coordinates))
   }
 
@@ -1038,6 +995,8 @@ function App() {
     setSelectedId(null)
     setExpanded(false)
     setSearchOpen(false)
+    setQuery('')
+    searchInputRef.current?.blur()
     mapRef.current?.fitBounds(overviewBounds, { padding: overviewPadding, maxZoom: 12, bearing: 0, pitch: 0, duration: motionDuration(700) })
   }
 
@@ -1083,78 +1042,81 @@ function App() {
     <main className={`app locale-${locale} state-${surfaceState} ${expanded ? 'details-expanded' : ''} ${nightPreview ? 'night-preview' : ''}`}>
       <div ref={mapContainer} className="map" role="region" aria-label={t.mapLabel} />
 
-      <header className="topbar">
-        <button className="brand" type="button" onClick={goHome} aria-label={t.resetMap}>
-          <span className="brand-mark"><BrandMark /></span>
-        </button>
-        <div className="top-controls">
-          <WeatherBoundary>
-            <a className="weather-chip" href={weatherPortalUrl} target="_blank" rel="noreferrer" aria-label={weather.condition ? `${weather.condition}${weather.temperature === null ? '' : `, ${weather.temperature} degrees Celsius`}` : 'Singapore weather'}>
-              <WeatherGlyph condition={weather.condition} />
-              {weather.temperature !== null && <span>{weather.temperature}°</span>}
-            </a>
-          </WeatherBoundary>
-          <div className="appearance-menu">
-            <button type="button" className="appearance-preview-trigger" aria-label={locale === 'ja' ? '外観設定' : 'Appearance'} aria-haspopup="menu" aria-expanded={appearanceOpen} onClick={() => { setAppearanceOpen(open => !open); setLanguageOpen(false) }}>
-              {locale === 'ja' ? '外観' : 'Theme'} <CaretDown aria-hidden="true" size={16} weight="regular" />
-            </button>
-            {appearanceOpen && (
-              <div className="appearance-popover" role="menu" aria-label={locale === 'ja' ? '外観設定' : 'Appearance'}>
-                {(['system', 'day', 'night'] as const).map(value => (
-                  <button key={value} type="button" role="menuitemradio" aria-checked={appearance === value} onClick={() => chooseAppearance(value)}>
-                    <span>{value === 'system' ? (locale === 'ja' ? 'システム' : 'System') : value === 'day' ? (locale === 'ja' ? 'ライト' : 'Day') : (locale === 'ja' ? 'ダーク' : 'Night')}</span>
-                    {appearance === value && <Check aria-hidden="true" size={16} weight="bold" />}
-                  </button>
-                ))}
-              </div>
-            )}
+      <div className="top-ui">
+        <search className={`search-shell ${searchOpen ? 'open' : ''}`}>
+          <div className="search-bar">
+            <div className="search-input-wrap">
+              <MagnifyingGlass aria-hidden="true" size={20} weight="regular" />
+              <input
+                ref={searchInputRef}
+                type="search"
+                value={query}
+                onChange={(event) => { setQuery(event.target.value); setSearchOpen(true) }}
+                onFocus={openSearch}
+                aria-label={t.searchLabel}
+                aria-expanded={searchOpen}
+                aria-controls="search-results"
+                autoComplete="off"
+                placeholder={t.searchPlaceholder}
+              />
+              {hasSearchQuery && <button className="icon-button small" onClick={() => { setQuery(''); searchInputRef.current?.focus() }} aria-label={t.clearSearch}><X aria-hidden="true" size={16} weight="regular" /></button>}
+            </div>
+            {searchOpen && <button className="search-cancel" type="button" onClick={deactivateSearch}>{t.cancelSearch}</button>}
           </div>
-          <div className="language-menu">
-            <button type="button" className="language-trigger" aria-label={t.languageSwitcher} aria-haspopup="menu" aria-expanded={languageOpen} onClick={() => { setLanguageOpen(open => !open); setAppearanceOpen(false) }}>
-              <span>{locale.toUpperCase()}</span>
-              <CaretDown aria-hidden="true" size={16} weight="regular" />
+          {searchOpen && (
+            <div className="search-results" id="search-results" aria-label={t.searchResults}>
+              {hasSearchQuery && <p className="result-count" role="status" aria-atomic="true">{results.length ? t.resultCount(results.length) : t.noResults}</p>}
+              {results.map((building) => {
+                const copy = getBuildingCopy(locale, building.id, building.name)
+                return (
+                  <button key={building.id} onClick={() => chooseBuilding(building, true)}>
+                    <span><strong>{copy.name}</strong><small>{copy.architectCredit}</small></span>
+                    <ArrowRight aria-hidden="true" size={20} weight="regular" />
+                  </button>
+                )
+              })}
+            </div>
+          )}
+        </search>
+
+        <div className="control-row">
+          <div className="control-left">
+            <button className="brand" type="button" onClick={goHome} aria-label={t.resetMap}>
+              <span className="brand-mark"><BrandMark /></span>
             </button>
-            {languageOpen && (
-              <nav className="language-popover" aria-label={t.languageSwitcher}>
-                <a href={localeHref('en', { selected: selectedId ?? '', sheet: expanded ? 'expanded' : 'compact' })} hrefLang="en" aria-current={locale === 'en' ? 'page' : undefined} onClick={switchLanguage}>
-                  <span>EN</span>{locale === 'en' && <Check aria-hidden="true" size={16} weight="bold" />}
-                </a>
-                <a href={localeHref('ja', { selected: selectedId ?? '', sheet: expanded ? 'expanded' : 'compact' })} hrefLang="ja" aria-current={locale === 'ja' ? 'page' : undefined} onClick={switchLanguage}>
-                  <span>JP</span>{locale === 'ja' && <Check aria-hidden="true" size={16} weight="bold" />}
-                </a>
-              </nav>
-            )}
+            <WeatherBoundary>
+              <a className="weather-chip" href={weatherPortalUrl} target="_blank" rel="noreferrer" aria-label={weather.condition ? `${weather.condition}${weather.temperature === null ? '' : `, ${weather.temperature} degrees Celsius`}` : 'Singapore weather'}>
+                <WeatherGlyph condition={weather.condition} />
+                {weather.temperature !== null && <span>{weather.temperature}°</span>}
+              </a>
+            </WeatherBoundary>
+          </div>
+          <div className="control-right">
+            <a
+              className="language-trigger"
+              href={localeHref(nextLocale, { selected: selectedId ?? '', sheet: expanded ? 'expanded' : 'compact' })}
+              hrefLang={nextLocale}
+              onClick={switchLanguage}
+              aria-label={locale === 'en' ? 'Switch to Japanese' : '英語に切り替える'}
+            >
+              <span>{nextLocale.toUpperCase()}</span>
+            </a>
+            <button
+              type="button"
+              className="appearance-toggle"
+              aria-label={nightPreview ? (locale === 'ja' ? '昼表示に切り替える' : 'Switch to Day') : (locale === 'ja' ? '夜表示に切り替える' : 'Switch to Night')}
+              onClick={toggleAppearance}
+            >
+              {nightPreview
+                ? <Sun aria-hidden="true" size={20} weight="regular" />
+                : <Moon aria-hidden="true" size={20} weight="regular" />}
+            </button>
           </div>
         </div>
-      </header>
+      </div>
 
-      <div className={`bottom-surface ${surfaceState}`}>
-        {!selected ? (
-          <search className={`search-shell ${searchOpen ? 'open' : ''}`}>
-            <div className="search-bar">
-              <div className="search-input-wrap">
-                <MagnifyingGlass aria-hidden="true" size={20} weight="regular" />
-                <input ref={searchInputRef} type="search" value={query} onPointerDown={activateSearch} onChange={(event) => { setQuery(event.target.value); setSearchOpen(true) }} onFocus={() => setSearchOpen(true)} aria-label={t.searchLabel} aria-expanded={searchOpen} aria-controls="search-results" autoComplete="off" placeholder={t.searchPlaceholder} />
-                {hasSearchQuery && <button className="icon-button small" onClick={() => { setQuery(''); searchInputRef.current?.focus() }} aria-label={t.clearSearch}><X aria-hidden="true" size={16} weight="regular" /></button>}
-              </div>
-              {searchOpen && <button className="search-cancel" type="button" onClick={deactivateSearch}>{t.cancelSearch}</button>}
-            </div>
-            {searchOpen && (
-              <div className="search-results" id="search-results" aria-label={t.searchResults}>
-                {hasSearchQuery && <p className="result-count" role="status" aria-atomic="true">{results.length ? t.resultCount(results.length) : t.noResults}</p>}
-                {results.map((building) => {
-                  const copy = getBuildingCopy(locale, building.id, building.name)
-                  return (
-                    <button key={building.id} onClick={() => chooseBuilding(building, true)}>
-                      <span><strong>{copy.name}</strong><small>{copy.architectCredit}</small></span>
-                      <ArrowRight aria-hidden="true" size={20} weight="regular" />
-                    </button>
-                  )
-                })}
-              </div>
-            )}
-          </search>
-        ) : (
+      {selected && (
+        <div className={`bottom-surface ${surfaceState}`}>
           <aside className="place-surface" aria-label={expanded ? t.detailLabel(getBuildingCopy(locale, selected.id, selected.name).name) : t.previewLabel(getBuildingCopy(locale, selected.id, selected.name).name)}>
             <div className="sheet-compact" aria-hidden={expanded}>
               <PreviewCard
@@ -1172,8 +1134,8 @@ function App() {
               <DetailContent building={selected} locale={locale} t={t} onClose={() => setExpanded(false)} backRef={detailBackRef} />
             </div>
           </aside>
-        )}
-      </div>
+        </div>
+      )}
 
       <div className="map-tools">
         {Math.abs(((mapBearing + 180) % 360 + 360) % 360 - 180) > 3 && (
