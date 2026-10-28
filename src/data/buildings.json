@@ -1675,6 +1675,37 @@
       "scopeGroups": [
         "DP Architects"
       ]
+    },
+    {
+      "id": "SGM-0149",
+      "name": "The Linear",
+      "aliases": [
+        "The Linear Condominium"
+      ],
+      "architects": [
+        "TANGE Associates"
+      ],
+      "architectCredit": "TANGE Associates (post-2005 practice)",
+      "buildingType": "residential",
+      "completionYear": 2007,
+      "yearSource": "https://www.tangeweb.com/works/works_no-161/",
+      "address": "880–898 Upper Bukit Timah Road, Singapore 678181–678210",
+      "addressSource": "https://opengovsg.com/strata-title/3212",
+      "coordinates": [
+        103.762846,
+        1.375395
+      ],
+      "coordinatePrecision": "site_anchor_block_888_approximate",
+      "coordinateSource": "https://www.sgpostalcode.com/postal/678185",
+      "officialSource": "https://www.tangeweb.com/works/works_no-161/",
+      "coordinateReviewNote": "The development comprises ten blocks from 880 to 898 Upper Bukit Timah Road. The marker uses Block 888 as an approximate central site anchor, not a unit or entrance.",
+      "yearNote": "TANGE Associates labels the work Singapore 2007; current property records report 2006 completion/TOP. The practice year is retained pending reconciliation.",
+      "photo": null,
+      "publicAccess": "unverified",
+      "editorialStatus": "needs_review",
+      "scopeGroups": [
+        "TANGE successor practice"
+      ]
     }
   ]
 }
