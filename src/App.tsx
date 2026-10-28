@@ -144,9 +144,9 @@ const revealBuilding = (
   let top = Math.max(pinHeight + margin, bounds.height * 0.16)
   let bottom = Math.min(bounds.height - margin, bounds.height * 0.84)
 
-  // Keep the pin below persistent top controls. The topbar itself spans the
-  // viewport, so use the visible controls rather than its full bounding box.
-  const topControls = Array.from(document.querySelectorAll<HTMLElement>('.brand, .top-controls'))
+  // Keep the pin below the persistent Search + auxiliary-control stack.
+  // Measure the visible surfaces rather than the full top UI wrapper.
+  const topControls = Array.from(document.querySelectorAll<HTMLElement>('.search-bar, .control-row'))
     .map(element => element.getBoundingClientRect())
     .filter(rect => rect.bottom > bounds.top && rect.top < bounds.bottom)
   if (topControls.length) {
