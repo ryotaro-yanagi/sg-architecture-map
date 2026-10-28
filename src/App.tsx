@@ -1,5 +1,5 @@
 import { Component, useEffect, useMemo, useRef, useState } from 'react'
-import { ArrowLeft, ArrowRight, ArrowSquareOut, CaretDown, Check, Cloud, CloudRain, CloudSun, Compass, Crosshair, Lightning, MagnifyingGlass, NavigationArrow, Sun, X } from '@phosphor-icons/react'
+import { ArrowLeft, ArrowRight, ArrowSquareOut, CaretDown, Check, Cloud, CloudRain, CloudSun, Compass, Crosshair, Lightning, MagnifyingGlass, Moon, NavigationArrow, Sun, X } from '@phosphor-icons/react'
 import * as maplibregl from 'maplibre-gl'
 import type { ExpressionSpecification, GeoJSONSource, Map as MapLibreMap } from 'maplibre-gl'
 import data from './data/buildings.json'
@@ -647,7 +647,6 @@ function App() {
   const [notice, setNotice] = useState<string | null>(null)
   const [languageOpen, setLanguageOpen] = useState(false)
   const [appearance, setAppearance] = useState<Appearance>(readAppearance)
-  const [appearanceOpen, setAppearanceOpen] = useState(false)
   const [systemDark, setSystemDark] = useState(() => window.matchMedia('(prefers-color-scheme: dark)').matches)
   const nightPreview = appearance === 'night' || (appearance === 'system' && systemDark)
   // Async MapLibre style/image loading must use the latest requested appearance.
@@ -711,10 +710,11 @@ function App() {
     return () => preference.removeEventListener('change', sync)
   }, [])
 
-  const chooseAppearance = (value: Appearance) => {
-    setAppearance(value)
-    setAppearanceOpen(false)
-    try { window.localStorage.setItem(appearanceKey, value) } catch { /* Private browsing can restrict storage. */ }
+  const toggleAppearance = () => {
+    const nextAppearance: Appearance = nightPreview ? 'day' : 'night'
+    setAppearance(nextAppearance)
+    setLanguageOpen(false)
+    try { window.localStorage.setItem(appearanceKey, nextAppearance) } catch { /* Private browsing can restrict storage. */ }
   }
 
   useEffect(() => {
@@ -1070,23 +1070,20 @@ function App() {
               {weather.temperature !== null && <span>{weather.temperature}°</span>}
             </a>
           </WeatherBoundary>
-          <div className="appearance-menu">
-            <button type="button" className="appearance-preview-trigger" aria-label={locale === 'ja' ? '外観設定' : 'Appearance'} aria-haspopup="menu" aria-expanded={appearanceOpen} onClick={() => { setAppearanceOpen(open => !open); setLanguageOpen(false) }}>
-              {locale === 'ja' ? '外観' : 'Theme'} <CaretDown aria-hidden="true" size={16} weight="regular" />
+          <div className="appearance-control">
+            <button
+              type="button"
+              className="appearance-toggle"
+              aria-label={nightPreview ? (locale === 'ja' ? '昼表示に切り替える' : 'Switch to Day') : (locale === 'ja' ? '夜表示に切り替える' : 'Switch to Night')}
+              onClick={toggleAppearance}
+            >
+              {nightPreview
+                ? <Sun aria-hidden="true" size={20} weight="regular" />
+                : <Moon aria-hidden="true" size={20} weight="regular" />}
             </button>
-            {appearanceOpen && (
-              <div className="appearance-popover" role="menu" aria-label={locale === 'ja' ? '外観設定' : 'Appearance'}>
-                {(['system', 'day', 'night'] as const).map(value => (
-                  <button key={value} type="button" role="menuitemradio" aria-checked={appearance === value} onClick={() => chooseAppearance(value)}>
-                    <span>{value === 'system' ? (locale === 'ja' ? 'システム' : 'System') : value === 'day' ? (locale === 'ja' ? 'ライト' : 'Day') : (locale === 'ja' ? 'ダーク' : 'Night')}</span>
-                    {appearance === value && <Check aria-hidden="true" size={16} weight="bold" />}
-                  </button>
-                ))}
-              </div>
-            )}
           </div>
           <div className="language-menu">
-            <button type="button" className="language-trigger" aria-label={t.languageSwitcher} aria-haspopup="menu" aria-expanded={languageOpen} onClick={() => { setLanguageOpen(open => !open); setAppearanceOpen(false) }}>
+            <button type="button" className="language-trigger" aria-label={t.languageSwitcher} aria-haspopup="menu" aria-expanded={languageOpen} onClick={() => setLanguageOpen(open => !open)}>
               <span>{locale.toUpperCase()}</span>
               <CaretDown aria-hidden="true" size={16} weight="regular" />
             </button>
