@@ -839,6 +839,7 @@ function App() {
           setExpanded(false)
           setSearchOpen(false)
           setQuery('')
+          searchInputRef.current?.blur()
           window.requestAnimationFrame(() => revealBuilding(map, nearest.coordinates))
         } else if (!expandedRef.current) {
           // Compact Preview is transient and can be cleared from the map.
@@ -847,6 +848,7 @@ function App() {
           setExpanded(false)
           setSearchOpen(false)
           setQuery('')
+          searchInputRef.current?.blur()
         }
       })
       map.on('mouseenter', 'building-hit-targets', () => { map.getCanvas().style.cursor = 'pointer' })
@@ -976,12 +978,6 @@ function App() {
     setSearchOpen(true)
   }
 
-  const deactivateSearch = () => {
-    searchInputRef.current?.blur()
-    setSearchOpen(false)
-    setQuery('')
-  }
-
   const chooseBuilding = (building: Building, focusMap = false) => {
     setSelectedId(building.id)
     setExpanded(false)
@@ -1061,7 +1057,6 @@ function App() {
               />
               {hasSearchQuery && <button className="icon-button small" onClick={() => { setQuery(''); searchInputRef.current?.focus() }} aria-label={t.clearSearch}><X aria-hidden="true" size={16} weight="regular" /></button>}
             </div>
-            {searchOpen && <button className="search-cancel" type="button" onClick={deactivateSearch}>{t.cancelSearch}</button>}
           </div>
           {searchOpen && (
             <div className="search-results" id="search-results" aria-label={t.searchResults}>
