@@ -1,7 +1,7 @@
 # SGM / Visual System Handoff
 
-**Date:** 2026-10-28  
-**Source state:** main at `95b28e9`  
+**Date:** 2026-10-29  
+**Source state:** main at `b0094fb`  
 **Primary reference:** `docs/SGM_Visual_System_v0.2.md`  
 **Purpose:** Continue Visual System research and controlled production experiments in a new chat without reopening resolved v0.1 decisions.
 
@@ -22,6 +22,34 @@ The v0.1 phase established a high-quality functional baseline:
 - refined Search, utility, marker and record hierarchy.
 
 This baseline is intentionally restrained and highly legible. The current problem is not lack of polish. It is that the interface can feel **too system-like, hard and administrative** for a product whose purpose is to make people want to go out, look around and discover architecture.
+
+## 1A. Latest real-device review — 2026-10-29
+
+The latest iPhone Safari screenshots confirm that the v0.1 baseline is visually mature: spacing, typography, markers, map hierarchy and controls are coherent. The next problem is **character, not polish**.
+
+Observed strengths:
+- map remains the largest perceptual field;
+- architecture markers read clearly over the cartography;
+- Search / Preview / Detail hierarchy is understandable;
+- controls are optically clean and technically consistent;
+- EN / JA and Day / Night already behave as one product.
+
+Observed tension:
+- the top utility group reads as a compact **settings toolbar** rather than a set of city-exploration tools;
+- repeated square / rounded-rectangle containers create an administrative, system-like tone;
+- Theme and Language both require opening a menu before the simple state change happens;
+- Weather is grouped with settings even though it is city information;
+- the interface is refined but does not yet create enough desire to **go out, look around, change perspective and discover**;
+- current Preview / Detail motion feels mechanically polished but not yet semantically inevitable.
+
+Reference lesson from Apple Maps:
+- use it for **interaction grammar**, not visual styling;
+- place controls where their role is immediately understandable;
+- prefer recognizable symbols for common actions;
+- let a simple tap produce a simple, predictable result;
+- keep the map interactive and preserve geographic context around place information.
+
+The design response is therefore not “make everything round.” It is to make the system feel more **organic, variable and exploratory by assigning shape, placement and motion according to role**.
 
 ## 2. Direction change
 
@@ -244,6 +272,24 @@ Recommended order:
 
 Production must show only the chosen experiment. No permanent A/B UI.
 
+## 9A. Current production baseline before v0.2 experiments
+
+Do not assume the screenshots represent unfinished styling. They are the deliberate end-state of the v0.1 refinement phase.
+
+Current production qualities to preserve unless a v0.2 experiment proves a better relationship:
+- calm warm cartography;
+- Gentle Pop architecture categories;
+- selected marker emphasis and camera coordination;
+- flat opaque surfaces;
+- Source Sans / Source Serif role separation;
+- map-first Bottom Surface architecture;
+- nonmodal Detail;
+- compact Search hierarchy;
+- direct access to Google Maps / Search / Images from Detail;
+- minimum control sizing, focus visibility and Reduced Motion support.
+
+Recent main also includes ongoing architecture-database additions unrelated to the Visual System. Do not treat database commits as visual regressions.
+
 ## 10. Important current technical / visual issue
 
 ### Debugging handoff — iOS software keyboard
@@ -332,6 +378,19 @@ Use for motion discipline:
 - **expressive motion** for occasional important transitions where movement carries meaning;
 - related semantic actions should share related choreography.
 
+## 14A. What must be re-shared in the new chat
+
+The new chat can read repository documents, but it should not be assumed to inherit the visual attachments from this conversation.
+
+For the first review, re-upload a small representative set:
+1. current EN overview;
+2. current JA overview;
+3. current Theme menu;
+4. current Detail state;
+5. one Apple Maps reference screenshot or short recording that demonstrates the desired direct-control / distributed-placement behavior.
+
+The full old image set is not necessary. The purpose is to calibrate **current visual tone and interaction feel**, not to reconstruct the entire conversation.
+
 ## 15. Prompt for the next Visual System chat
 
 Paste the prompt below into a new project chat.
@@ -376,6 +435,8 @@ Brand / home mark exploration also belongs to a separate Iconography / Identity 
 
 Start with the smallest useful v0.2 experiment:
 **direct Day/Night interaction → direct EN/JA interaction → weather separation → distributed control placement → role-based shape grammar → semantic motion.**
+
+Before changing code, explicitly state which **Urban Lenses** principle the experiment tests and what existing v0.1 quality must remain unchanged. One experiment should change one relationship, not restyle the whole interface.
 
 Do not add permanent comparison controls to production. Use reversible commits and screenshots for comparison.
 
