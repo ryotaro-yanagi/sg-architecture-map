@@ -724,6 +724,41 @@ function App() {
   }, [nightPreview])
 
   useEffect(() => {
+    const viewport = window.visualViewport
+    if (!viewport) return
+
+    const syncSearchViewport = () => {
+      const heightLoss = Math.max(0, window.innerHeight - viewport.height)
+      const bodyShift = Math.max(0, -document.body.getBoundingClientRect().top)
+      const pageShift = Math.max(0, viewport.pageTop - window.scrollY)
+      const viewportShift = Math.max(0, viewport.offsetTop, pageShift, bodyShift)
+      const searchFocused = document.activeElement === searchInputRef.current
+      const keyboardVisible = heightLoss > 120 || (searchFocused && viewportShift > 80)
+
+      document.documentElement.style.setProperty(
+        '--search-viewport-shift',
+        `${keyboardVisible ? viewportShift : 0}px`,
+      )
+    }
+
+    syncSearchViewport()
+    viewport.addEventListener('resize', syncSearchViewport)
+    viewport.addEventListener('scroll', syncSearchViewport)
+    window.addEventListener('resize', syncSearchViewport)
+    document.addEventListener('focusin', syncSearchViewport)
+    document.addEventListener('focusout', syncSearchViewport)
+
+    return () => {
+      viewport.removeEventListener('resize', syncSearchViewport)
+      viewport.removeEventListener('scroll', syncSearchViewport)
+      window.removeEventListener('resize', syncSearchViewport)
+      document.removeEventListener('focusin', syncSearchViewport)
+      document.removeEventListener('focusout', syncSearchViewport)
+      document.documentElement.style.removeProperty('--search-viewport-shift')
+    }
+  }, [])
+
+  useEffect(() => {
     document.documentElement.lang = locale
     document.documentElement.dir = 'ltr'
     const url = new URL(window.location.href)
