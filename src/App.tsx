@@ -1,6 +1,7 @@
 import { Component, useEffect, useMemo, useRef, useState } from 'react'
 import { ArrowLeft, ArrowRight, ArrowSquareOut, CaretDown, Check, Cloud, CloudRain, CloudSun, Compass, Crosshair, Lightning, MagnifyingGlass, NavigationArrow, Sun, X } from '@phosphor-icons/react'
 import * as maplibregl from 'maplibre-gl'
+import { flushSync } from 'react-dom'
 import type { ExpressionSpecification, GeoJSONSource, Map as MapLibreMap } from 'maplibre-gl'
 import data from './data/buildings.json'
 import { getBuildingCopy, getLocaleFromPath, localeHref, translations } from './i18n'
@@ -724,39 +725,6 @@ function App() {
   }, [nightPreview])
 
   useEffect(() => {
-    const viewport = window.visualViewport
-    if (!viewport) return
-
-    const syncSearchViewport = () => {
-      const heightLoss = Math.max(0, window.innerHeight - viewport.height)
-      const searchFocused = document.activeElement === searchInputRef.current
-      const keyboardVisible = searchFocused && heightLoss > 120
-      const viewportShift = keyboardVisible ? Math.max(0, viewport.offsetTop) : 0
-
-      document.documentElement.style.setProperty(
-        '--search-viewport-shift',
-        `${viewportShift}px`,
-      )
-    }
-
-    syncSearchViewport()
-    viewport.addEventListener('resize', syncSearchViewport)
-    viewport.addEventListener('scroll', syncSearchViewport)
-    window.addEventListener('resize', syncSearchViewport)
-    document.addEventListener('focusin', syncSearchViewport)
-    document.addEventListener('focusout', syncSearchViewport)
-
-    return () => {
-      viewport.removeEventListener('resize', syncSearchViewport)
-      viewport.removeEventListener('scroll', syncSearchViewport)
-      window.removeEventListener('resize', syncSearchViewport)
-      document.removeEventListener('focusin', syncSearchViewport)
-      document.removeEventListener('focusout', syncSearchViewport)
-      document.documentElement.style.removeProperty('--search-viewport-shift')
-    }
-  }, [])
-
-  useEffect(() => {
     document.documentElement.lang = locale
     document.documentElement.dir = 'ltr'
     const url = new URL(window.location.href)
@@ -1001,6 +969,14 @@ function App() {
     return () => window.clearTimeout(timer)
   }, [notice])
 
+  const activateSearch = () => {
+    if (searchOpen) return
+    // Commit the active Search layout before Safari performs its default
+    // pointer-to-focus action. This avoids focusing a field at the bottom edge
+    // and triggering Visual Viewport auto-pan.
+    flushSync(() => setSearchOpen(true))
+  }
+
   const chooseBuilding = (building: Building, focusMap = false) => {
     setSelectedId(building.id)
     setExpanded(false)
@@ -1108,7 +1084,7 @@ function App() {
             <div className="search-bar">
               <div className="search-input-wrap">
                 <MagnifyingGlass aria-hidden="true" size={20} weight="regular" />
-                <input ref={searchInputRef} type="search" value={query} onChange={(event) => { setQuery(event.target.value); setSearchOpen(true) }} onFocus={() => setSearchOpen(true)} aria-label={t.searchLabel} aria-expanded={searchOpen} aria-controls="search-results" autoComplete="off" placeholder={t.searchPlaceholder} />
+                <input ref={searchInputRef} type="search" value={query} onPointerDown={activateSearch} onChange={(event) => { setQuery(event.target.value); setSearchOpen(true) }} onFocus={() => setSearchOpen(true)} aria-label={t.searchLabel} aria-expanded={searchOpen} aria-controls="search-results" autoComplete="off" placeholder={t.searchPlaceholder} />
                 {hasSearchQuery && <button className="icon-button small" onClick={() => { setQuery(''); searchInputRef.current?.focus() }} aria-label={t.clearSearch}><X aria-hidden="true" size={16} weight="regular" /></button>}
               </div>
               {searchOpen && <button className="search-cancel" type="button" onClick={() => { setSearchOpen(false); setQuery(''); searchInputRef.current?.blur() }}>{t.cancelSearch}</button>}
