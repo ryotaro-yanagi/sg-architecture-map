@@ -239,6 +239,8 @@ const buildingCopy: Record<Locale, Record<string, BuildingCopy>> = {
     'SGM-0146': { name: 'Bird Paradise', architectCredit: 'Mandai Wildlife Group · RSP Architects' },
     'SGM-0011': { name: 'Sengkang Hospitals', architectCredit: 'DP Architects' },
     'SGM-0012': { name: 'Frasers Tower', architectCredit: 'DP Architects' },
+    'SGM-0147': { name: 'HomeTeamNS Khatib Clubhouse', architectCredit: 'DP Architects · DP Green' },
+    'SGM-0148': { name: 'Raffles Girls\’ School (Braddell Campus)', architectCredit: 'DP Architects · DP Green' },
   },
   ja: {
     'dpa-esplanade': { name: 'Esplanade – Theatres on the Bay', architectCredit: 'DP Architects、Michael Wilford & Partners（英国）による協働' },
@@ -298,6 +300,8 @@ const buildingCopy: Record<Locale, Record<string, BuildingCopy>> = {
     'SGM-0146': { name: 'Bird Paradise', architectCredit: 'Mandai Wildlife Group · RSP Architects' },
     'SGM-0011': { name: 'Sengkang Hospitals', architectCredit: 'DP Architects' },
     'SGM-0012': { name: 'Frasers Tower', architectCredit: 'DP Architects' },
+    'SGM-0147': { name: 'HomeTeamNS Khatib Clubhouse', architectCredit: 'DP Architects · DP Green' },
+    'SGM-0148': { name: 'Raffles Girls\’ School (Braddell Campus)', architectCredit: 'DP Architects · DP Green' },
   },
 }
 

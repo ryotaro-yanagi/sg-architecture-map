@@ -1616,6 +1616,65 @@
       "scopeGroups": [
         "DP Architects"
       ]
+    },
+    {
+      "id": "SGM-0147",
+      "name": "HomeTeamNS Khatib Clubhouse",
+      "architects": [
+        "DP Architects",
+        "DP Green"
+      ],
+      "architectCredit": "DP Architects · DP Green",
+      "buildingType": "community",
+      "completionYear": null,
+      "address": "2 Yishun Walk, Singapore 767944",
+      "coordinates": [
+        103.8311,
+        1.41479
+      ],
+      "coordinatePrecision": "recreation_site_polygon_representative_point_approximate",
+      "coordinateSource": "https://mapcarta.com/W1355667013",
+      "officialSource": "https://www.dpa.com.sg/projects/hometeamns-khatib-clubhouse/",
+      "addressSource": "https://hometeamnshelp.zendesk.com/hc/en-sg/articles/4408444110233-Where-is-HomeTeamNS-Khatib-located",
+      "yearNote": "Awards dated 2020–22 do not establish a construction completion date.",
+      "photo": null,
+      "publicAccess": "unverified",
+      "editorialStatus": "needs_review",
+      "scopeGroups": [
+        "DP Architects"
+      ]
+    },
+    {
+      "id": "SGM-0148",
+      "name": "Raffles Girls’ School (Braddell Campus)",
+      "aliases": [
+        "Raffles Girls' Secondary School",
+        "Raffles Girls' School",
+        "RGSS"
+      ],
+      "architects": [
+        "DP Architects",
+        "DP Green"
+      ],
+      "architectCredit": "DP Architects · DP Green",
+      "buildingType": "education",
+      "completionYear": null,
+      "address": "2 Braddell Rise, Singapore 318871",
+      "coordinates": [
+        103.84315,
+        1.34308
+      ],
+      "coordinatePrecision": "school_site_polygon_representative_point_approximate",
+      "coordinateSource": "https://mapcarta.com/W538457085",
+      "officialSource": "https://www.dpa.com.sg/projects/raffles-girls-secondary-school/",
+      "addressSource": "https://www.rgs.edu.sg/contact-us/",
+      "coordinateReviewNote": "The school confirms its current address at 2 Braddell Rise; DP official architecture listing gives 321 Braddell Road. Marker represents the campus, not a specific entrance.",
+      "photo": null,
+      "publicAccess": "unverified",
+      "editorialStatus": "needs_review",
+      "scopeGroups": [
+        "DP Architects"
+      ]
     }
   ]
 }
