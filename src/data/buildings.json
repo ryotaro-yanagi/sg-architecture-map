@@ -1554,6 +1554,68 @@
       "scopeGroups": [
         "PDA Design of the Year"
       ]
+    },
+    {
+      "id": "SGM-0011",
+      "name": "Sengkang Hospitals",
+      "aliases": [
+        "Sengkang General Hospital",
+        "Sengkang Community Hospital",
+        "SKH"
+      ],
+      "architects": [
+        "DP Architects",
+        "DP Design",
+        "DP Green",
+        "DP Sustainable Design"
+      ],
+      "architectCredit": "DP Architects",
+      "buildingType": "healthcare",
+      "completionYear": null,
+      "address": "5 Anchorvale Street, Singapore 545047",
+      "coordinates": [
+        103.89253,
+        1.39521
+      ],
+      "coordinatePrecision": "hospital_campus_representative_point_approximate",
+      "coordinateSource": "https://mapcarta.com/W33570275",
+      "officialSource": "https://www.dpa.com.sg/projects/sengkang-hospitals/",
+      "coordinateReviewNote": "Campus representative point; not a specified hospital entrance.",
+      "photo": null,
+      "publicAccess": "unverified",
+      "editorialStatus": "needs_review",
+      "scopeGroups": [
+        "DP Architects"
+      ]
+    },
+    {
+      "id": "SGM-0012",
+      "name": "Frasers Tower",
+      "aliases": [
+        "Fraser Tower"
+      ],
+      "architects": [
+        "DP Architects"
+      ],
+      "architectCredit": "DP Architects",
+      "buildingType": "office",
+      "completionYear": 2018,
+      "yearSource": "https://mapcarta.com/W627103707",
+      "address": "182 Cecil Street, Singapore 069547",
+      "coordinates": [
+        103.84737,
+        1.27886
+      ],
+      "coordinatePrecision": "building_footprint_representative_point_approximate",
+      "coordinateSource": "https://mapcarta.com/W627103707",
+      "officialSource": "https://www.dpa.com.sg/projects/frasers-tower/",
+      "addressSource": "https://www.frasersproperty.com/sg/our-portfolio/commercial/frasers-tower",
+      "photo": null,
+      "publicAccess": "unverified",
+      "editorialStatus": "needs_review",
+      "scopeGroups": [
+        "DP Architects"
+      ]
     }
   ]
 }

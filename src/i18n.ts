@@ -110,6 +110,7 @@ export const translations: Record<Locale, Translation> = {
       office: 'Office',
       residential: 'Residential',
       sports: 'Sports & entertainment',
+      healthcare: 'Healthcare',
       infrastructure: 'Infrastructure',
     },
   },
@@ -173,6 +174,7 @@ export const translations: Record<Locale, Translation> = {
       office: '業務',
       residential: '住宅',
       sports: 'スポーツ・興行',
+      healthcare: '医療',
       infrastructure: 'インフラ',
     },
   },
@@ -235,6 +237,8 @@ const buildingCopy: Record<Locale, Record<string, BuildingCopy>> = {
     'SGM-0144': { name: 'Khoo Teck Puat Hospital', architectCredit: 'CPG Consultants' },
     'SGM-0145': { name: 'Marina Bay Sands Integrated Resort', architectCredit: 'Safdie Architects · Aedas (executive architect)' },
     'SGM-0146': { name: 'Bird Paradise', architectCredit: 'Mandai Wildlife Group · RSP Architects' },
+    'SGM-0011': { name: 'Sengkang Hospitals', architectCredit: 'DP Architects' },
+    'SGM-0012': { name: 'Frasers Tower', architectCredit: 'DP Architects' },
   },
   ja: {
     'dpa-esplanade': { name: 'Esplanade – Theatres on the Bay', architectCredit: 'DP Architects、Michael Wilford & Partners（英国）による協働' },
@@ -292,6 +296,8 @@ const buildingCopy: Record<Locale, Record<string, BuildingCopy>> = {
     'SGM-0144': { name: 'Khoo Teck Puat Hospital', architectCredit: 'CPG Consultants' },
     'SGM-0145': { name: 'Marina Bay Sands Integrated Resort', architectCredit: 'Safdie Architects · Aedas (executive architect)' },
     'SGM-0146': { name: 'Bird Paradise', architectCredit: 'Mandai Wildlife Group · RSP Architects' },
+    'SGM-0011': { name: 'Sengkang Hospitals', architectCredit: 'DP Architects' },
+    'SGM-0012': { name: 'Frasers Tower', architectCredit: 'DP Architects' },
   },
 }
 
