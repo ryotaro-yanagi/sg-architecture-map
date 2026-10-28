@@ -729,15 +729,13 @@ function App() {
 
     const syncSearchViewport = () => {
       const heightLoss = Math.max(0, window.innerHeight - viewport.height)
-      const bodyShift = Math.max(0, -document.body.getBoundingClientRect().top)
-      const pageShift = Math.max(0, viewport.pageTop - window.scrollY)
-      const viewportShift = Math.max(0, viewport.offsetTop, pageShift, bodyShift)
       const searchFocused = document.activeElement === searchInputRef.current
-      const keyboardVisible = heightLoss > 120 || (searchFocused && viewportShift > 80)
+      const keyboardVisible = searchFocused && heightLoss > 120
+      const viewportShift = keyboardVisible ? Math.max(0, viewport.offsetTop) : 0
 
       document.documentElement.style.setProperty(
         '--search-viewport-shift',
-        `${keyboardVisible ? viewportShift : 0}px`,
+        `${viewportShift}px`,
       )
     }
 
