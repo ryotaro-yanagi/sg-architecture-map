@@ -1065,7 +1065,7 @@ function App() {
                 const copy = getBuildingCopy(locale, building.id, building.name)
                 return (
                   <button key={building.id} onClick={() => chooseBuilding(building, true)}>
-                    <span><strong>{copy.name}</strong><small>{copy.architectCredit}</small></span>
+                    <span><strong>{copy.name}</strong><small>{copy.previewArchitectCredit ?? copy.architectCredit}</small></span>
                     <ArrowRight aria-hidden="true" size={20} weight="regular" />
                   </button>
                 )
