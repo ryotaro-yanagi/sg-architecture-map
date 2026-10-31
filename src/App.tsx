@@ -800,7 +800,7 @@ function App() {
       map.addLayer({
         id: 'building-pins', type: 'symbol', source: 'buildings', minzoom: markerSwitchZoom,
         filter: ['==', ['get', 'selected'], false],
-        layout: { 'icon-image': ['concat', 'building-pin-day-', ['coalesce', ['get', 'mapCategory'], 'fallback']], 'icon-anchor': 'bottom', 'icon-overlap': 'always', 'icon-ignore-placement': true },
+        layout: { 'icon-image': ['concat', 'building-pin-day-', ['coalesce', ['get', 'mapCategory'], 'fallback']], 'icon-anchor': 'bottom', 'icon-overlap': 'always', 'icon-ignore-placement': false },
         paint: { 'icon-opacity': 1 },
       })
       map.addLayer({
