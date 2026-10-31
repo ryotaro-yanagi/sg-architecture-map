@@ -3,7 +3,24 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#f2eee6" />
+    <meta name="theme-color" content="#fafafa" />
+    <script>
+      (() => {
+        let appearance = 'system'
+        try { appearance = localStorage.getItem('sgm-appearance') || 'system' } catch {}
+        const night = appearance === 'night' || (appearance === 'system' && matchMedia('(prefers-color-scheme: dark)').matches)
+        document.documentElement.dataset.appearance = night ? 'night' : 'day'
+        document.querySelector('meta[name="theme-color"]').content = night ? '#1B211F' : '#fafafa'
+      })()
+    </script>
+    <style>
+      html, body, #root { width: 100%; height: 100%; margin: 0; }
+      body { background: #fafafa; }
+      html[data-appearance='night'] body { background: #1B211F; }
+      .initial-page-loading { position: fixed; inset: 0; display: grid; place-content: center; padding: 24px; color: #212121; background: #fafafa; font: 500 18px/1.35 'Source Sans 3', 'Hiragino Sans', 'Yu Gothic', system-ui, -apple-system, sans-serif; text-align: center; }
+      .initial-page-loading p { margin: 0; }
+      html[data-appearance='night'] .initial-page-loading { color: #F2F4F0; background: #1B211F; }
+    </style>
     <meta name="description" content="シンガポールの建築を地図から発見する、SG Architecture Mapの試作版。" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -28,7 +45,7 @@
     <title>SGM — シンガポール建築マップ</title>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root"><div class="initial-page-loading" role="status"><p>Singapore Architecture Map</p></div></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

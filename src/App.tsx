@@ -11,6 +11,7 @@ import type { WeatherState } from './weather'
 
 type Coordinates = [number, number]
 type Appearance = 'system' | 'day' | 'night'
+type InitialMapState = 'loading' | 'fading' | 'hidden' | 'error'
 const appearanceKey = 'sgm-appearance'
 const readAppearance = (): Appearance => {
   try {
@@ -648,6 +649,7 @@ function App() {
   const [notice, setNotice] = useState<string | null>(null)
   const [appearance, setAppearance] = useState<Appearance>(readAppearance)
   const [systemDark, setSystemDark] = useState(() => window.matchMedia('(prefers-color-scheme: dark)').matches)
+  const [initialMapState, setInitialMapState] = useState<InitialMapState>('loading')
   const nightPreview = appearance === 'night' || (appearance === 'system' && systemDark)
   // Async MapLibre style/image loading must use the latest requested appearance.
   const nightPreviewRef = useRef(nightPreview)
@@ -710,6 +712,20 @@ function App() {
     return () => preference.removeEventListener('change', sync)
   }, [])
 
+  useEffect(() => {
+    document.documentElement.dataset.appearance = nightPreview ? 'night' : 'day'
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', nightPreview ? '#1B211F' : '#fafafa')
+  }, [nightPreview])
+
+  useEffect(() => {
+    if (initialMapState !== 'fading') return
+    const timer = window.setTimeout(
+      () => setInitialMapState('hidden'),
+      prefersReducedMotion() ? 0 : 240,
+    )
+    return () => window.clearTimeout(timer)
+  }, [initialMapState])
+
   const toggleAppearance = () => {
     const nextAppearance: Appearance = nightPreview ? 'day' : 'night'
     setAppearance(nextAppearance)
@@ -740,6 +756,16 @@ function App() {
   useEffect(() => {
     if (!mapContainer.current || mapRef.current) return
 
+    setInitialMapState('loading')
+    let disposed = false
+    let readyTimeout: number | undefined
+
+    const finishInitialLoad = () => {
+      if (disposed) return
+      if (readyTimeout !== undefined) window.clearTimeout(readyTimeout)
+      setInitialMapState('fading')
+    }
+
     const map = new maplibregl.Map({
       container: mapContainer.current,
       style: 'https://tiles.openfreemap.org/styles/liberty',
@@ -757,6 +783,10 @@ function App() {
       attributionControl: false,
       locale: t.mapControls,
     })
+
+    readyTimeout = window.setTimeout(() => {
+      if (!disposed) setInitialMapState('error')
+    }, 15000)
 
     map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-left')
 
@@ -817,6 +847,13 @@ function App() {
       })
       applyProductionMapTheme(map, nightPreviewRef.current)
       applyProductionTypeScaleToMap(map)
+
+      // Do not uncover the application at MapLibre's generic `load` event.
+      // First render the SGM sources and layers, then wait until MapLibre has
+      // no outstanding camera/style/tile work for this initial frame.
+      map.triggerRepaint()
+      map.once('render', () => map.once('idle', finishInitialLoad))
+
       const deepLinkedBuilding = buildings.find((building) => building.id === requestedSelectedId)
       if (deepLinkedBuilding && !restoredState) {
         window.requestAnimationFrame(() => revealBuilding(map, deepLinkedBuilding.coordinates))
@@ -860,6 +897,8 @@ function App() {
     syncBearing()
     mapRef.current = map
     return () => {
+      disposed = true
+      if (readyTimeout !== undefined) window.clearTimeout(readyTimeout)
       map.off('rotate', syncBearing)
       userMarkerRef.current?.remove()
       selectedMarkerRef.current?.remove()
@@ -1035,7 +1074,7 @@ function App() {
   }
 
   return (
-    <main className={`app locale-${locale} state-${surfaceState} ${expanded ? 'details-expanded' : ''} ${nightPreview ? 'night-preview' : ''}`}>
+    <main className={`app locale-${locale} state-${surfaceState} ${expanded ? 'details-expanded' : ''} ${nightPreview ? 'night-preview' : ''}`} aria-busy={initialMapState !== 'hidden'}>
       <div ref={mapContainer} className="map" role="region" aria-label={t.mapLabel} />
 
       <div className="top-ui">
@@ -1144,6 +1183,24 @@ function App() {
       </div>
 
       {notice && <div className="notice" role="status">{notice}</div>}
+
+      {initialMapState !== 'hidden' && (
+        <div
+          className={`initial-loading-screen ${initialMapState === 'fading' ? 'is-fading' : ''}`}
+          role={initialMapState === 'error' ? 'alert' : 'status'}
+          aria-live="polite"
+        >
+          <p>Singapore Architecture Map</p>
+          {initialMapState === 'error' && (
+            <div className="initial-loading-error">
+              <span>{locale === 'ja' ? '地図を読み込めませんでした。' : 'The map could not be loaded.'}</span>
+              <button type="button" onClick={() => window.location.reload()}>
+                {locale === 'ja' ? '再試行' : 'Retry'}
+              </button>
+            </div>
+          )}
+        </div>
+      )}
     </main>
   )
 }

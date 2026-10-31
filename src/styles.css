@@ -35,6 +35,11 @@
   --heading-tracking: -0.01em;
 }
 
+:root[data-appearance='night'] {
+  color-scheme: dark;
+  background: #1B211F;
+}
+
 .app { font-family: var(--font-ui); }
 /* Temporary N1b comparison. Keep the existing Light tokens unchanged. */
 .app.night-preview {
@@ -92,6 +97,27 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
 
 .app, .map { position: relative; width: 100%; height: 100%; }
 .map { position: absolute; inset: 0; z-index: 0; background: var(--paper); }
+
+.initial-loading-screen {
+  position: absolute;
+  z-index: 100;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 18px;
+  padding: 24px;
+  color: var(--ink);
+  background: var(--paper);
+  opacity: 1;
+  transition: opacity 240ms ease-out;
+}
+.initial-loading-screen.is-fading { opacity: 0; pointer-events: none; }
+.initial-loading-screen p { margin: 0; font: 500 18px/1.35 var(--font-ui); text-align: center; }
+.initial-loading-error { display: grid; justify-items: center; gap: 10px; color: var(--muted); font-size: 14px; line-height: 20px; text-align: center; }
+.initial-loading-error button { min-height: 44px; padding: 0 16px; color: var(--ink); background: var(--paper-strong); border: 1px solid var(--line); border-radius: 22px; cursor: pointer; }
+.initial-loading-error button:hover { background: var(--interaction-hover); }
+.initial-loading-error button:active { background: var(--interaction-pressed); }
 
 .maplibregl-canvas:focus-visible { outline: 3px solid var(--focus-ring); outline-offset: -4px; }
 .maplibregl-ctrl-bottom-left { bottom: 4px; left: 6px; }
@@ -359,4 +385,5 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
   .bottom-surface, .control-row { transition: none; animation: none; }
   .sheet-compact, .sheet-expanded { transition: opacity 80ms linear; }
   .notice { animation: none; }
+  .initial-loading-screen { transition: none; }
 }
