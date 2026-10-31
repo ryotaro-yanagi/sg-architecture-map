@@ -564,9 +564,9 @@ const applyProductionMapTheme = (map: MapLibreMap, nightPreview = false) => {
   map.setPaintProperty('building-labels', 'text-halo-blur', nightPreview ? 0.35 : 0)
 }
 
-const applyProductionTypeScaleToMap = (map: MapLibreMap, locale: Locale) => {
+const applyProductionTypeScaleToMap = (map: MapLibreMap) => {
   if (!map.getLayer('building-labels')) return
-  map.setLayoutProperty('building-labels', 'text-size', locale === 'en' ? 13 : 11)
+  map.setLayoutProperty('building-labels', 'text-size', 13)
 }
 
 const readRestoredMapState = (): RestoredMapState | null => {
@@ -816,7 +816,7 @@ function App() {
         paint: { 'text-color': '#282724', 'text-halo-color': '#f8f4ec', 'text-halo-width': 1 },
       })
       applyProductionMapTheme(map, nightPreviewRef.current)
-      applyProductionTypeScaleToMap(map, locale)
+      applyProductionTypeScaleToMap(map)
       const deepLinkedBuilding = buildings.find((building) => building.id === requestedSelectedId)
       if (deepLinkedBuilding && !restoredState) {
         window.requestAnimationFrame(() => revealBuilding(map, deepLinkedBuilding.coordinates))
