@@ -806,7 +806,7 @@ function App() {
       map.addLayer({
         id: 'building-pin-selected', type: 'symbol', source: 'buildings',
         filter: ['==', ['get', 'selected'], true],
-        layout: { 'icon-image': 'building-pin-selected', 'icon-anchor': 'bottom', 'icon-overlap': 'always', 'icon-ignore-placement': true },
+        layout: { 'icon-image': 'building-pin-selected', 'icon-anchor': 'bottom', 'icon-overlap': 'always', 'icon-ignore-placement': false },
         paint: { 'icon-opacity': 0 },
       })
       map.addLayer({
