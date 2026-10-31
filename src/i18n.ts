@@ -182,8 +182,8 @@ export const translations: Record<Locale, Translation> = {
 
 const buildingCopy: Record<Locale, Record<string, BuildingCopy>> = {
   en: {
-    'dpa-esplanade': { name: 'Esplanade – Theatres on the Bay', architectCredit: 'DP Architects in collaboration with Michael Wilford & Partners, UK' },
-    'dpa-suntec-city': { name: 'Suntec City', architectCredit: 'DP Architects in collaboration with Tsao & Mckwon Pte Ltd (DPA website spelling)' },
+    'dpa-esplanade': { name: 'Esplanade – Theatres on the Bay', architectCredit: 'DP Architects in collaboration with Michael Wilford & Partners, UK', previewArchitectCredit: 'DP Architects · Michael Wilford & Partners' },
+    'dpa-suntec-city': { name: 'Suntec City', architectCredit: 'DP Architects in collaboration with Tsao & Mckwon Pte Ltd (DPA website spelling)', previewArchitectCredit: 'DP Architects · Tsao & Mckwon Pte Ltd' },
     'dpa-orchard-central': { name: 'Orchard Central', architectCredit: 'DP Architects' },
     'dpa-bugis-junction': { name: 'Bugis Junction', architectCredit: 'DP Architects' },
     'dpa-peoples-park-complex': { name: 'People’s Park Complex', architectCredit: 'Design Partnership Architects & Planners and DP Architects (in continuation of Design Partnership)', previewArchitectCredit: 'Design Partnership → DP Architects' },
@@ -244,8 +244,8 @@ const buildingCopy: Record<Locale, Record<string, BuildingCopy>> = {
     'SGM-0149': { name: 'The Linear', architectCredit: 'TANGE Associates (post-2005 practice)' },
   },
   ja: {
-    'dpa-esplanade': { name: 'Esplanade – Theatres on the Bay', architectCredit: 'DP Architects、Michael Wilford & Partners（英国）による協働' },
-    'dpa-suntec-city': { name: 'Suntec City', architectCredit: 'DP Architects、Tsao & Mckwon Pte Ltdによる協働（DPA公式サイト表記）' },
+    'dpa-esplanade': { name: 'Esplanade – Theatres on the Bay', architectCredit: 'DP Architects、Michael Wilford & Partners（英国）による協働', previewArchitectCredit: 'DP Architects · Michael Wilford & Partners' },
+    'dpa-suntec-city': { name: 'Suntec City', architectCredit: 'DP Architects、Tsao & Mckwon Pte Ltdによる協働（DPA公式サイト表記）', previewArchitectCredit: 'DP Architects · Tsao & Mckwon Pte Ltd' },
     'dpa-orchard-central': { name: 'Orchard Central', architectCredit: 'DP Architects' },
     'dpa-bugis-junction': { name: 'Bugis Junction', architectCredit: 'DP Architects' },
     'dpa-peoples-park-complex': { name: 'People’s Park Complex', architectCredit: 'Design Partnership Architects & PlannersおよびDP Architects（Design Partnershipの継続）', previewArchitectCredit: 'Design Partnership → DP Architects' },
