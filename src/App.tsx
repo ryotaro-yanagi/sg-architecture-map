@@ -806,6 +806,7 @@ function App() {
   }
 
   useEffect(() => {
+    previewSurfaceRef.current?.classList.remove('preview-returning')
     const target = previewReleaseTargetRef.current
     if (!target || target === selectedId) return
     previewReleaseAnimationRef.current?.cancel()
@@ -851,6 +852,8 @@ function App() {
 
     const swapPage = () => {
       if (surfacePageTransitionIdRef.current !== transitionId) return
+      if (toExpanded) surface.classList.remove('preview-returning')
+      else surface.classList.add('preview-returning')
       setExpanded(toExpanded)
       if (toExpanded && building) revealBuilding(mapRef.current, building.coordinates, 'detail')
 
