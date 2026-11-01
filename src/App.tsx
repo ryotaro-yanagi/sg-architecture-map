@@ -798,7 +798,7 @@ function App() {
     previewReleaseTargetRef.current = null
   }, [selectedId])
 
-  const transitionSurfaceDepth = (toExpanded: boolean) => {
+  const transitionSurfaceDepth = (toExpanded: boolean, keyboardActivated = false) => {
     const surface = previewSurfaceRef.current
     const outgoing = toExpanded ? previewContentRef.current : detailContentRef.current
     const incoming = toExpanded ? detailContentRef.current : previewContentRef.current
@@ -814,9 +814,21 @@ function App() {
     outgoing.style.opacity = '1'
     incoming.style.opacity = '0'
 
+    const activeBeforeTransition = document.activeElement
     flushSync(() => setExpanded(toExpanded))
     const last = surface.getBoundingClientRect()
 
+    if (keyboardActivated) {
+      window.requestAnimationFrame(() => {
+        if (toExpanded) {
+          detailBackRef.current?.focus({ preventScroll: true })
+        } else {
+          previewContentRef.current?.querySelector<HTMLButtonElement>('.preview-details')?.focus({ preventScroll: true })
+        }
+      })
+    } else if (activeBeforeTransition instanceof HTMLElement && outgoing.contains(activeBeforeTransition)) {
+      activeBeforeTransition.blur()
+    }
 
     if (reduced) {
       const outgoingFade = outgoing.animate([{ opacity: 1 }, { opacity: 0 }], {
@@ -961,7 +973,6 @@ function App() {
   useEffect(() => {
     if (expanded) {
       detailBackRef.current?.closest('.sheet-expanded')?.scrollTo({ top: 0 })
-      detailBackRef.current?.focus({ preventScroll: true })
     }
   }, [expanded, selectedId])
 
@@ -1216,7 +1227,7 @@ function App() {
         setQuery('')
         searchInputRef.current?.blur()
       } else if (expanded) {
-        transitionSurfaceDepth(false)
+        transitionSurfaceDepth(false, true)
       }
     }
     window.addEventListener('keydown', closeLayer)
@@ -1384,12 +1395,12 @@ function App() {
                 building={selected}
                 locale={locale}
                 t={t}
-                onDetails={() => transitionSurfaceDepth(true)}
+                onDetails={(keyboardActivated) => transitionSurfaceDepth(true, keyboardActivated)}
                 onClose={releasePreview}
               />
             </div>
             <div ref={detailContentRef} className="sheet-expanded" aria-hidden={!expanded}>
-              <DetailContent building={selected} locale={locale} t={t} onClose={() => transitionSurfaceDepth(false)} backRef={detailBackRef} />
+              <DetailContent building={selected} locale={locale} t={t} onClose={(keyboardActivated) => transitionSurfaceDepth(false, keyboardActivated)} backRef={detailBackRef} />
             </div>
           </aside>
         </div>
@@ -1450,7 +1461,7 @@ function WeatherGlyph({ condition }: { condition: string | null }) {
 
 type LocalizedProps = { building: Building; locale: Locale; t: Translation }
 
-function PreviewCard({ building, locale, t, onDetails, onClose }: LocalizedProps & { onDetails: () => void; onClose: () => void }) {
+function PreviewCard({ building, locale, t, onDetails, onClose }: LocalizedProps & { onDetails: (keyboardActivated: boolean) => void; onClose: () => void }) {
   const copy = getBuildingCopy(locale, building.id, building.name)
   const { primary: primaryYear } = getBuildingYearDetails(building, locale, t)
   return (
@@ -1465,7 +1476,7 @@ function PreviewCard({ building, locale, t, onDetails, onClose }: LocalizedProps
         <span>{copy.previewArchitectCredit ?? copy.architectCredit}</span>
         {primaryYear && <span className="preview-year">{primaryYear}</span>}
       </p>
-      <button className="preview-details" onClick={onDetails}>
+      <button className="preview-details" onClick={(event) => onDetails(event.detail === 0)}>
         <span>{t.viewDetails}</span>
         <ArrowRight aria-hidden="true" size={20} weight="regular" />
       </button>
@@ -1473,7 +1484,7 @@ function PreviewCard({ building, locale, t, onDetails, onClose }: LocalizedProps
   )
 }
 
-function DetailContent({ building, locale, t, onClose, backRef }: LocalizedProps & { onClose: () => void; backRef: RefObject<HTMLButtonElement | null> }) {
+function DetailContent({ building, locale, t, onClose, backRef }: LocalizedProps & { onClose: (keyboardActivated: boolean) => void; backRef: RefObject<HTMLButtonElement | null> }) {
   const copy = getBuildingCopy(locale, building.id, building.name)
   const mapsQuery = encodeURIComponent(`${building.name}, ${building.address}`)
   const searchQuery = encodeURIComponent(`${copy.name} Singapore architecture`)
@@ -1481,7 +1492,7 @@ function DetailContent({ building, locale, t, onClose, backRef }: LocalizedProps
   return (
     <div className="detail-content">
       <div className="detail-heading">
-        <button ref={backRef} className="back-button" onClick={onClose} aria-label={t.backToOverviewLabel(copy.name)}>
+        <button ref={backRef} className="back-button" onClick={(event) => onClose(event.detail === 0)} aria-label={t.backToOverviewLabel(copy.name)}>
           <ArrowLeft aria-hidden="true" size={16} weight="regular" />
           {t.back}
         </button>
