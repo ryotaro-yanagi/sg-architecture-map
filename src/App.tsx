@@ -705,6 +705,7 @@ function App() {
   const previewSurfaceRef = useRef<HTMLDivElement>(null)
   const previewReleaseAnimationRef = useRef<Animation | null>(null)
   const previewReleaseTargetRef = useRef<string | null>(null)
+  const surfaceTransformAnimationRef = useRef<Animation | null>(null)
   const [selectedId, setSelectedId] = useState<string | null>(requestedSelectedId ?? restoredState?.selectedId ?? null)
   const [expanded, setExpanded] = useState(getRequestedExpandedState() ?? restoredState?.expanded ?? false)
   const selectedIdRef = useRef(selectedId)
@@ -811,6 +812,68 @@ function App() {
     previewReleaseTargetRef.current = null
     previewSurfaceRef.current?.style.removeProperty('pointer-events')
   }, [selectedId])
+
+  const transitionSurfaceDepth = (toExpanded: boolean, building?: Building) => {
+    const surface = previewSurfaceRef.current
+    const mobile = window.matchMedia('(max-width: 719px)').matches
+
+    if (!surface || !mobile || prefersReducedMotion()) {
+      setExpanded(toExpanded)
+      if (toExpanded && building) revealBuilding(mapRef.current, building.coordinates, 'detail')
+      return
+    }
+
+    // Capture the currently rendered bounds first, including any in-flight
+    // transform, so a second action can continue without waiting for motion.
+    const first = surface.getBoundingClientRect()
+    const startRadius = getComputedStyle(surface).borderRadius
+    surfaceTransformAnimationRef.current?.cancel()
+
+    surface.classList.add('surface-transforming')
+    if (toExpanded) surface.classList.remove('returned-from-detail')
+    else surface.classList.add('returned-from-detail')
+
+    setExpanded(toExpanded)
+    if (toExpanded && building) revealBuilding(mapRef.current, building.coordinates, 'detail')
+
+    window.requestAnimationFrame(() => {
+      if (!surface.isConnected) return
+      const last = surface.getBoundingClientRect()
+      const endRadius = getComputedStyle(surface).borderRadius
+      const scaleX = last.width ? first.width / last.width : 1
+      const scaleY = last.height ? first.height / last.height : 1
+      const translateX = first.left - last.left
+      const translateY = first.top - last.top
+
+      surface.style.transformOrigin = 'top left'
+      const animation = surface.animate(
+        [
+          {
+            transform: `translate(${translateX}px, ${translateY}px) scale(${scaleX}, ${scaleY})`,
+            borderRadius: startRadius,
+          },
+          {
+            transform: 'translate(0, 0) scale(1, 1)',
+            borderRadius: endRadius,
+          },
+        ],
+        {
+          duration: toExpanded ? 300 : 240,
+          easing: 'cubic-bezier(.22, 1, .36, 1)',
+          fill: 'both',
+        },
+      )
+      surfaceTransformAnimationRef.current = animation
+
+      const cleanup = () => {
+        if (surfaceTransformAnimationRef.current !== animation) return
+        surfaceTransformAnimationRef.current = null
+        surface.classList.remove('surface-transforming')
+        surface.style.removeProperty('transform-origin')
+      }
+      animation.addEventListener('finish', cleanup, { once: true })
+    })
+  }
 
   useEffect(() => {
     let cancelled = false
@@ -1151,7 +1214,7 @@ function App() {
         setQuery('')
         searchInputRef.current?.blur()
       } else if (expanded) {
-        setExpanded(false)
+        transitionSurfaceDepth(false)
       }
     }
     window.addEventListener('keydown', closeLayer)
@@ -1319,15 +1382,12 @@ function App() {
                 building={selected}
                 locale={locale}
                 t={t}
-                onDetails={() => {
-                  setExpanded(true)
-                  revealBuilding(mapRef.current, selected.coordinates, 'detail')
-                }}
+                onDetails={() => transitionSurfaceDepth(true, selected)}
                 onClose={releasePreview}
               />
             </div>
             <div className="sheet-expanded" aria-hidden={!expanded}>
-              <DetailContent building={selected} locale={locale} t={t} onClose={() => setExpanded(false)} backRef={detailBackRef} />
+              <DetailContent building={selected} locale={locale} t={t} onClose={() => transitionSurfaceDepth(false)} backRef={detailBackRef} />
             </div>
           </aside>
         </div>
