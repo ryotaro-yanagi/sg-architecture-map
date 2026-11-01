@@ -2,6 +2,7 @@ import { Component, useEffect, useMemo, useRef, useState } from 'react'
 import type { CSSProperties } from 'react'
 import { ArrowLeft, ArrowRight, ArrowSquareOut, Cloud, CloudRain, CloudSun, Lightning, MagnifyingGlass, Moon, NavigationArrow, Sun, X } from '@phosphor-icons/react'
 import * as maplibregl from 'maplibre-gl'
+import { flushSync } from 'react-dom'
 import type { ExpressionSpecification, GeoJSONSource, Map as MapLibreMap } from 'maplibre-gl'
 import data from './data/buildings.json'
 import { getBuildingCopy, getLocaleFromPath, localeHref, translations } from './i18n'
@@ -703,10 +704,12 @@ function App() {
   const detailBackRef = useRef<HTMLButtonElement>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
   const previewSurfaceRef = useRef<HTMLDivElement>(null)
+  const previewContentRef = useRef<HTMLDivElement>(null)
+  const detailContentRef = useRef<HTMLDivElement>(null)
   const previewReleaseAnimationRef = useRef<Animation | null>(null)
   const previewReleaseTargetRef = useRef<string | null>(null)
-  const surfacePageAnimationRef = useRef<Animation | null>(null)
-  const surfacePageTransitionIdRef = useRef(0)
+  const panelDepthAnimationsRef = useRef<Animation[]>([])
+  const panelDepthTransitionIdRef = useRef(0)
   const [selectedId, setSelectedId] = useState<string | null>(requestedSelectedId ?? restoredState?.selectedId ?? null)
   const [expanded, setExpanded] = useState(getRequestedExpandedState() ?? restoredState?.expanded ?? false)
   const selectedIdRef = useRef(selectedId)
@@ -785,18 +788,11 @@ function App() {
     }
 
     previewReleaseAnimationRef.current?.cancel()
-    const reduced = prefersReducedMotion()
-    surface.style.pointerEvents = 'none'
     const animation = surface.animate(
-      reduced
-        ? [{ opacity: 1 }, { opacity: 0 }]
-        : [
-            { opacity: 1, transform: 'translateY(0)' },
-            { opacity: 0, transform: 'translateY(8px)' },
-          ],
+      [{ opacity: 1 }, { opacity: 0 }],
       {
-        duration: reduced ? 80 : 160,
-        easing: reduced ? 'linear' : 'cubic-bezier(.4, 0, 1, 1)',
+        duration: prefersReducedMotion() ? 80 : 140,
+        easing: 'linear',
         fill: 'forwards',
       },
     )
@@ -806,85 +802,91 @@ function App() {
   }
 
   useEffect(() => {
-    previewSurfaceRef.current?.classList.remove('preview-returning')
     const target = previewReleaseTargetRef.current
     if (!target || target === selectedId) return
     previewReleaseAnimationRef.current?.cancel()
     previewReleaseAnimationRef.current = null
     previewReleaseTargetRef.current = null
-    previewSurfaceRef.current?.style.removeProperty('pointer-events')
   }, [selectedId])
 
   const transitionSurfaceDepth = (toExpanded: boolean, building?: Building) => {
     const surface = previewSurfaceRef.current
-    if (!surface) {
-      setExpanded(toExpanded)
-      if (toExpanded && building) revealBuilding(mapRef.current, building.coordinates, 'detail')
+    const outgoing = toExpanded ? previewContentRef.current : detailContentRef.current
+    const incoming = toExpanded ? detailContentRef.current : previewContentRef.current
+    if (!surface || !outgoing || !incoming || expandedRef.current === toExpanded) return
+
+    const transitionId = ++panelDepthTransitionIdRef.current
+    panelDepthAnimationsRef.current.forEach(animation => animation.cancel())
+    panelDepthAnimationsRef.current = []
+
+    const first = surface.getBoundingClientRect()
+    const reduced = prefersReducedMotion()
+
+    outgoing.style.opacity = '1'
+    incoming.style.opacity = '0'
+
+    flushSync(() => setExpanded(toExpanded))
+    const last = surface.getBoundingClientRect()
+
+    if (toExpanded && building) revealBuilding(mapRef.current, building.coordinates, 'detail')
+
+    if (reduced) {
+      const outgoingFade = outgoing.animate([{ opacity: 1 }, { opacity: 0 }], {
+        duration: 60,
+        easing: 'linear',
+        fill: 'forwards',
+      })
+      panelDepthAnimationsRef.current = [outgoingFade]
+      outgoingFade.addEventListener('finish', () => {
+        if (panelDepthTransitionIdRef.current !== transitionId) return
+        outgoing.style.removeProperty('opacity')
+        const incomingFade = incoming.animate([{ opacity: 0 }, { opacity: 1 }], {
+          duration: 80,
+          easing: 'linear',
+          fill: 'forwards',
+        })
+        panelDepthAnimationsRef.current = [incomingFade]
+        incomingFade.addEventListener('finish', () => {
+          if (panelDepthTransitionIdRef.current !== transitionId) return
+          incoming.style.removeProperty('opacity')
+          incomingFade.cancel()
+          panelDepthAnimationsRef.current = []
+        }, { once: true })
+      }, { once: true })
       return
     }
 
-    const transitionId = ++surfacePageTransitionIdRef.current
-    const reduced = prefersReducedMotion()
-    const outDuration = reduced ? 60 : (toExpanded ? 60 : 70)
-    const inDuration = reduced ? 80 : (toExpanded ? 160 : 130)
-    const outY = reduced ? 0 : (toExpanded ? 0 : 10)
-    const inY = reduced ? 0 : (toExpanded ? 24 : 16)
-    const currentStyle = getComputedStyle(surface)
-    const parsedOpacity = Number.parseFloat(currentStyle.opacity)
-    const currentOpacity = Number.isFinite(parsedOpacity) ? parsedOpacity : 1
-    const currentTransform = currentStyle.transform === 'none' ? 'translateY(0)' : currentStyle.transform
-
-    surfacePageAnimationRef.current?.cancel()
-    surface.style.pointerEvents = 'none'
-
-    const outAnimation = surface.animate(
+    const shell = surface.animate(
       [
-        { opacity: currentOpacity, transform: currentTransform },
-        { opacity: 0, transform: `translateY(${outY}px)` },
+        { height: `${first.height}px` },
+        { height: `${last.height}px` },
       ],
       {
-        duration: outDuration,
-        easing: reduced ? 'linear' : 'cubic-bezier(.2, 0, 1, .9)',
-        fill: 'forwards',
+        duration: toExpanded ? 240 : 220,
+        easing: 'cubic-bezier(.22, 1, .36, 1)',
+        fill: 'both',
       },
     )
-    surfacePageAnimationRef.current = outAnimation
+    const outgoingFade = outgoing.animate([{ opacity: 1 }, { opacity: 0 }], {
+      duration: 80,
+      easing: 'linear',
+      fill: 'forwards',
+    })
+    const incomingFade = incoming.animate([{ opacity: 0 }, { opacity: 1 }], {
+      duration: 140,
+      delay: toExpanded ? 90 : 70,
+      easing: 'linear',
+      fill: 'forwards',
+    })
+    panelDepthAnimationsRef.current = [shell, outgoingFade, incomingFade]
 
-    const swapPage = () => {
-      if (surfacePageTransitionIdRef.current !== transitionId) return
-      if (toExpanded) surface.classList.remove('preview-returning')
-      else surface.classList.add('preview-returning')
-      setExpanded(toExpanded)
-      if (toExpanded && building) revealBuilding(mapRef.current, building.coordinates, 'detail')
-
-      window.requestAnimationFrame(() => {
-        if (!surface.isConnected || surfacePageTransitionIdRef.current !== transitionId) return
-        outAnimation.cancel()
-
-        const inAnimation = surface.animate(
-          [
-            { opacity: 0, transform: `translateY(${inY}px)` },
-            { opacity: 1, transform: 'translateY(0)' },
-          ],
-          {
-            duration: inDuration,
-            easing: reduced ? 'linear' : 'cubic-bezier(0, 0, .38, .9)',
-            fill: 'forwards',
-          },
-        )
-        surfacePageAnimationRef.current = inAnimation
-
-        const finish = () => {
-          if (surfacePageAnimationRef.current !== inAnimation) return
-          inAnimation.cancel()
-          surfacePageAnimationRef.current = null
-          surface.style.removeProperty('pointer-events')
-        }
-        inAnimation.addEventListener('finish', finish, { once: true })
-      })
-    }
-
-    outAnimation.addEventListener('finish', swapPage, { once: true })
+    shell.addEventListener('finish', () => {
+      if (panelDepthTransitionIdRef.current !== transitionId) return
+      outgoing.style.removeProperty('opacity')
+      incoming.style.removeProperty('opacity')
+      panelDepthAnimationsRef.current.forEach(animation => animation.cancel())
+      panelDepthAnimationsRef.current = []
+    }, { once: true })
   }
 
   useEffect(() => {
@@ -1389,7 +1391,7 @@ function App() {
       {selected && (
         <div ref={previewSurfaceRef} className={`bottom-surface ${surfaceState}`}>
           <aside className="place-surface" aria-label={expanded ? t.detailLabel(getBuildingCopy(locale, selected.id, selected.name).name) : t.previewLabel(getBuildingCopy(locale, selected.id, selected.name).name)}>
-            <div className="sheet-compact" aria-hidden={expanded}>
+            <div ref={previewContentRef} className="sheet-compact" aria-hidden={expanded}>
               <PreviewCard
                 building={selected}
                 locale={locale}
@@ -1398,7 +1400,7 @@ function App() {
                 onClose={releasePreview}
               />
             </div>
-            <div className="sheet-expanded" aria-hidden={!expanded}>
+            <div ref={detailContentRef} className="sheet-expanded" aria-hidden={!expanded}>
               <DetailContent building={selected} locale={locale} t={t} onClose={() => transitionSurfaceDepth(false)} backRef={detailBackRef} />
             </div>
           </aside>
