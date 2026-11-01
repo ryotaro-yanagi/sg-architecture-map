@@ -12,7 +12,7 @@
   --muted: #505050;
   --line: #e0e0e0;
   --accent: #262626;
-  --focus-ring: #0f62fe;
+  --focus-ring: #212121;
   --system-soft: #f2f2f2;
   --interaction-hover: #f4f4f4;
   --interaction-pressed: #e0e0e0;
@@ -50,7 +50,7 @@
   --muted: #B3BDB7;
   --line: #48534D;
   --accent: #EDF1EA;
-  --focus-ring: #8FBCFF;
+  --focus-ring: #F2F4F0;
   --system-soft: #333C38;
   --interaction-hover: #35403A;
   --interaction-pressed: #45534A;
@@ -90,7 +90,7 @@ html, body, #root { width: 100%; height: 100%; margin: 0; overflow: hidden; }
 button, input { font: inherit; }
 button, a { -webkit-tap-highlight-color: transparent; }
 button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-visible {
-  outline: 3px solid var(--focus-ring);
+  outline: 2px solid var(--focus-ring);
   outline-offset: 3px;
   box-shadow: 0 0 0 2px var(--paper-strong);
 }
@@ -127,7 +127,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
   50% { opacity: .3; }
 }
 
-.maplibregl-canvas:focus-visible { outline: 3px solid var(--focus-ring); outline-offset: -4px; }
+.maplibregl-canvas:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: -4px; }
 .maplibregl-ctrl-bottom-left { bottom: 4px; left: 6px; }
 .maplibregl-ctrl-bottom-right { bottom: 88px; right: 12px; }
 .maplibregl-ctrl-attrib { font-size: 10px; opacity: .8; }
