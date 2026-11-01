@@ -60,26 +60,43 @@ const controls: Record<GroupName, ColorControl[]> = {
   ],
 }
 
-// Historical Day is the user-authored Color Lab export; the Minimal variant only
-// makes four small category adjustments. Neither preset changes the Night palette.
-const historicalDay: ColorSchemeTokens = {
-  neutral: { canvas: '#FAFAFA', surface: '#FFFFFF', subtleSurface: '#F2F2F2', border: '#E0E0E0' },
-  typography: { primary: '#403625', secondary: '#403625', geographicPrimary: '#403625', geographicSecondary: '#8E8568', geographicWater: '#445848', geographicHalo: '#FFFFFF', architectureLabel: '#403625' },
-  interaction: { primaryAction: '#403625', hover: '#F4F4F4', pressed: '#E0E0E0', selectedBackground: '#FAFAFA', selectedIndicator: '#E0E0E0', focus: '#403625' },
-  architecture: { cultureCivic: '#FF3B32', mixedUse: '#9CDCFF', commercial: '#51A0D9', education: '#FFE030', hospitality: '#5973B8', residential: '#FE7A3E', genericFill: '#8BC084', categoryGlyph: '#FFFFFF', genericGlyph: '#FFFFFF', markerOutline: '#FFFFFF' },
-  geographic: { background: '#F1E5C7', residential: '#F1E5C7', park: '#E5E5A3', wood: '#7E7D39', grass: '#E5E5A3', water: '#D1DACE', waterway: '#A1B8AA', roadMinor: '#DACFB3', roadMajor: '#DACFB3', roadMotorway: '#DACFB3', roadCasing: '#DACFB3', building: '#AE6670', buildingOutline: '#AE6670' },
-}
-const minimalDay: ColorSchemeTokens = {
-  ...historicalDay,
-  architecture: { ...historicalDay.architecture, mixedUse: '#8FCDF4', commercial: '#4094CE', education: '#FFD619', residential: '#F16D34' },
-}
-
 const groupLabels: Record<GroupName, string> = {
   neutral: 'Neutral',
   typography: 'Typography',
   interaction: 'Interaction',
   architecture: 'Architecture',
   geographic: 'Geographic',
+}
+
+// Validate an exported palette before replacing the active preview.
+const parsePalette = (raw: string): ColorTokens => {
+  const value: unknown = JSON.parse(raw)
+  if (!value || typeof value !== 'object') throw new Error('Invalid JSON palette.')
+  const record = value as Record<string, unknown>
+  if (record.schemaVersion !== 1) throw new Error('Unsupported palette version (expected 1).')
+  const result = {} as ColorTokens
+  for (const scheme of ['day', 'night'] as const) {
+    const schemeData = record[scheme]
+    if (!schemeData || typeof schemeData !== 'object') throw new Error('Missing ' + scheme + ' palette.')
+    const schemeRecord = schemeData as Record<string, unknown>
+    const next = {} as ColorSchemeTokens
+    for (const group of Object.keys(controls) as GroupName[]) {
+      const groupData = schemeRecord[group]
+      if (!groupData || typeof groupData !== 'object') throw new Error('Missing ' + scheme + '.' + group + '.')
+      const groupRecord = groupData as Record<string, unknown>
+      const validated: Record<string, string> = {}
+      for (const control of controls[group]) {
+        const color = groupRecord[control.token]
+        if (typeof color !== 'string' || !/^#[0-9a-fA-F]{6}$/.test(color)) {
+          throw new Error('Invalid color at ' + scheme + '.' + group + '.' + control.token)
+        }
+        validated[control.token] = color.toUpperCase()
+      }
+      Object.assign(next, { [group]: validated })
+    }
+    result[scheme] = next
+  }
+  return result
 }
 
 const getValue = (tokens: ColorTokens, scheme: SchemeName, control: ColorControl) =>
@@ -133,7 +150,9 @@ type ColorLabPanelProps = {
 export default function ColorLabPanel({ tokens, activeScheme, onChange }: ColorLabPanelProps) {
   const [editingScheme, setEditingScheme] = useState<SchemeName>('day')
   const [group, setGroup] = useState<GroupName>('neutral')
-  const [copyState, setCopyState] = useState('Copy JSON')
+  const [importOpen, setImportOpen] = useState(false)
+  const [importText, setImportText] = useState('')
+  const [importMessage, setImportMessage] = useState('')
 
   const updateColor = (control: ColorControl, value: string) => {
     const section = {
@@ -155,15 +174,26 @@ export default function ColorLabPanel({ tokens, activeScheme, onChange }: ColorL
     onChange({ ...tokens, [editingScheme]: nextScheme })
   }
 
-  const copyJson = async () => {
-    const exportData = { schemaVersion: 1, name: 'SGM Color Lab', day: tokens.day, night: tokens.night }
+  const exportJson = () => {
+    const data = { schemaVersion: 1, name: 'SGM Color Lab', day: tokens.day, night: tokens.night }
+    const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }))
+    const link = document.createElement('a')
+    link.href = url
+    link.download = 'sgm-color-palette.json'
+    link.click()
+    window.setTimeout(() => URL.revokeObjectURL(url), 0)
+  }
+
+  const importJson = (raw: string) => {
     try {
-      await navigator.clipboard.writeText(JSON.stringify(exportData, null, 2))
-      setCopyState('Copied')
-    } catch {
-      setCopyState('Copy failed')
+      const parsed = parsePalette(raw)
+      onChange(parsed)
+      setImportMessage('Imported Day and Night colors.')
+      setImportOpen(false)
+      setImportText('')
+    } catch (error) {
+      setImportMessage(error instanceof Error ? error.message : 'Could not read palette.')
     }
-    window.setTimeout(() => setCopyState('Copy JSON'), 1800)
   }
 
   return (
@@ -180,14 +210,6 @@ export default function ColorLabPanel({ tokens, activeScheme, onChange }: ColorL
           </button>
         ))}
       </div>
-
-      <section className="color-lab-presets" aria-label="Day palette comparisons">
-        <span>Historical Day comparison (Night unchanged)</span>
-        <div className="color-lab-segmented">
-          <button type="button" onClick={() => { onChange({ ...tokens, day: structuredClone(historicalDay) }); setEditingScheme('day'); setGroup('architecture') }}>Original</button>
-          <button type="button" onClick={() => { onChange({ ...tokens, day: structuredClone(minimalDay) }); setEditingScheme('day'); setGroup('architecture') }}>Minimal</button>
-        </div>
-      </section>
 
       <nav className="color-lab-groups" aria-label="Color groups">
         {(Object.keys(groupLabels) as GroupName[]).map((name) => (
@@ -215,8 +237,26 @@ export default function ColorLabPanel({ tokens, activeScheme, onChange }: ColorL
       <footer className="color-lab-footer">
         <button type="button" onClick={resetGroup}>Reset group</button>
         <button type="button" onClick={() => onChange(structuredClone(defaultColorTokens))}>Reset all</button>
-        <button type="button" className="color-lab-copy" onClick={copyJson}>{copyState}</button>
+        <button type="button" onClick={() => { setImportOpen(open => !open); setImportMessage('') }}>Import JSON</button>
+        <button type="button" className="color-lab-copy" onClick={exportJson}>Export JSON</button>
       </footer>
+      {importOpen && (
+        <section className="color-lab-import" aria-label="Import palette JSON">
+          <label htmlFor="color-lab-import-text">Paste exported JSON, or choose a .json file</label>
+          <textarea id="color-lab-import-text" rows={5} value={importText} onChange={event => setImportText(event.target.value)} />
+          <input type="file" accept=".json,application/json" aria-label="Choose palette JSON file" onChange={async event => {
+            const file = event.target.files?.[0]
+            if (!file) return
+            try { setImportText(await file.text()); setImportMessage('File loaded. Apply to preview.') }
+            catch { setImportMessage('Could not read file.') }
+          }} />
+          <div className="color-lab-import-actions">
+            <button type="button" onClick={() => importJson(importText)} disabled={!importText.trim()}>Apply JSON</button>
+            <button type="button" onClick={() => setImportOpen(false)}>Cancel</button>
+          </div>
+        </section>
+      )}
+      {importMessage && <p className="color-lab-import-message" role="status">{importMessage}</p>}
     </aside>
   )
 }
