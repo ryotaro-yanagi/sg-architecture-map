@@ -705,8 +705,8 @@ function App() {
   const previewSurfaceRef = useRef<HTMLDivElement>(null)
   const previewReleaseAnimationRef = useRef<Animation | null>(null)
   const previewReleaseTargetRef = useRef<string | null>(null)
-  const surfaceTransformAnimationRef = useRef<Animation | null>(null)
-  const surfaceTransformIdRef = useRef(0)
+  const surfacePageAnimationRef = useRef<Animation | null>(null)
+  const surfacePageTransitionIdRef = useRef(0)
   const [selectedId, setSelectedId] = useState<string | null>(requestedSelectedId ?? restoredState?.selectedId ?? null)
   const [expanded, setExpanded] = useState(getRequestedExpandedState() ?? restoredState?.expanded ?? false)
   const selectedIdRef = useRef(selectedId)
@@ -816,65 +816,72 @@ function App() {
 
   const transitionSurfaceDepth = (toExpanded: boolean, building?: Building) => {
     const surface = previewSurfaceRef.current
-    const mobile = window.matchMedia('(max-width: 719px)').matches
-
-    if (!surface || !mobile || prefersReducedMotion()) {
+    if (!surface) {
       setExpanded(toExpanded)
       if (toExpanded && building) revealBuilding(mapRef.current, building.coordinates, 'detail')
       return
     }
 
-    // Capture the currently rendered bounds first, including any in-flight
-    // transform, so a second action can continue without waiting for motion.
-    const first = surface.getBoundingClientRect()
-    const startRadius = getComputedStyle(surface).borderRadius
-    const transitionId = ++surfaceTransformIdRef.current
-    surfaceTransformAnimationRef.current?.cancel()
+    const transitionId = ++surfacePageTransitionIdRef.current
+    const reduced = prefersReducedMotion()
+    const distance = reduced ? 0 : 8
+    const outDuration = reduced ? 60 : (toExpanded ? 80 : 70)
+    const inDuration = reduced ? 80 : (toExpanded ? 130 : 120)
+    const outX = toExpanded ? -distance : distance
+    const inX = toExpanded ? distance : -distance
+    const currentStyle = getComputedStyle(surface)
+    const currentOpacity = Number.parseFloat(currentStyle.opacity) || 1
+    const currentTransform = currentStyle.transform === 'none' ? 'translateX(0)' : currentStyle.transform
 
-    surface.classList.add('surface-transforming')
-    if (toExpanded) surface.classList.remove('returned-from-detail')
-    else surface.classList.add('returned-from-detail')
+    surfacePageAnimationRef.current?.cancel()
+    surface.style.pointerEvents = 'none'
 
-    setExpanded(toExpanded)
-    if (toExpanded && building) revealBuilding(mapRef.current, building.coordinates, 'detail')
+    const outAnimation = surface.animate(
+      [
+        { opacity: currentOpacity, transform: currentTransform },
+        { opacity: 0, transform: `translateX(${outX}px)` },
+      ],
+      {
+        duration: outDuration,
+        easing: reduced ? 'linear' : 'cubic-bezier(.2, 0, 1, .9)',
+        fill: 'forwards',
+      },
+    )
+    surfacePageAnimationRef.current = outAnimation
 
-    window.requestAnimationFrame(() => {
-      if (!surface.isConnected || surfaceTransformIdRef.current !== transitionId) return
-      const last = surface.getBoundingClientRect()
-      const endRadius = getComputedStyle(surface).borderRadius
-      const scaleX = last.width ? first.width / last.width : 1
-      const scaleY = last.height ? first.height / last.height : 1
-      const translateX = first.left - last.left
-      const translateY = first.top - last.top
+    const swapPage = () => {
+      if (surfacePageTransitionIdRef.current !== transitionId) return
+      setExpanded(toExpanded)
+      if (toExpanded && building) revealBuilding(mapRef.current, building.coordinates, 'detail')
 
-      surface.style.transformOrigin = 'top left'
-      const animation = surface.animate(
-        [
+      window.requestAnimationFrame(() => {
+        if (!surface.isConnected || surfacePageTransitionIdRef.current !== transitionId) return
+        outAnimation.cancel()
+
+        const inAnimation = surface.animate(
+          [
+            { opacity: 0, transform: `translateX(${inX}px)` },
+            { opacity: 1, transform: 'translateX(0)' },
+          ],
           {
-            transform: `translate(${translateX}px, ${translateY}px) scale(${scaleX}, ${scaleY})`,
-            borderRadius: startRadius,
+            duration: inDuration,
+            easing: reduced ? 'linear' : 'cubic-bezier(0, 0, .38, .9)',
+            fill: 'forwards',
           },
-          {
-            transform: 'translate(0, 0) scale(1, 1)',
-            borderRadius: endRadius,
-          },
-        ],
-        {
-          duration: toExpanded ? 300 : 240,
-          easing: 'cubic-bezier(.22, 1, .36, 1)',
-          fill: 'both',
-        },
-      )
-      surfaceTransformAnimationRef.current = animation
+        )
+        surfacePageAnimationRef.current = inAnimation
 
-      const cleanup = () => {
-        if (surfaceTransformAnimationRef.current !== animation) return
-        surfaceTransformAnimationRef.current = null
-        surface.classList.remove('surface-transforming')
-        surface.style.removeProperty('transform-origin')
-      }
-      animation.addEventListener('finish', cleanup, { once: true })
-    })
+        const finish = () => {
+          if (surfacePageAnimationRef.current !== inAnimation) return
+          inAnimation.cancel()
+          surfacePageAnimationRef.current = null
+          surface.style.removeProperty('pointer-events')
+        }
+        inAnimation.addEventListener('finish', finish, { once: true })
+      })
+    }
+
+    outAnimation.addEventListener('finish', swapPage, { once: true })
   }
 
   useEffect(() => {
