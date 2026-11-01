@@ -60,6 +60,20 @@ const controls: Record<GroupName, ColorControl[]> = {
   ],
 }
 
+// Historical Day is the user-authored Color Lab export; the Minimal variant only
+// makes four small category adjustments. Neither preset changes the Night palette.
+const historicalDay: ColorSchemeTokens = {
+  neutral: { canvas: '#FAFAFA', surface: '#FFFFFF', subtleSurface: '#F2F2F2', border: '#E0E0E0' },
+  typography: { primary: '#403625', secondary: '#403625', geographicPrimary: '#403625', geographicSecondary: '#8E8568', geographicWater: '#445848', geographicHalo: '#FFFFFF', architectureLabel: '#403625' },
+  interaction: { primaryAction: '#403625', hover: '#F4F4F4', pressed: '#E0E0E0', selectedBackground: '#FAFAFA', selectedIndicator: '#E0E0E0', focus: '#403625' },
+  architecture: { cultureCivic: '#FF3B32', mixedUse: '#9CDCFF', commercial: '#51A0D9', education: '#FFE030', hospitality: '#5973B8', residential: '#FE7A3E', genericFill: '#8BC084', categoryGlyph: '#FFFFFF', genericGlyph: '#FFFFFF', markerOutline: '#FFFFFF' },
+  geographic: { background: '#F1E5C7', residential: '#F1E5C7', park: '#E5E5A3', wood: '#7E7D39', grass: '#E5E5A3', water: '#D1DACE', waterway: '#A1B8AA', roadMinor: '#DACFB3', roadMajor: '#DACFB3', roadMotorway: '#DACFB3', roadCasing: '#DACFB3', building: '#AE6670', buildingOutline: '#AE6670' },
+}
+const minimalDay: ColorSchemeTokens = {
+  ...historicalDay,
+  architecture: { ...historicalDay.architecture, mixedUse: '#8FCDF4', commercial: '#4094CE', education: '#FFD619', residential: '#F16D34' },
+}
+
 const groupLabels: Record<GroupName, string> = {
   neutral: 'Neutral',
   typography: 'Typography',
@@ -166,6 +180,14 @@ export default function ColorLabPanel({ tokens, activeScheme, onChange }: ColorL
           </button>
         ))}
       </div>
+
+      <section className="color-lab-presets" aria-label="Day palette comparisons">
+        <span>Historical Day comparison (Night unchanged)</span>
+        <div className="color-lab-segmented">
+          <button type="button" onClick={() => { onChange({ ...tokens, day: structuredClone(historicalDay) }); setEditingScheme('day'); setGroup('architecture') }}>Original</button>
+          <button type="button" onClick={() => { onChange({ ...tokens, day: structuredClone(minimalDay) }); setEditingScheme('day'); setGroup('architecture') }}>Minimal</button>
+        </div>
+      </section>
 
       <nav className="color-lab-groups" aria-label="Color groups">
         {(Object.keys(groupLabels) as GroupName[]).map((name) => (
