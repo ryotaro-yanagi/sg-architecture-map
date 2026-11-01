@@ -284,16 +284,19 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
 .locate-button:disabled { opacity: .7; cursor: wait; }
 .locate-button svg { width: 20px; height: 20px; }
 .locate-button.compass-button {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 8px);
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  transition: opacity 160ms ease-out, visibility 0s linear 160ms;
+  transition: opacity 260ms cubic-bezier(.22, 1, .36, 1), visibility 0s linear 260ms;
 }
 .locate-button.compass-button.is-visible {
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
-  transition: opacity 180ms ease-out, visibility 0s;
+  transition: opacity 280ms cubic-bezier(.22, 1, .36, 1), visibility 0s;
 }
 .locate-button.compass-button svg { width: 20px; height: 20px; }
 @media (prefers-reduced-motion: reduce) {
