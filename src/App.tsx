@@ -830,7 +830,8 @@ function App() {
     const outX = toExpanded ? -distance : distance
     const inX = toExpanded ? distance : -distance
     const currentStyle = getComputedStyle(surface)
-    const currentOpacity = Number.parseFloat(currentStyle.opacity) || 1
+    const parsedOpacity = Number.parseFloat(currentStyle.opacity)
+    const currentOpacity = Number.isFinite(parsedOpacity) ? parsedOpacity : 1
     const currentTransform = currentStyle.transform === 'none' ? 'translateX(0)' : currentStyle.transform
 
     surfacePageAnimationRef.current?.cancel()
