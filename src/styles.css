@@ -437,7 +437,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
   html { scroll-behavior: auto; }
   .bottom-surface, .control-row { transition: none; animation: none; }
   .bottom-surface.preview { animation: preview-reveal-reduced 80ms linear both; }
-  .sheet-compact, .sheet-expanded { transition: opacity 80ms linear; }
   .notice { animation: none; }
   .initial-loading-screen { transition: none; }
   .initial-loading-screen .loading-title { animation: none; opacity: 1; }
