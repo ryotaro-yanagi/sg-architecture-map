@@ -305,6 +305,9 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
 @media (prefers-reduced-motion: reduce) {
   .locate-button.compass-button { transition-duration: 0.01ms, 0s; }
 }
+.state-explore .map-tools {
+  transition: opacity 180ms cubic-bezier(0, 0, .38, .9) 80ms, visibility 0s linear 80ms;
+}
 .state-search .map-tools,
 .details-expanded .maplibregl-ctrl-bottom-right { visibility: hidden; }
 .state-preview .map-tools,
