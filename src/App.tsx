@@ -170,39 +170,31 @@ const revealBuilding = (
     top = Math.max(top, controlsBottom + margin + pinHeight)
   }
 
-  if (targetSurface === 'detail') {
-    // Coordinate the camera with the final Detail geometry from the same click
-    // that starts the surface transition. Mobile keeps the upper 38dvh as map;
-    // desktop turns Detail into a right-side reading surface.
-    if (bounds.width < 720) {
-      bottom = Math.min(bottom, bounds.height * 0.38 - margin)
-    } else {
-      const detailWidth = Math.min(470, bounds.width * 0.42)
-      right = Math.min(right, bounds.width - detailWidth - margin - pinHalfWidth)
-    }
-  } else {
-    const surface = document.querySelector<HTMLElement>('.bottom-surface')
-    const surfaceBounds = surface?.getBoundingClientRect()
-    if (surfaceBounds) {
-      const surfaceLeft = surfaceBounds.left - bounds.left
-      const surfaceRight = surfaceBounds.right - bounds.left
-      const surfaceTop = surfaceBounds.top - bounds.top
-      const surfaceWidth = surfaceBounds.width
-      const surfaceHeight = surfaceBounds.height
+  const surface = document.querySelector<HTMLElement>('.bottom-surface')
+  const surfaceBounds = surface?.getBoundingClientRect()
+  if (surfaceBounds) {
+    const surfaceLeft = surfaceBounds.left - bounds.left
+    const surfaceRight = surfaceBounds.right - bounds.left
+    const surfaceTop = surfaceBounds.top - bounds.top
+    const surfaceWidth = surfaceBounds.width
+    const surfaceHeight = surfaceBounds.height
 
-      // Mobile Preview/Detail behaves as a bottom inset across almost the full
-      // map. Desktop Detail behaves as a side inset. Desktop Preview only
-      // constrains the lower map when the selected pin is horizontally above it.
-      if (surfaceWidth >= bounds.width * 0.72) {
-        bottom = Math.min(bottom, surfaceTop - margin)
-      } else if (surfaceHeight >= bounds.height * 0.72 && surfaceLeft > bounds.width / 2) {
-        right = Math.min(right, surfaceLeft - margin - pinHalfWidth)
+    // Read the actual floating panel instead of assuming a mobile bottom sheet
+    // or desktop side panel. This keeps camera coordination coupled to the
+    // current Visual System geometry.
+    if (surfaceWidth >= bounds.width * 0.72) {
+      bottom = Math.min(bottom, surfaceTop - margin)
+    } else if (surfaceHeight >= bounds.height * 0.72) {
+      if (surfaceLeft <= bounds.width / 2) {
+        left = Math.max(left, surfaceRight + margin + pinHalfWidth)
       } else {
-        const pinOverSurfaceX =
-          point.x + pinHalfWidth + margin >= surfaceLeft &&
-          point.x - pinHalfWidth - margin <= surfaceRight
-        if (pinOverSurfaceX) bottom = Math.min(bottom, surfaceTop - margin)
+        right = Math.min(right, surfaceLeft - margin - pinHalfWidth)
       }
+    } else {
+      const pinOverSurfaceX =
+        point.x + pinHalfWidth + margin >= surfaceLeft &&
+        point.x - pinHalfWidth - margin <= surfaceRight
+      if (pinOverSurfaceX) bottom = Math.min(bottom, surfaceTop - margin)
     }
   }
 
