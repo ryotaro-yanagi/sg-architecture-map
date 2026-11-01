@@ -703,6 +703,8 @@ function App() {
   const detailBackRef = useRef<HTMLButtonElement>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
   const previewSurfaceRef = useRef<HTMLDivElement>(null)
+  const previewReleaseAnimationRef = useRef<Animation | null>(null)
+  const previewReleaseTargetRef = useRef<string | null>(null)
   const [selectedId, setSelectedId] = useState<string | null>(requestedSelectedId ?? restoredState?.selectedId ?? null)
   const [expanded, setExpanded] = useState(getRequestedExpandedState() ?? restoredState?.expanded ?? false)
   const selectedIdRef = useRef(selectedId)
@@ -763,7 +765,11 @@ function App() {
 
   const releasePreview = () => {
     const surface = previewSurfaceRef.current
+    const releasingId = selectedIdRef.current
     const finish = () => {
+      if (selectedIdRef.current !== releasingId) return
+      previewReleaseAnimationRef.current = null
+      previewReleaseTargetRef.current = null
       setSelectedId(null)
       setExpanded(false)
       setSearchOpen(false)
@@ -771,11 +777,12 @@ function App() {
       searchInputRef.current?.blur()
     }
 
-    if (!surface || expandedRef.current) {
+    if (!surface || expandedRef.current || !releasingId) {
       finish()
       return
     }
 
+    previewReleaseAnimationRef.current?.cancel()
     const reduced = prefersReducedMotion()
     surface.style.pointerEvents = 'none'
     const animation = surface.animate(
@@ -791,16 +798,19 @@ function App() {
         fill: 'forwards',
       },
     )
-
-    let finished = false
-    const complete = () => {
-      if (finished) return
-      finished = true
-      finish()
-    }
-    animation.addEventListener('finish', complete, { once: true })
-    animation.addEventListener('cancel', complete, { once: true })
+    previewReleaseAnimationRef.current = animation
+    previewReleaseTargetRef.current = releasingId
+    animation.addEventListener('finish', finish, { once: true })
   }
+
+  useEffect(() => {
+    const target = previewReleaseTargetRef.current
+    if (!target || target === selectedId) return
+    previewReleaseAnimationRef.current?.cancel()
+    previewReleaseAnimationRef.current = null
+    previewReleaseTargetRef.current = null
+    previewSurfaceRef.current?.style.removeProperty('pointer-events')
+  }, [selectedId])
 
   useEffect(() => {
     let cancelled = false
