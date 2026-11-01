@@ -113,7 +113,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
   transition: opacity 240ms ease-out;
 }
 .initial-loading-screen.is-fading { opacity: 0; pointer-events: none; }
-.initial-loading-screen .loading-title { margin: 0; font: 500 18px/1.35 var(--font-ui); text-align: center; animation: sgm-loading-breathe 800ms ease-in-out infinite; }
+.initial-loading-screen .loading-title { margin: 0; font: 500 18px/1.35 var(--font-ui); text-align: center; animation: sgm-loading-breathe 600ms ease-in-out infinite; }
 .initial-loading-screen.has-error .loading-title { animation: none; opacity: 1; }
 .initial-loading-error { display: grid; justify-items: center; gap: 10px; color: var(--muted); font-size: 14px; line-height: 20px; text-align: center; }
 .initial-loading-error button { min-height: 44px; padding: 0 16px; color: var(--ink); background: var(--paper-strong); border: 1px solid var(--line); border-radius: 22px; cursor: pointer; }

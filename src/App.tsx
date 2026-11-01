@@ -626,7 +626,7 @@ class WeatherBoundary extends Component<{ children: ReactNode }, { hasError: boo
 
 function App() {
   const locale = useMemo(getLocaleFromPath, [])
-  const loadingAnimationDelay = useMemo(() => `-${performance.now() % 800}ms`, [])
+  const loadingAnimationDelay = useMemo(() => `-${performance.now() % 600}ms`, [])
   const t = translations[locale]
   const nextLocale: Locale = locale === 'en' ? 'ja' : 'en'
   const restoredState = useMemo(readRestoredMapState, [])
