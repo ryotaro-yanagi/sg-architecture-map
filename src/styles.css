@@ -351,6 +351,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
   from { opacity: 0; transform: translateY(24px); }
   to { opacity: 1; transform: translateY(0); }
 }
+.bottom-surface.preview.preview-returning { animation: none; }
 
 @keyframes preview-reveal-reduced {
   from { opacity: 0; }
