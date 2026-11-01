@@ -337,6 +337,17 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
   right: 12px;
   bottom: max(12px, env(safe-area-inset-bottom));
   border-radius: 18px;
+  animation: preview-reveal 210ms cubic-bezier(.22,1,.36,1) both;
+}
+
+@keyframes preview-reveal {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes preview-reveal-reduced {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 .bottom-surface.detail {
   inset: 38dvh 0 0;
@@ -426,6 +437,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .bottom-surface, .control-row { transition: none; animation: none; }
+  .bottom-surface.preview { animation: preview-reveal-reduced 80ms linear both; }
   .sheet-compact, .sheet-expanded { transition: opacity 80ms linear; }
   .notice { animation: none; }
   .initial-loading-screen { transition: none; }
