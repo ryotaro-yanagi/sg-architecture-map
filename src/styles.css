@@ -269,6 +269,9 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
   display: grid;
   justify-items: end;
   gap: 8px;
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 160ms cubic-bezier(0, 0, .38, .9), visibility 0s;
 }
 .locate-button {
   width: 48px;
@@ -320,7 +323,12 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
 .state-search .map-tools,
 .details-expanded .map-tools,
 .details-expanded .maplibregl-ctrl-bottom-right { visibility: hidden; }
-.state-preview .map-tools { visibility: visible; bottom: max(214px, calc(env(safe-area-inset-bottom) + 204px)); }
+.state-preview .map-tools {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 120ms cubic-bezier(.2, 0, 1, .9), visibility 0s linear 120ms;
+}
 .user-location-marker { width: 17px; height: 17px; background: #3e7e91; border: 3px solid #fff; border-radius: 50%; box-shadow: 0 0 0 5px rgba(62,126,145,.22), 0 2px 6px rgba(0,0,0,.25); }
 
 .bottom-surface {
@@ -336,11 +344,11 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
   right: 12px;
   bottom: max(12px, env(safe-area-inset-bottom));
   border-radius: 18px;
-  animation: preview-reveal 210ms cubic-bezier(.22,1,.36,1) both;
+  animation: preview-reveal 220ms cubic-bezier(0, 0, .38, .9) both;
 }
 
 @keyframes preview-reveal {
-  from { opacity: 0; transform: translateY(10px); }
+  from { opacity: 0; transform: translateY(24px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
