@@ -298,7 +298,18 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
   pointer-events: auto;
   transition: opacity 280ms cubic-bezier(.22, 1, .36, 1), visibility 0s;
 }
-.locate-button.compass-button svg { width: 20px; height: 20px; }
+.compass-north {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  font-family: var(--font-ui);
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1;
+  transform-origin: center;
+  font-variant-numeric: normal;
+}
 @media (prefers-reduced-motion: reduce) {
   .locate-button.compass-button { transition-duration: 0.01ms, 0s; }
 }
