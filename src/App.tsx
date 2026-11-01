@@ -706,6 +706,7 @@ function App() {
   const previewReleaseAnimationRef = useRef<Animation | null>(null)
   const previewReleaseTargetRef = useRef<string | null>(null)
   const surfaceTransformAnimationRef = useRef<Animation | null>(null)
+  const surfaceTransformIdRef = useRef(0)
   const [selectedId, setSelectedId] = useState<string | null>(requestedSelectedId ?? restoredState?.selectedId ?? null)
   const [expanded, setExpanded] = useState(getRequestedExpandedState() ?? restoredState?.expanded ?? false)
   const selectedIdRef = useRef(selectedId)
@@ -827,6 +828,7 @@ function App() {
     // transform, so a second action can continue without waiting for motion.
     const first = surface.getBoundingClientRect()
     const startRadius = getComputedStyle(surface).borderRadius
+    const transitionId = ++surfaceTransformIdRef.current
     surfaceTransformAnimationRef.current?.cancel()
 
     surface.classList.add('surface-transforming')
@@ -837,7 +839,7 @@ function App() {
     if (toExpanded && building) revealBuilding(mapRef.current, building.coordinates, 'detail')
 
     window.requestAnimationFrame(() => {
-      if (!surface.isConnected) return
+      if (!surface.isConnected || surfaceTransformIdRef.current !== transitionId) return
       const last = surface.getBoundingClientRect()
       const endRadius = getComputedStyle(surface).borderRadius
       const scaleX = last.width ? first.width / last.width : 1
