@@ -1252,7 +1252,8 @@ function App() {
           className={`locate-button compass-button ${Math.abs(((mapBearing + 180) % 360 + 360) % 360 - 180) > 3 ? 'is-visible' : ''}`}
           type="button"
           onClick={resetNorth}
-          disabled={Math.abs(((mapBearing + 180) % 360 + 360) % 360 - 180) <= 3}
+          aria-hidden={Math.abs(((mapBearing + 180) % 360 + 360) % 360 - 180) <= 3}
+          tabIndex={Math.abs(((mapBearing + 180) % 360 + 360) % 360 - 180) > 3 ? 0 : -1}
           aria-label={locale === 'ja' ? '北を上に戻す' : 'Reset map to north'}
           title={locale === 'ja' ? '北を上に戻す' : 'Reset map to north'}
         >
