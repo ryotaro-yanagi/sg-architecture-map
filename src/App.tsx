@@ -278,6 +278,8 @@ const mapPaletteFromTokens = (tokens: ColorSchemeTokens): MapPalette => ({
 
 const markerPixelRatio = 3
 const markerSwitchZoom = 13.5
+const normalPinOutlineWidth = 2.5
+const selectedPinOutlineWidth = 3
 const singaporeLabelCoordinates: Coordinates = [103.82, 1.36]
 const singaporeLabelSourceId = 'singapore-city-label'
 const singaporeLabelLayerId = 'label_city_singapore'
@@ -336,12 +338,12 @@ const updateMarkerImages = async (
   isCurrent: () => boolean = () => true,
 ) => {
   const [normal, selected, ...categoryImages] = await Promise.all([
-    loadSvgMarker(createBuildingPinSvg(28, 31, 1.5, 13, tokens)),
-    loadSvgMarker(createBuildingPinSvg(52, 56, 2, 24, tokens)),
+    loadSvgMarker(createBuildingPinSvg(28, 31, normalPinOutlineWidth, 13, tokens)),
+    loadSvgMarker(createBuildingPinSvg(52, 56, selectedPinOutlineWidth, 24, tokens)),
     ...mapCategories.map((category) => loadSvgMarker(createBuildingPinSvg(
       28,
       31,
-      1.5,
+      normalPinOutlineWidth,
       13,
       tokens,
       categoryColor(tokens, category),
@@ -1011,7 +1013,7 @@ function App() {
     const category = getMapCategory(building.buildingType)
     const fill = category ? categoryColor(activeArchitecture, category) : activeArchitecture.genericFill
     const normal = map.getZoom() >= markerSwitchZoom
-      ? createImage(createBuildingPinSvg(28, 31, 1.5, 13, activeArchitecture, fill, category), 28, 31, 1)
+      ? createImage(createBuildingPinSvg(28, 31, normalPinOutlineWidth, 13, activeArchitecture, fill, category), 28, 31, 1)
       : document.createElement('span')
     if (normal instanceof HTMLSpanElement) {
       normal.style.position = 'absolute'
@@ -1025,7 +1027,7 @@ function App() {
       normal.style.boxSizing = 'border-box'
       normal.style.zIndex = '1'
     }
-    const selected = createImage(createBuildingPinSvg(52, 56, 2, 24, activeArchitecture, fill, category), 52, 56, 2)
+    const selected = createImage(createBuildingPinSvg(52, 56, selectedPinOutlineWidth, 24, activeArchitecture, fill, category), 52, 56, 2)
     element.append(normal, selected)
     const marker = new maplibregl.Marker({ element, anchor: 'bottom' })
       .setLngLat(building.coordinates)
