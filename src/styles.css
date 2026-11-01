@@ -95,7 +95,9 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
   box-shadow: 0 0 0 2px var(--paper-strong);
 }
 
-.app, .map { position: relative; width: 100%; height: 100%; }
+.app { position: relative; display: flex; width: 100%; height: 100%; }
+.sgm-stage { position: relative; min-width: 0; height: 100%; flex: 1; overflow: hidden; }
+.map { position: relative; width: 100%; height: 100%; }
 .map { position: absolute; inset: 0; z-index: 0; background: var(--paper); }
 
 .initial-loading-screen {

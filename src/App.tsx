@@ -1,4 +1,5 @@
 import { Component, useEffect, useMemo, useRef, useState } from 'react'
+import type { CSSProperties } from 'react'
 import { ArrowLeft, ArrowRight, ArrowSquareOut, Cloud, CloudRain, CloudSun, Compass, Crosshair, Lightning, MagnifyingGlass, Moon, NavigationArrow, Sun, X } from '@phosphor-icons/react'
 import * as maplibregl from 'maplibre-gl'
 import type { ExpressionSpecification, GeoJSONSource, Map as MapLibreMap } from 'maplibre-gl'
@@ -8,6 +9,9 @@ import type { ErrorInfo, ReactNode, RefObject } from 'react'
 import type { Locale, Translation } from './i18n'
 import { parseWeatherPayloads } from './weather'
 import type { WeatherState } from './weather'
+import ColorLabPanel from './ColorLabPanel'
+import { cloneColorTokens, colorTokenCssVariables } from './colorTokens'
+import type { ArchitectureColorTokens, ColorSchemeTokens, ColorTokens } from './colorTokens'
 
 type Coordinates = [number, number]
 type Appearance = 'system' | 'day' | 'night'
@@ -97,14 +101,16 @@ const mapCategoryByType = {
 
 type MapCategory = typeof mapCategoryByType[keyof typeof mapCategoryByType]
 
-const mapCategoryStyle: Record<MapCategory, { color: string; icon: string }> = {
-  culture_civic: { color: '#A987FF', icon: 'landmark' },
-  mixed_use: { color: '#FF8D4F', icon: 'layers' },
-  commercial: { color: '#46A5FF', icon: 'building' },
-  education: { color: '#FFC341', icon: 'graduation-cap' },
-  hospitality: { color: '#FD6360', icon: 'bed' },
-  residential: { color: '#5DD089', icon: 'house' },
-}
+const mapCategories: MapCategory[] = ['culture_civic', 'mixed_use', 'commercial', 'education', 'hospitality', 'residential']
+
+const categoryColor = (tokens: ArchitectureColorTokens, category: MapCategory): string => ({
+  culture_civic: tokens.cultureCivic,
+  mixed_use: tokens.mixedUse,
+  commercial: tokens.commercial,
+  education: tokens.education,
+  hospitality: tokens.hospitality,
+  residential: tokens.residential,
+})[category]
 
 const getMapCategory = (buildingType: string): MapCategory | null =>
   Object.prototype.hasOwnProperty.call(mapCategoryByType, buildingType)
@@ -261,25 +267,17 @@ type MapPalette = {
   poiOpacity: number
 }
 
-const productionMapPalette: MapPalette = {
-  background: '#fbf8f3', residential: '#eae0d0', park: '#e1ebb0', wood: '#d3e4d5', grass: '#e6eee6',
-  water: '#b0d0d6', waterway: '#83b8c4', roadMinor: '#E7E5E0', roadMajor: '#DADCD9', roadMotorway: '#C8D0D2', roadCasing: '#cbd0cd',
-  building: '#ded3be', buildingOutline: '#c8ccca', label: '#414744', labelSecondary: '#6b726e', labelWater: '#3f7885', labelHalo: '#ffffff', poiOpacity: .58,
-}
-// N1b is a comparison palette, not an adopted production Dark theme.
-const nightPreviewPalette: MapPalette = {
-  background: '#202824', residential: '#202824', park: '#3E5645', wood: '#293D32', grass: '#2B3930',
-  water: '#365562', waterway: '#477687', roadMinor: '#46554D', roadMajor: '#586A5F', roadMotorway: '#6C7C72', roadCasing: '#202824',
-  building: '#4D5951', buildingOutline: '#4D5951', label: '#D4DDD6', labelSecondary: '#A6B3AA', labelWater: '#85B6C7', labelHalo: '#202824', poiOpacity: .58,
-}
-const markerFill = '#35946b'
-const markerStroke = '#242424'
-const markerOutline = '#ffffff'
+const mapPaletteFromTokens = (tokens: ColorSchemeTokens): MapPalette => ({
+  ...tokens.geographic,
+  label: tokens.typography.geographicPrimary,
+  labelSecondary: tokens.typography.geographicSecondary,
+  labelWater: tokens.typography.geographicWater,
+  labelHalo: tokens.typography.geographicHalo,
+  poiOpacity: .58,
+})
+
 const markerPixelRatio = 3
 const markerSwitchZoom = 13.5
-const markerIcon = '#ffffff'
-const categoryMarkerIcon = '#212121' // Stable neutral pictogram ink across category colors and appearances.
-const dayCategoryMarkerIcon = categoryMarkerIcon
 const singaporeLabelCoordinates: Coordinates = [103.82, 1.36]
 const singaporeLabelSourceId = 'singapore-city-label'
 const singaporeLabelLayerId = 'label_city_singapore'
@@ -294,7 +292,16 @@ const categoryIconPaths: Record<MapCategory, string> = {
   residential: 'M160-200v-360q0-19 8.5-36t23.5-28l240-180q21-16 48-16t48 16l240 180q15 11 23.5 28t8.5 36v360q0 33-23.5 56.5T720-120H600q-17 0-28.5-11.5T560-160v-200q0-17-11.5-28.5T520-400h-80q-17 0-28.5 11.5T400-360v200q0 17-11.5 28.5T360-120H240q-33 0-56.5-23.5T160-200Z', // Material Symbols Rounded Filled: home
 }
 
-const createBuildingPinSvg = (width: number, height: number, strokeWidth: number, iconSize: number, fill = markerFill, category: MapCategory | null = null, glyphColor = categoryMarkerIcon) => {
+const createBuildingPinSvg = (
+  width: number,
+  height: number,
+  strokeWidth: number,
+  iconSize: number,
+  architecture: ArchitectureColorTokens,
+  fill = architecture.genericFill,
+  category: MapCategory | null = null,
+  glyphColor = architecture.categoryGlyph,
+) => {
   const cx = width / 2
   const iconX = (width - iconSize) / 2
   const iconY = (width <= 28 ? 5 : 9) + (width <= 28 ? 1 : 2)
@@ -306,8 +313,8 @@ const createBuildingPinSvg = (width: number, height: number, strokeWidth: number
     `C ${width * .93} ${height * .68}, ${cx + width * .16} ${height * .84}, ${cx} ${height - strokeWidth / 2} Z`,
   ].join(' ')
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${width * markerPixelRatio}" height="${height * markerPixelRatio}" viewBox="0 0 ${width} ${height}">
-    <path d="${path}" fill="${fill}" stroke="${markerOutline}" stroke-width="${strokeWidth}" stroke-linejoin="round"/>
-    ${category ? `<svg x="${iconX}" y="${iconY}" width="${iconSize}" height="${iconSize}" viewBox="0 -960 960 960" fill="${glyphColor}"><path d="${categoryIconPaths[category]}"/></svg>` : `<svg x="${iconX}" y="${iconY}" width="${iconSize}" height="${iconSize}" viewBox="0 0 256 256" fill="${markerIcon}"><path d="${phosphorBuildingFillPath}"/></svg>`}
+    <path d="${path}" fill="${fill}" stroke="${architecture.markerOutline}" stroke-width="${strokeWidth}" stroke-linejoin="round"/>
+    ${category ? `<svg x="${iconX}" y="${iconY}" width="${iconSize}" height="${iconSize}" viewBox="0 -960 960 960" fill="${glyphColor}"><path d="${categoryIconPaths[category]}"/></svg>` : `<svg x="${iconX}" y="${iconY}" width="${iconSize}" height="${iconSize}" viewBox="0 0 256 256" fill="${architecture.genericGlyph}"><path d="${phosphorBuildingFillPath}"/></svg>`}
   </svg>`
 }
 const loadSvgMarker = (svg: string) => new Promise<HTMLImageElement>((resolve, reject) => {
@@ -316,13 +323,44 @@ const loadSvgMarker = (svg: string) => new Promise<HTMLImageElement>((resolve, r
   image.onerror = () => reject(new Error('Failed to load marker SVG'))
   image.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`
 })
+
+const setMapImage = (map: MapLibreMap, id: string, image: HTMLImageElement) => {
+  if (map.hasImage(id)) map.updateImage(id, image)
+  else map.addImage(id, image, { pixelRatio: markerPixelRatio })
+}
+
+const updateMarkerImages = async (
+  map: MapLibreMap,
+  tokens: ArchitectureColorTokens,
+  scheme: 'day' | 'night',
+  isCurrent: () => boolean = () => true,
+) => {
+  const [normal, selected, ...categoryImages] = await Promise.all([
+    loadSvgMarker(createBuildingPinSvg(28, 31, 1.5, 13, tokens)),
+    loadSvgMarker(createBuildingPinSvg(52, 56, 2, 24, tokens)),
+    ...mapCategories.map((category) => loadSvgMarker(createBuildingPinSvg(
+      28,
+      31,
+      1.5,
+      13,
+      tokens,
+      categoryColor(tokens, category),
+      category,
+    ))),
+  ])
+  if (!isCurrent()) return
+  setMapImage(map, 'building-pin-normal', normal)
+  setMapImage(map, 'building-pin-selected', selected)
+  setMapImage(map, `building-pin-${scheme}-fallback`, normal)
+  mapCategories.forEach((category, index) => setMapImage(map, `building-pin-${scheme}-${category}`, categoryImages[index]))
+}
 const legacyComparisonParams = ['ui', 'font', 'visual', 'map', 'scale', 'preset', 'lab', 'shape', 'weight', 'pin', 'surface', 'spacing', 'identity', 'mapMode', 'color', 'mapColor']
 
 const setPaint = (map: MapLibreMap, layerId: string, property: string, value: unknown) => {
   if (map.getLayer(layerId)) map.setPaintProperty(layerId, property as never, value as never)
 }
 
-const addSingaporeCityLabel = (map: MapLibreMap) => {
+const addSingaporeCityLabel = (map: MapLibreMap, palette: MapPalette) => {
   const excludeSingapore: maplibregl.FilterSpecification = [
     '!=',
     ['coalesce', ['get', 'name_en'], ['get', 'name'], ''],
@@ -364,8 +402,8 @@ const addSingaporeCityLabel = (map: MapLibreMap) => {
       'text-ignore-placement': false,
     },
     paint: {
-      'text-color': productionMapPalette.label,
-      'text-halo-color': productionMapPalette.labelHalo,
+      'text-color': palette.label,
+      'text-halo-color': palette.labelHalo,
       'text-halo-width': 1.25,
       'text-halo-blur': 1,
       'text-opacity': ['interpolate', ['linear'], ['zoom'], 9, 0.9, 9.35, 1, 12, 1, 12.5, 0],
@@ -464,9 +502,10 @@ const applyMapColors = (map: MapLibreMap, palette: MapPalette) => {
   setPaint(map, 'landcover_grass', 'fill-color', palette.grass)
   ;['landuse_pitch', 'landuse_track', 'landuse_cemetery', 'landuse_hospital', 'landuse_school'].forEach((id) => setPaint(map, id, 'fill-color', palette.grass))
   setPaint(map, 'water', 'fill-color', palette.water)
+  setPaint(map, 'landuse_residential', 'fill-color', palette.residential)
   ;['waterway_tunnel', 'waterway_river', 'waterway_other'].forEach((id) => setPaint(map, id, 'line-color', palette.waterway))
   setPaint(map, 'building', 'fill-color', palette.building)
-  setPaint(map, 'building', 'fill-outline-color', palette.building)
+  setPaint(map, 'building', 'fill-outline-color', palette.buildingOutline)
   const layers = map.getStyle().layers ?? []
   layers.forEach((layer) => {
     const id = layer.id
@@ -493,8 +532,8 @@ const applyMapColors = (map: MapLibreMap, palette: MapPalette) => {
     }
   })
 }
-const applyProductionMapTheme = (map: MapLibreMap, nightPreview = false) => {
-  const palette = nightPreview ? nightPreviewPalette : productionMapPalette
+const applyMapTheme = (map: MapLibreMap, tokens: ColorSchemeTokens, nightPreview = false) => {
+  const palette = mapPaletteFromTokens(tokens)
   applyMapColors(map, palette)
   if (map.getLayer('building-pins')) {
     map.setLayoutProperty('building-pins', 'icon-image', ['concat', nightPreview ? 'building-pin-night-' : 'building-pin-day-', ['coalesce', ['get', 'mapCategory'], 'fallback']])
@@ -559,7 +598,7 @@ const applyProductionMapTheme = (map: MapLibreMap, nightPreview = false) => {
     })
   }
   if (!map.getLayer('building-labels')) return
-  map.setPaintProperty('building-labels', 'text-color', nightPreview ? '#F2F4F0' : markerStroke)
+  map.setPaintProperty('building-labels', 'text-color', tokens.typography.architectureLabel)
   map.setPaintProperty('building-labels', 'text-halo-color', palette.labelHalo)
   map.setPaintProperty('building-labels', 'text-halo-width', nightPreview ? 0.85 : 1)
   map.setPaintProperty('building-labels', 'text-halo-blur', nightPreview ? 0.35 : 0)
@@ -583,7 +622,7 @@ const readRestoredMapState = (): RestoredMapState | null => {
   }
 }
 
-const featureCollection = (selectedId: string | null, locale: Locale): GeoJSON.FeatureCollection => ({
+const featureCollection = (selectedId: string | null, locale: Locale, architecture: ArchitectureColorTokens): GeoJSON.FeatureCollection => ({
   type: 'FeatureCollection',
   features: buildings.map((building) => ({
     type: 'Feature',
@@ -593,7 +632,7 @@ const featureCollection = (selectedId: string | null, locale: Locale): GeoJSON.F
       name: getBuildingCopy(locale, building.id, building.name).name,
       selected: building.id === selectedId,
       mapCategory: getMapCategory(building.buildingType),
-      mapCategoryColor: getMapCategory(building.buildingType) ? mapCategoryStyle[getMapCategory(building.buildingType)!].color : null,
+      mapCategoryColor: getMapCategory(building.buildingType) ? categoryColor(architecture, getMapCategory(building.buildingType)!) : null,
     },
   })),
 })
@@ -652,6 +691,17 @@ function App() {
   const [systemDark, setSystemDark] = useState(() => window.matchMedia('(prefers-color-scheme: dark)').matches)
   const [initialMapState, setInitialMapState] = useState<InitialMapState>('loading')
   const nightPreview = appearance === 'night' || (appearance === 'system' && systemDark)
+  const activeScheme = nightPreview ? 'night' : 'day'
+  const colorLabEnabled = useMemo(
+    () => import.meta.env.DEV && new URLSearchParams(window.location.search).get('lab') === 'color',
+    [],
+  )
+  const [colorTokens, setColorTokens] = useState<ColorTokens>(cloneColorTokens)
+  const activeColorTokens = colorTokens[activeScheme]
+  const activeArchitecture = activeColorTokens.architecture
+  const colorTokensRef = useRef(colorTokens)
+  const markerUpdateIdRef = useRef(0)
+  colorTokensRef.current = colorTokens
   // Async MapLibre style/image loading must use the latest requested appearance.
   const nightPreviewRef = useRef(nightPreview)
   nightPreviewRef.current = nightPreview
@@ -736,16 +786,34 @@ function App() {
   useEffect(() => {
     const map = mapRef.current
     if (!map || !map.getLayer('building-pins')) return
-    applyProductionMapTheme(map, nightPreview)
-  }, [nightPreview])
+    applyMapTheme(map, activeColorTokens, nightPreview)
+  }, [activeColorTokens, nightPreview])
+
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map || !map.getLayer('building-pins')) return
+    const updateId = ++markerUpdateIdRef.current
+    void updateMarkerImages(map, activeArchitecture, activeScheme, () => (
+      markerUpdateIdRef.current === updateId && mapRef.current === map
+    )).then(() => {
+      if (markerUpdateIdRef.current === updateId && mapRef.current === map) map.triggerRepaint()
+    })
+    const source = map.getSource('buildings') as GeoJSONSource | undefined
+    source?.setData(featureCollection(selectedIdRef.current, locale, activeArchitecture))
+    setPaint(map, 'building-dots', 'circle-color', ['coalesce', ['get', 'mapCategoryColor'], activeArchitecture.genericFill])
+    setPaint(map, 'building-dots', 'circle-stroke-color', activeArchitecture.markerOutline)
+    return () => { markerUpdateIdRef.current += 1 }
+  }, [activeArchitecture, activeScheme, locale])
 
   useEffect(() => {
     document.documentElement.lang = locale
     document.documentElement.dir = 'ltr'
     const url = new URL(window.location.href)
-    legacyComparisonParams.forEach((param) => url.searchParams.delete(param))
+    legacyComparisonParams.forEach((param) => {
+      if (param !== 'lab' || !colorLabEnabled) url.searchParams.delete(param)
+    })
     window.history.replaceState({}, '', url)
-  }, [locale])
+  }, [colorLabEnabled, locale])
 
   useEffect(() => {
     if (expanded) {
@@ -767,23 +835,29 @@ function App() {
       setInitialMapState('fading')
     }
 
-    const map = new maplibregl.Map({
-      container: mapContainer.current,
-      style: 'https://tiles.openfreemap.org/styles/liberty',
-      ...(restoredState
-        ? { center: restoredState.center, zoom: restoredState.zoom }
-        : { bounds: overviewBounds, fitBoundsOptions: { padding: overviewPadding, maxZoom: 12 } }),
-      bearing: restoredState?.bearing ?? 0,
-      pitch: 0,
-      minPitch: 0,
-      maxPitch: 0,
-      touchPitch: false,
-      pitchWithRotate: false,
-      minZoom: 9,
-      maxZoom: 18,
-      attributionControl: false,
-      locale: t.mapControls,
-    })
+    let map: MapLibreMap
+    try {
+      map = new maplibregl.Map({
+        container: mapContainer.current,
+        style: 'https://tiles.openfreemap.org/styles/liberty',
+        ...(restoredState
+          ? { center: restoredState.center, zoom: restoredState.zoom }
+          : { bounds: overviewBounds, fitBoundsOptions: { padding: overviewPadding, maxZoom: 12 } }),
+        bearing: restoredState?.bearing ?? 0,
+        pitch: 0,
+        minPitch: 0,
+        maxPitch: 0,
+        touchPitch: false,
+        pitchWithRotate: false,
+        minZoom: 9,
+        maxZoom: 18,
+        attributionControl: false,
+        locale: t.mapControls,
+      })
+    } catch {
+      setInitialMapState('error')
+      return
+    }
 
     readyTimeout = window.setTimeout(() => {
       if (!disposed) setInitialMapState('error')
@@ -794,24 +868,16 @@ function App() {
     map.on('load', async () => {
       // Apply geographic styling before asynchronous marker SVG decoding.
       // Otherwise Liberty's original buildings and linework can briefly appear.
+      const initialScheme = nightPreviewRef.current ? 'night' : 'day'
+      const initialTokens = colorTokensRef.current[initialScheme]
       applyMapStructure(map)
-      addSingaporeCityLabel(map)
-      applyMapColors(map, productionMapPalette)
-      const [normalPin, selectedPin] = await Promise.all([
-        loadSvgMarker(createBuildingPinSvg(28, 31, 1.5, 13)),
-        loadSvgMarker(createBuildingPinSvg(52, 56, 2, 24)),
+      addSingaporeCityLabel(map, mapPaletteFromTokens(initialTokens))
+      applyMapColors(map, mapPaletteFromTokens(initialTokens))
+      await Promise.all([
+        updateMarkerImages(map, colorTokensRef.current.day.architecture, 'day'),
+        updateMarkerImages(map, colorTokensRef.current.night.architecture, 'night'),
       ])
-      map.addImage('building-pin-normal', normalPin, { pixelRatio: markerPixelRatio })
-      map.addImage('building-pin-selected', selectedPin, { pixelRatio: markerPixelRatio })
-      await Promise.all(Object.entries(mapCategoryStyle).map(async ([category, style]) => {
-        const [day, night] = await Promise.all([
-          loadSvgMarker(createBuildingPinSvg(28, 31, 1.5, 13, style.color, category as MapCategory, dayCategoryMarkerIcon)),
-          loadSvgMarker(createBuildingPinSvg(28, 31, 1.5, 13, style.color, category as MapCategory, categoryMarkerIcon)),
-        ])
-        map.addImage(`building-pin-day-${category}`, day, { pixelRatio: markerPixelRatio })
-        map.addImage(`building-pin-night-${category}`, night, { pixelRatio: markerPixelRatio })
-      }))
-      map.addSource('buildings', { type: 'geojson', data: featureCollection(selectedId, locale) })
+      map.addSource('buildings', { type: 'geojson', data: featureCollection(selectedId, locale, initialTokens.architecture) })
       map.addLayer({
         id: 'building-hit-targets', type: 'circle', source: 'buildings',
         layout: { 'circle-sort-key': ['case', ['get', 'selected'], 1, 0] },
@@ -822,8 +888,8 @@ function App() {
         filter: ['==', ['get', 'selected'], false],
         paint: {
           'circle-radius': 5,
-          'circle-color': ['coalesce', ['get', 'mapCategoryColor'], markerFill],
-          'circle-stroke-color': '#ffffff',
+          'circle-color': ['coalesce', ['get', 'mapCategoryColor'], initialTokens.architecture.genericFill],
+          'circle-stroke-color': initialTokens.architecture.markerOutline,
           'circle-stroke-width': 1,
           'circle-opacity': 1,
         },
@@ -844,9 +910,9 @@ function App() {
         id: 'building-labels', type: 'symbol', source: 'buildings', minzoom: markerSwitchZoom,
         filter: ['==', ['get', 'selected'], false],
         layout: { 'text-field': ['get', 'name'], 'text-size': 13, 'text-anchor': 'left', 'text-justify': 'auto', 'text-variable-anchor-offset': ['left', [1.55, -1.3], 'right', [-1.55, -1.3]], 'text-max-width': 12 },
-        paint: { 'text-color': '#282724', 'text-halo-color': '#f8f4ec', 'text-halo-width': 1 },
+        paint: { 'text-color': initialTokens.typography.architectureLabel, 'text-halo-color': initialTokens.typography.geographicHalo, 'text-halo-width': 1 },
       })
-      applyProductionMapTheme(map, nightPreviewRef.current)
+      applyMapTheme(map, initialTokens, nightPreviewRef.current)
       applyProductionTypeScaleToMap(map)
 
       // Do not uncover the application at MapLibre's generic `load` event.
@@ -911,7 +977,7 @@ function App() {
   useEffect(() => {
     const map = mapRef.current
     const source = map?.getSource('buildings') as GeoJSONSource | undefined
-    source?.setData(featureCollection(selectedId, locale))
+    source?.setData(featureCollection(selectedId, locale, activeArchitecture))
 
     selectedMarkerRef.current?.remove()
     selectedMarkerRef.current = null
@@ -943,9 +1009,9 @@ function App() {
       return image
     }
     const category = getMapCategory(building.buildingType)
-    const fill = category ? mapCategoryStyle[category].color : markerFill
+    const fill = category ? categoryColor(activeArchitecture, category) : activeArchitecture.genericFill
     const normal = map.getZoom() >= markerSwitchZoom
-      ? createImage(createBuildingPinSvg(28, 31, 1.5, 13, fill, category), 28, 31, 1)
+      ? createImage(createBuildingPinSvg(28, 31, 1.5, 13, activeArchitecture, fill, category), 28, 31, 1)
       : document.createElement('span')
     if (normal instanceof HTMLSpanElement) {
       normal.style.position = 'absolute'
@@ -953,13 +1019,13 @@ function App() {
       normal.style.height = '10px'
       normal.style.left = '21px'
       normal.style.bottom = '0'
-      normal.style.border = '1px solid #ffffff'
+      normal.style.border = `1px solid ${activeArchitecture.markerOutline}`
       normal.style.borderRadius = '50%'
       normal.style.background = fill
       normal.style.boxSizing = 'border-box'
       normal.style.zIndex = '1'
     }
-    const selected = createImage(createBuildingPinSvg(52, 56, 2, 24, fill, category), 52, 56, 2)
+    const selected = createImage(createBuildingPinSvg(52, 56, 2, 24, activeArchitecture, fill, category), 52, 56, 2)
     element.append(normal, selected)
     const marker = new maplibregl.Marker({ element, anchor: 'bottom' })
       .setLngLat(building.coordinates)
@@ -981,7 +1047,7 @@ function App() {
       marker.remove()
       if (selectedMarkerRef.current === marker) selectedMarkerRef.current = null
     }
-  }, [locale, selectedId])
+  }, [activeArchitecture, locale, selectedId])
 
   useEffect(() => {
     const url = new URL(window.location.href)
@@ -1075,7 +1141,12 @@ function App() {
   }
 
   return (
-    <main className={`app locale-${locale} state-${surfaceState} ${expanded ? 'details-expanded' : ''} ${nightPreview ? 'night-preview' : ''}`} aria-busy={initialMapState !== 'hidden'}>
+    <main
+      className={`app locale-${locale} state-${surfaceState} ${expanded ? 'details-expanded' : ''} ${nightPreview ? 'night-preview' : ''} ${colorLabEnabled ? 'color-lab-active' : ''}`}
+      style={colorTokenCssVariables(activeColorTokens) as CSSProperties}
+      aria-busy={initialMapState !== 'hidden'}
+    >
+      <div className="sgm-stage">
       <div ref={mapContainer} className="map" role="region" aria-label={t.mapLabel} />
 
       <div className="top-ui">
@@ -1129,7 +1200,11 @@ function App() {
           <div className="control-right">
             <a
               className="language-trigger"
-              href={localeHref(nextLocale, { selected: selectedId ?? '', sheet: expanded ? 'expanded' : 'compact' })}
+              href={localeHref(nextLocale, {
+                selected: selectedId ?? '',
+                sheet: expanded ? 'expanded' : 'compact',
+                ...(colorLabEnabled ? { lab: 'color' } : {}),
+              })}
               hrefLang={nextLocale}
               onClick={switchLanguage}
               aria-label={locale === 'en' ? 'Switch to Japanese' : '英語に切り替える'}
@@ -1201,6 +1276,10 @@ function App() {
             </div>
           )}
         </div>
+      )}
+      </div>
+      {colorLabEnabled && (
+        <ColorLabPanel tokens={colorTokens} activeScheme={activeScheme} onChange={setColorTokens} />
       )}
     </main>
   )
