@@ -67,7 +67,6 @@
   border-radius: 50%;
   cursor: pointer;
 }
-.appearance-toggle:active { background: var(--interaction-pressed); }
 .appearance-toggle svg { width: 20px; height: 20px; }
 .app.night-preview .primary-button { color: #1B211F; }
 .app.night-preview .notice { color: #F2F4F0; background: #333C38; }
@@ -117,7 +116,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
 .initial-loading-screen.has-error .loading-title { animation: none; opacity: 1; }
 .initial-loading-error { display: grid; justify-items: center; gap: 10px; color: var(--muted); font-size: 14px; line-height: 20px; text-align: center; }
 .initial-loading-error button { min-height: 44px; padding: 0 16px; color: var(--ink); background: var(--paper-strong); border: 1px solid var(--line); border-radius: 22px; cursor: pointer; }
-.initial-loading-error button:active { background: var(--interaction-pressed); }
 
 @keyframes sgm-loading-breathe {
   0%, 100% { opacity: 1; }
@@ -130,7 +128,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
 .maplibregl-ctrl-attrib { font-size: 10px; opacity: .8; }
 .maplibregl-ctrl-group { border-radius: 5px !important; overflow: hidden; box-shadow: 0 4px 16px rgba(22, 31, 27, .12) !important; }
 .maplibregl-ctrl-group button { width: var(--control-min); height: var(--control-min); }
-.maplibregl-ctrl-group button:active { background-color: var(--interaction-pressed); }
 
 .top-ui {
   position: absolute;
@@ -242,13 +239,11 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
   line-height: 20px;
   text-decoration: none;
 }
-.weather-chip:active, .language-trigger:active { background: var(--interaction-pressed); }
 .weather-chip { min-width: 48px; }
 .weather-chip svg { width: 20px; height: 20px; }
 .language-trigger { min-width: 58px; cursor: pointer; }
 
 .icon-button { display: grid; place-items: center; width: var(--control-min); height: var(--control-min); padding: 0; color: var(--ink); border: 1px solid var(--line); border-radius: 50%; background: var(--paper-strong); cursor: pointer; }
-.icon-button:active { background: var(--interaction-pressed); }
 .icon-button svg { width: 20px; height: 20px; }
 .icon-button.small { width: var(--control-min); height: var(--control-min); border: 0; background: transparent; }
 .icon-button.small svg { width: 16px; height: 16px; }
@@ -278,7 +273,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
   box-shadow: none;
   cursor: pointer;
 }
-.locate-button:active { background: var(--interaction-pressed); }
 .locate-button:disabled { opacity: .7; cursor: wait; }
 .locate-button svg { width: 20px; height: 20px; }
 .locate-button.compass-button {
