@@ -856,28 +856,44 @@ function App() {
       return
     }
 
+    const duration = toExpanded ? 280 : 240
     const shell = surface.animate(
       [
         { height: `${first.height}px` },
         { height: `${last.height}px` },
       ],
       {
-        duration: toExpanded ? 280 : 240,
+        duration,
         easing: 'cubic-bezier(.2, 0, .38, .9)',
         fill: 'both',
       },
     )
-    const outgoingFade = outgoing.animate([{ opacity: 1 }, { opacity: 0 }], {
-      duration: toExpanded ? 100 : 90,
-      easing: 'cubic-bezier(.2, 0, 1, .9)',
-      fill: 'forwards',
-    })
-    const incomingFade = incoming.animate([{ opacity: 0 }, { opacity: 1 }], {
-      duration: toExpanded ? 160 : 150,
-      delay: toExpanded ? 60 : 50,
-      easing: 'cubic-bezier(0, 0, .38, .9)',
-      fill: 'forwards',
-    })
+    const outgoingFade = outgoing.animate(
+      [
+        { opacity: 1, offset: 0 },
+        { opacity: 1, offset: 0.12 },
+        { opacity: 0, offset: 0.42 },
+        { opacity: 0, offset: 1 },
+      ],
+      {
+        duration,
+        easing: 'linear',
+        fill: 'forwards',
+      },
+    )
+    const incomingFade = incoming.animate(
+      [
+        { opacity: 0, offset: 0 },
+        { opacity: 0, offset: 0.32 },
+        { opacity: 1, offset: 0.78 },
+        { opacity: 1, offset: 1 },
+      ],
+      {
+        duration,
+        easing: 'linear',
+        fill: 'forwards',
+      },
+    )
     panelDepthAnimationsRef.current = [shell, outgoingFade, incomingFade]
 
     shell.addEventListener('finish', () => {
