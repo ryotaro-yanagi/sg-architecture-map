@@ -1,6 +1,6 @@
 import { Component, useEffect, useMemo, useRef, useState } from 'react'
 import type { CSSProperties } from 'react'
-import { ArrowLeft, ArrowRight, ArrowSquareOut, Cloud, CloudRain, CloudSun, Compass, Lightning, MagnifyingGlass, Moon, NavigationArrow, Sun, X } from '@phosphor-icons/react'
+import { ArrowLeft, ArrowRight, ArrowSquareOut, Cloud, CloudRain, CloudSun, Lightning, MagnifyingGlass, Moon, NavigationArrow, Sun, X } from '@phosphor-icons/react'
 import * as maplibregl from 'maplibre-gl'
 import type { ExpressionSpecification, GeoJSONSource, Map as MapLibreMap } from 'maplibre-gl'
 import data from './data/buildings.json'
@@ -1248,11 +1248,21 @@ function App() {
       )}
 
       <div className="map-tools">
-        {Math.abs(((mapBearing + 180) % 360 + 360) % 360 - 180) > 3 && (
-          <button className="locate-button compass-button" type="button" onClick={resetNorth} aria-label={locale === 'ja' ? '北を上に戻す' : 'Reset map to north'} title={locale === 'ja' ? '北を上に戻す' : 'Reset map to north'}>
-            <Compass aria-hidden="true" size={20} weight="regular" style={{ transform: `rotate(${-mapBearing}deg)` }} />
-          </button>
-        )}
+        <button
+          className={`locate-button compass-button ${Math.abs(((mapBearing + 180) % 360 + 360) % 360 - 180) > 3 ? 'is-visible' : ''}`}
+          type="button"
+          onClick={resetNorth}
+          disabled={Math.abs(((mapBearing + 180) % 360 + 360) % 360 - 180) <= 3}
+          aria-label={locale === 'ja' ? '北を上に戻す' : 'Reset map to north'}
+          title={locale === 'ja' ? '北を上に戻す' : 'Reset map to north'}
+        >
+          <svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="none">
+            <g transform={`rotate(${-mapBearing} 12 12)`}>
+              <path d="M12 2L17.5 18L12 14.7L6.5 18Z" fill="currentColor"/>
+              <path d="M12 14.7L12 22L6.5 18Z" fill="currentColor" opacity=".35"/>
+            </g>
+          </svg>
+        </button>
         <button className={`locate-button ${locating ? 'loading' : ''}`} onClick={locate} disabled={locating} aria-label={locating ? t.locating : t.locate}>
           <NavigationArrow aria-hidden="true" size={20} weight="fill" />
         </button>
