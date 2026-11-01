@@ -871,7 +871,7 @@ function App() {
     const outgoingFade = outgoing.animate(
       [
         { opacity: 1, offset: 0 },
-        { opacity: 1, offset: 0.12 },
+        { opacity: 1, offset: 0.12, easing: 'cubic-bezier(.2, 0, 1, .9)' },
         { opacity: 0, offset: 0.42 },
         { opacity: 0, offset: 1 },
       ],
@@ -884,7 +884,7 @@ function App() {
     const incomingFade = incoming.animate(
       [
         { opacity: 0, offset: 0 },
-        { opacity: 0, offset: 0.32 },
+        { opacity: 0, offset: 0.32, easing: 'cubic-bezier(0, 0, .38, .9)' },
         { opacity: 1, offset: 0.78 },
         { opacity: 1, offset: 1 },
       ],
