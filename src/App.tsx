@@ -824,15 +824,14 @@ function App() {
 
     const transitionId = ++surfacePageTransitionIdRef.current
     const reduced = prefersReducedMotion()
-    const distance = reduced ? 0 : 8
-    const outDuration = reduced ? 60 : (toExpanded ? 80 : 70)
-    const inDuration = reduced ? 80 : (toExpanded ? 130 : 120)
-    const outX = toExpanded ? -distance : distance
-    const inX = toExpanded ? distance : -distance
+    const outDuration = reduced ? 60 : (toExpanded ? 60 : 70)
+    const inDuration = reduced ? 80 : (toExpanded ? 160 : 130)
+    const outY = reduced ? 0 : (toExpanded ? 0 : 10)
+    const inY = reduced ? 0 : (toExpanded ? 24 : 16)
     const currentStyle = getComputedStyle(surface)
     const parsedOpacity = Number.parseFloat(currentStyle.opacity)
     const currentOpacity = Number.isFinite(parsedOpacity) ? parsedOpacity : 1
-    const currentTransform = currentStyle.transform === 'none' ? 'translateX(0)' : currentStyle.transform
+    const currentTransform = currentStyle.transform === 'none' ? 'translateY(0)' : currentStyle.transform
 
     surfacePageAnimationRef.current?.cancel()
     surface.style.pointerEvents = 'none'
@@ -840,7 +839,7 @@ function App() {
     const outAnimation = surface.animate(
       [
         { opacity: currentOpacity, transform: currentTransform },
-        { opacity: 0, transform: `translateX(${outX}px)` },
+        { opacity: 0, transform: `translateY(${outY}px)` },
       ],
       {
         duration: outDuration,
@@ -861,8 +860,8 @@ function App() {
 
         const inAnimation = surface.animate(
           [
-            { opacity: 0, transform: `translateX(${inX}px)` },
-            { opacity: 1, transform: 'translateX(0)' },
+            { opacity: 0, transform: `translateY(${inY}px)` },
+            { opacity: 1, transform: 'translateY(0)' },
           ],
           {
             duration: inDuration,
