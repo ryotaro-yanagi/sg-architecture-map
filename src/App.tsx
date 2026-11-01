@@ -781,7 +781,7 @@ function App() {
       [{ opacity: 1 }, { opacity: 0 }],
       {
         duration: prefersReducedMotion() ? 80 : 140,
-        easing: 'linear',
+        easing: prefersReducedMotion() ? 'linear' : 'cubic-bezier(.2, 0, 1, .9)',
         fill: 'forwards',
       },
     )
@@ -862,20 +862,20 @@ function App() {
         { height: `${last.height}px` },
       ],
       {
-        duration: toExpanded ? 240 : 220,
-        easing: 'cubic-bezier(.22, 1, .36, 1)',
+        duration: toExpanded ? 280 : 240,
+        easing: 'cubic-bezier(.2, 0, .38, .9)',
         fill: 'both',
       },
     )
     const outgoingFade = outgoing.animate([{ opacity: 1 }, { opacity: 0 }], {
-      duration: 80,
-      easing: 'linear',
+      duration: toExpanded ? 100 : 90,
+      easing: 'cubic-bezier(.2, 0, 1, .9)',
       fill: 'forwards',
     })
     const incomingFade = incoming.animate([{ opacity: 0 }, { opacity: 1 }], {
-      duration: 140,
-      delay: toExpanded ? 90 : 70,
-      easing: 'linear',
+      duration: toExpanded ? 160 : 150,
+      delay: toExpanded ? 60 : 50,
+      easing: 'cubic-bezier(0, 0, .38, .9)',
       fill: 'forwards',
     })
     panelDepthAnimationsRef.current = [shell, outgoingFade, incomingFade]
