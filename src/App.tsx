@@ -131,6 +131,8 @@ const normalPinOutlineWidth = 2
 const selectedPinOutlineWidth = 2.5
 const normalPinIconSize = 13
 const selectedPinIconSize = 26
+const distantSelectionZoomThreshold = 12
+const distantSelectionTargetZoom = 13.8
 
 const prefersReducedMotion = () =>
   window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -159,6 +161,7 @@ const panelSpringHeightFrames = (from: number, to: number): Keyframe[] =>
 const revealBuilding = (
   map: MapLibreMap | null,
   coordinates: Coordinates,
+  targetZoom?: number,
 ) => {
   if (!map) return
   const canvas = map.getCanvas()
@@ -226,12 +229,26 @@ const revealBuilding = (
   }
 
   const outside = point.x < left || point.x > right || point.y < top || point.y > bottom
-  if (!outside) return
+  const shouldZoom = targetZoom !== undefined && map.getZoom() < targetZoom
+  if (!outside && !shouldZoom) return
 
   // Reframe toward the visual center of the remaining map, preserving zoom,
   // bearing and pitch instead of resetting the user's camera.
   const targetX = (left + right) / 2
   const targetY = (top + bottom) / 2
+  if (shouldZoom) {
+    map.easeTo({
+      center: coordinates,
+      zoom: targetZoom,
+      offset: [targetX - bounds.width / 2, targetY - bounds.height / 2],
+      bearing: map.getBearing(),
+      pitch: map.getPitch(),
+      duration: motionDuration(760),
+      easing: t => t * t * (3 - 2 * t),
+      essential: false,
+    })
+    return
+  }
   const dx = point.x - targetX
   const dy = point.y - targetY
   const distance = Math.hypot(dx, dy)
@@ -1139,7 +1156,10 @@ function App() {
           setSearchOpen(false)
           setQuery('')
           searchInputRef.current?.blur()
-          window.requestAnimationFrame(() => revealBuilding(map, nearest.coordinates))
+          const targetZoom = map.getZoom() < distantSelectionZoomThreshold
+            ? distantSelectionTargetZoom
+            : undefined
+          window.requestAnimationFrame(() => revealBuilding(map, nearest.coordinates, targetZoom))
         } else if (!expandedRef.current) {
           // Compact Preview is transient and releases back to the map.
           // Detail is persistent until Back/Escape/Home or another building.
