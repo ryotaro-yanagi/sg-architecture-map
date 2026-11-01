@@ -66,77 +66,76 @@ export type ColorTokens = {
   night: ColorSchemeTokens
 }
 
-// These are the deployed SGM values. Color Lab edits always start from this
-// immutable baseline and never write changes back into the repository.
+// Production palette: Historical Day + Historical After Dark N3.
+// Color Lab starts from these shared defaults; preview edits do not modify source.
 export const defaultColorTokens: ColorTokens = {
   day: {
     neutral: {
       canvas: '#FAFAFA',
       surface: '#FFFFFF',
       subtleSurface: '#F2F2F2',
-      border: '#E0E0E0',
+      border: '#E0E0E0'
     },
     typography: {
-      primary: '#212121',
-      secondary: '#505050',
-      geographicPrimary: '#414744',
-      geographicSecondary: '#6B726E',
-      geographicWater: '#3F7885',
+      primary: '#403625',
+      secondary: '#403625',
+      geographicPrimary: '#403625',
+      geographicSecondary: '#8E8568',
+      geographicWater: '#445848',
       geographicHalo: '#FFFFFF',
-      architectureLabel: '#242424',
+      architectureLabel: '#403625'
     },
     interaction: {
-      primaryAction: '#262626',
+      primaryAction: '#403625',
       hover: '#F4F4F4',
       pressed: '#E0E0E0',
       selectedBackground: '#FAFAFA',
       selectedIndicator: '#E0E0E0',
-      focus: '#0F62FE',
+      focus: '#403625'
     },
     architecture: {
-      cultureCivic: '#A987FF',
-      mixedUse: '#FF8D4F',
-      commercial: '#46A5FF',
-      education: '#FFC341',
-      hospitality: '#FD6360',
-      residential: '#5DD089',
-      genericFill: '#35946B',
+      cultureCivic: '#FF3B32',
+      mixedUse: '#9CDCFF',
+      commercial: '#51A0D9',
+      education: '#FFE030',
+      hospitality: '#5973B8',
+      residential: '#FE7A3E',
+      genericFill: '#8BC084',
       categoryGlyph: '#FFFFFF',
       genericGlyph: '#FFFFFF',
-      markerOutline: '#FFFFFF',
+      markerOutline: '#FFFFFF'
     },
     geographic: {
-      background: '#FBF8F3',
-      residential: '#EAE0D0',
-      park: '#E1EBB0',
-      wood: '#D3E4D5',
-      grass: '#E6EEE6',
-      water: '#B0D0D6',
-      waterway: '#83B8C4',
-      roadMinor: '#E7E5E0',
-      roadMajor: '#DADCD9',
-      roadMotorway: '#C8D0D2',
-      roadCasing: '#CBD0CD',
-      building: '#DED3BE',
-      // The deployed map currently renders the outline with the building fill.
-      buildingOutline: '#DED3BE',
-    },
+      background: '#F1E5C7',
+      residential: '#F1E5C7',
+      park: '#E5E5A3',
+      wood: '#7E7D39',
+      grass: '#E5E5A3',
+      water: '#D1DACE',
+      waterway: '#A1B8AA',
+      roadMinor: '#DACFB3',
+      roadMajor: '#DACFB3',
+      roadMotorway: '#DACFB3',
+      roadCasing: '#DACFB3',
+      building: '#AE6670',
+      buildingOutline: '#AE6670'
+    }
   },
   night: {
     neutral: {
       canvas: '#1B211F',
       surface: '#28302D',
       subtleSurface: '#333C38',
-      border: '#48534D',
+      border: '#48534D'
     },
     typography: {
       primary: '#F2F4F0',
       secondary: '#B3BDB7',
-      geographicPrimary: '#D4DDD6',
-      geographicSecondary: '#A6B3AA',
-      geographicWater: '#85B6C7',
-      geographicHalo: '#202824',
-      architectureLabel: '#F2F4F0',
+      geographicPrimary: '#E6DECD',
+      geographicSecondary: '#C5B9A0',
+      geographicWater: '#C2DBD2',
+      geographicHalo: '#25271F',
+      architectureLabel: '#F2F4F0'
     },
     interaction: {
       primaryAction: '#EDF1EA',
@@ -144,36 +143,36 @@ export const defaultColorTokens: ColorTokens = {
       pressed: '#45534A',
       selectedBackground: '#1B211F',
       selectedIndicator: '#48534D',
-      focus: '#8FBCFF',
+      focus: '#8FBCFF'
     },
     architecture: {
-      cultureCivic: '#A987FF',
-      mixedUse: '#FF8D4F',
-      commercial: '#46A5FF',
-      education: '#FFC341',
-      hospitality: '#FD6360',
-      residential: '#5DD089',
+      cultureCivic: '#FF3B32',
+      mixedUse: '#9CDCFF',
+      commercial: '#51A0D9',
+      education: '#FFE030',
+      hospitality: '#5973B8',
+      residential: '#FE7A3E',
       genericFill: '#35946B',
-      categoryGlyph: '#000000',
+      categoryGlyph: '#FFFFFF',
       genericGlyph: '#000000',
-      markerOutline: '#000000',
+      markerOutline: '#000000'
     },
     geographic: {
-      background: '#202824',
-      residential: '#202824',
-      park: '#3E5645',
-      wood: '#293D32',
-      grass: '#2B3930',
-      water: '#365562',
-      waterway: '#477687',
-      roadMinor: '#46554D',
-      roadMajor: '#586A5F',
-      roadMotorway: '#6C7C72',
-      roadCasing: '#202824',
-      building: '#4D5951',
-      buildingOutline: '#4D5951',
-    },
-  },
+      background: '#25271F',
+      residential: '#292B22',
+      park: '#3B4630',
+      wood: '#525333',
+      grass: '#3B4630',
+      water: '#344D4A',
+      waterway: '#54746C',
+      roadMinor: '#35382D',
+      roadMajor: '#45483B',
+      roadMotorway: '#515346',
+      roadCasing: '#25271F',
+      building: '#71505A',
+      buildingOutline: '#71505A'
+    }
+  }
 }
 
 export const cloneColorTokens = (tokens: ColorTokens = defaultColorTokens): ColorTokens =>
