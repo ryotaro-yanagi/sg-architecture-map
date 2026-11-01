@@ -138,6 +138,22 @@ const prefersReducedMotion = () =>
 const motionDuration = (duration: number) =>
   prefersReducedMotion() ? 0 : duration
 
+// Approximate a bounce-free, critically damped spring for the panel shell.
+// The panel accelerates from rest, carries momentum through the middle,
+// then spends the final part of the timeline gently settling into place.
+const panelSpringOffsets = [0, 0.06, 0.12, 0.20, 0.30, 0.42, 0.56, 0.72, 0.86, 1]
+const panelSpringProgress = (time: number) => {
+  const response = 7
+  const end = 1 - (1 + response) * Math.exp(-response)
+  const x = response * time
+  return (1 - (1 + x) * Math.exp(-x)) / end
+}
+const panelSpringHeightFrames = (from: number, to: number): Keyframe[] =>
+  panelSpringOffsets.map((offset) => ({
+    height: `${from + (to - from) * panelSpringProgress(offset)}px`,
+    offset,
+  }))
+
 // Preserve the user's camera when selecting a building. The selected pin
 // stays inside the map area that is actually visible around SGM's UI.
 const revealBuilding = (
@@ -858,13 +874,10 @@ function App() {
 
     const duration = toExpanded ? 280 : 240
     const shell = surface.animate(
-      [
-        { height: `${first.height}px` },
-        { height: `${last.height}px` },
-      ],
+      panelSpringHeightFrames(first.height, last.height),
       {
         duration,
-        easing: 'cubic-bezier(.2, 0, .38, .9)',
+        easing: 'linear',
         fill: 'both',
       },
     )
