@@ -702,6 +702,7 @@ function App() {
   const selectedMarkerRef = useRef<maplibregl.Marker | null>(null)
   const detailBackRef = useRef<HTMLButtonElement>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
+  const previewSurfaceRef = useRef<HTMLDivElement>(null)
   const [selectedId, setSelectedId] = useState<string | null>(requestedSelectedId ?? restoredState?.selectedId ?? null)
   const [expanded, setExpanded] = useState(getRequestedExpandedState() ?? restoredState?.expanded ?? false)
   const selectedIdRef = useRef(selectedId)
@@ -759,6 +760,47 @@ function App() {
     })
   }, [locale, query])
   const hasSearchQuery = query.trim().length > 0
+
+  const releasePreview = () => {
+    const surface = previewSurfaceRef.current
+    const finish = () => {
+      setSelectedId(null)
+      setExpanded(false)
+      setSearchOpen(false)
+      setQuery('')
+      searchInputRef.current?.blur()
+    }
+
+    if (!surface || expandedRef.current) {
+      finish()
+      return
+    }
+
+    const reduced = prefersReducedMotion()
+    surface.style.pointerEvents = 'none'
+    const animation = surface.animate(
+      reduced
+        ? [{ opacity: 1 }, { opacity: 0 }]
+        : [
+            { opacity: 1, transform: 'translateY(0)' },
+            { opacity: 0, transform: 'translateY(8px)' },
+          ],
+      {
+        duration: reduced ? 80 : 160,
+        easing: reduced ? 'linear' : 'cubic-bezier(.4, 0, 1, 1)',
+        fill: 'forwards',
+      },
+    )
+
+    let finished = false
+    const complete = () => {
+      if (finished) return
+      finished = true
+      finish()
+    }
+    animation.addEventListener('finish', complete, { once: true })
+    animation.addEventListener('cancel', complete, { once: true })
+  }
 
   useEffect(() => {
     let cancelled = false
@@ -974,11 +1016,7 @@ function App() {
           // different building returns to Preview for identification.
           if (expandedRef.current && nearest.id === selectedIdRef.current) return
           if (nearest.id === selectedIdRef.current) {
-            setSelectedId(null)
-            setExpanded(false)
-            setSearchOpen(false)
-            setQuery('')
-            searchInputRef.current?.blur()
+            releasePreview()
             return
           }
           setSelectedId(nearest.id)
@@ -988,13 +1026,9 @@ function App() {
           searchInputRef.current?.blur()
           window.requestAnimationFrame(() => revealBuilding(map, nearest.coordinates))
         } else if (!expandedRef.current) {
-          // Compact Preview is transient and can be cleared from the map.
+          // Compact Preview is transient and releases back to the map.
           // Detail is persistent until Back/Escape/Home or another building.
-          setSelectedId(null)
-          setExpanded(false)
-          setSearchOpen(false)
-          setQuery('')
-          searchInputRef.current?.blur()
+          releasePreview()
         }
       })
       map.on('mouseenter', 'building-hit-targets', () => { map.getCanvas().style.cursor = 'pointer' })
@@ -1268,7 +1302,7 @@ function App() {
       </div>
 
       {selected && (
-        <div className={`bottom-surface ${surfaceState}`}>
+        <div ref={previewSurfaceRef} className={`bottom-surface ${surfaceState}`}>
           <aside className="place-surface" aria-label={expanded ? t.detailLabel(getBuildingCopy(locale, selected.id, selected.name).name) : t.previewLabel(getBuildingCopy(locale, selected.id, selected.name).name)}>
             <div className="sheet-compact" aria-hidden={expanded}>
               <PreviewCard
@@ -1279,7 +1313,7 @@ function App() {
                   setExpanded(true)
                   revealBuilding(mapRef.current, selected.coordinates, 'detail')
                 }}
-                onClose={() => setSelectedId(null)}
+                onClose={releasePreview}
               />
             </div>
             <div className="sheet-expanded" aria-hidden={!expanded}>
