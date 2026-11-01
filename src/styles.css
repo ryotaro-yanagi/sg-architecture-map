@@ -67,14 +67,12 @@
   border-radius: 50%;
   cursor: pointer;
 }
-.appearance-toggle:hover { background: var(--interaction-hover); }
 .appearance-toggle:active { background: var(--interaction-pressed); }
 .appearance-toggle svg { width: 20px; height: 20px; }
 .app.night-preview .primary-button { color: #1B211F; }
 .app.night-preview .notice { color: #F2F4F0; background: #333C38; }
 .app.night-preview .maplibregl-ctrl-group { background: var(--paper-strong); }
 .app.night-preview .maplibregl-ctrl-group button { background-color: var(--paper-strong); }
-.app.night-preview .maplibregl-ctrl-group button:hover { background-color: var(--interaction-hover); }
 
 
 .app.locale-ja {
@@ -119,7 +117,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
 .initial-loading-screen.has-error .loading-title { animation: none; opacity: 1; }
 .initial-loading-error { display: grid; justify-items: center; gap: 10px; color: var(--muted); font-size: 14px; line-height: 20px; text-align: center; }
 .initial-loading-error button { min-height: 44px; padding: 0 16px; color: var(--ink); background: var(--paper-strong); border: 1px solid var(--line); border-radius: 22px; cursor: pointer; }
-.initial-loading-error button:hover { background: var(--interaction-hover); }
 .initial-loading-error button:active { background: var(--interaction-pressed); }
 
 @keyframes sgm-loading-breathe {
@@ -133,7 +130,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
 .maplibregl-ctrl-attrib { font-size: 10px; opacity: .8; }
 .maplibregl-ctrl-group { border-radius: 5px !important; overflow: hidden; box-shadow: 0 4px 16px rgba(22, 31, 27, .12) !important; }
 .maplibregl-ctrl-group button { width: var(--control-min); height: var(--control-min); }
-.maplibregl-ctrl-group button:hover { background-color: var(--interaction-hover); }
 .maplibregl-ctrl-group button:active { background-color: var(--interaction-pressed); }
 
 .top-ui {
@@ -193,8 +189,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
 .result-count { margin: 7px 10px 5px; color: var(--muted); font-size: 14px; line-height: 20px; }
 .search-results button { width: 100%; min-height: 52px; display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 9px 8px; text-align: left; color: var(--ink); background: transparent; border: 0; border-top: 1px solid var(--line); cursor: pointer; }
 .search-results button:first-of-type { border-top: 0; }
-.search-results button:hover { background: var(--interaction-hover); border-radius: 10px; }
-.search-results button:active { background: var(--interaction-pressed); }
 .search-results button span { display: grid; gap: 3px; }
 .search-results strong { font: 500 16px/25px var(--font-display); }
 .search-results small { color: var(--muted); font-size: 14px; line-height: 20px; }
@@ -248,14 +242,12 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
   line-height: 20px;
   text-decoration: none;
 }
-.weather-chip:hover, .language-trigger:hover { background: var(--interaction-hover); }
 .weather-chip:active, .language-trigger:active { background: var(--interaction-pressed); }
 .weather-chip { min-width: 48px; }
 .weather-chip svg { width: 20px; height: 20px; }
 .language-trigger { min-width: 58px; cursor: pointer; }
 
 .icon-button { display: grid; place-items: center; width: var(--control-min); height: var(--control-min); padding: 0; color: var(--ink); border: 1px solid var(--line); border-radius: 50%; background: var(--paper-strong); cursor: pointer; }
-.icon-button:hover { background: var(--interaction-hover); }
 .icon-button:active { background: var(--interaction-pressed); }
 .icon-button svg { width: 20px; height: 20px; }
 .icon-button.small { width: var(--control-min); height: var(--control-min); border: 0; background: transparent; }
@@ -286,7 +278,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
   box-shadow: none;
   cursor: pointer;
 }
-.locate-button:hover { background: var(--interaction-hover); }
 .locate-button:active { background: var(--interaction-pressed); }
 .locate-button:disabled { opacity: .7; cursor: wait; }
 .locate-button svg { width: 20px; height: 20px; }
@@ -369,8 +360,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
 .preview-year { white-space: nowrap; }
 .preview-details { width: 100%; min-height: var(--control-min); display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 0; color: var(--ink); background: transparent; border: 0; border-top: 1px solid var(--line); font-size: 15px; font-weight: 500; line-height: 20px; text-align: left; cursor: pointer; }
 .preview-details svg { width: 20px; height: 20px; flex: 0 0 20px; }
-.preview-details:hover { background: var(--interaction-hover); }
-.preview-details:active { background: var(--interaction-pressed); }
 
 .primary-button { min-height: 44px; display: inline-flex; justify-content: center; align-items: center; gap: 12px; padding: 0 16px; color: #fff; background: var(--accent); border: 0; border-radius: 3px; font-size: 15px; font-weight: 500; line-height: 20px; text-decoration: none; cursor: pointer; }
 .primary-button svg { width: 20px; height: 20px; }
@@ -378,8 +367,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
 .detail-content { width: 100%; max-width: 68ch; min-height: 100%; margin-inline: auto; padding: 18px 18px max(30px, calc(env(safe-area-inset-bottom) + 20px)); overflow-wrap: anywhere; }
 .detail-heading { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
 .back-button { min-height: var(--control-min); display: inline-flex; align-items: center; gap: 8px; margin-left: -8px; padding: 0 8px; border: 0; border-radius: 0; background: transparent; color: var(--ink); font-size: 15px; font-weight: 500; line-height: 20px; cursor: pointer; }
-.back-button:hover { background: var(--interaction-hover); }
-.back-button:active { background: var(--interaction-pressed); }
 .back-button svg { width: 16px; height: 16px; flex: 0 0 16px; }
 .record-index { color: var(--muted); font-size: var(--vs-meta-size); line-height: var(--vs-meta-line); letter-spacing: 0; }
 .detail-intro { padding-bottom: 22px; border-bottom: 1px solid var(--line); }
@@ -392,16 +379,12 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
 .detail-location small { display: block; margin-top: 8px; color: var(--muted); font-family: var(--font-attribution); font-size: 12px; line-height: 18px; }
 .actions { display: grid; grid-template-columns: 1fr; gap: 0; margin-top: 0; border-top: 0; }
 .actions a { min-height: 48px; display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 0; color: var(--ink); border: 0; border-bottom: 1px solid var(--line); border-radius: 0; font-size: 15px; font-weight: 500; line-height: 20px; text-decoration: none; }
-.actions a:hover { background: var(--interaction-hover); }
-.actions a:active { background: var(--interaction-pressed); }
 .actions .map-action { font-weight: 600; }
 .actions svg { width: 20px; height: 20px; flex: 0 0 20px; }
 .sources svg { width: 16px; height: 16px; flex: 0 0 16px; }
 .sources { display: grid; gap: 0; margin-top: 24px; padding-top: 0; border-top: 0; }
 .sources p { margin: 0 0 5px; color: var(--muted); font-size: var(--vs-meta-size); font-weight: 500; line-height: var(--vs-meta-line); letter-spacing: 0; text-transform: uppercase; }
 .sources a { min-height: var(--control-min); display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 9px 0; color: var(--ink); border-bottom: 1px solid var(--line); font-size: var(--vs-meta-size); font-weight: 500; line-height: var(--vs-meta-line); text-decoration: none; }
-.sources a:hover { background: var(--interaction-hover); }
-.sources a:active { background: var(--interaction-pressed); }
 
 .notice { position: absolute; z-index: 30; left: 50%; bottom: max(24px, env(safe-area-inset-bottom)); transform: translateX(-50%); width: max-content; max-width: calc(100% - 28px); padding: 12px 16px; color: #fff; background: #282724; border-radius: 5px; box-shadow: none; font-size: 14px; line-height: 20px; animation: rise .2s ease-out; }
 
@@ -429,6 +412,22 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
   .detail-content { padding: 24px 28px 38px; }
   .map-tools { right: 22px; bottom: 98px; }
   .maplibregl-ctrl-bottom-right { right: 14px; bottom: 152px; }
+}
+
+
+@media (hover: hover) and (pointer: fine) {
+  .appearance-toggle:hover { background: var(--interaction-hover); }
+  .app.night-preview .maplibregl-ctrl-group button:hover { background-color: var(--interaction-hover); }
+  .initial-loading-error button:hover { background: var(--interaction-hover); }
+  .maplibregl-ctrl-group button:hover { background-color: var(--interaction-hover); }
+  .search-results button:hover { background: var(--interaction-hover); border-radius: 10px; }
+  .weather-chip:hover, .language-trigger:hover { background: var(--interaction-hover); }
+  .icon-button:hover { background: var(--interaction-hover); }
+  .locate-button:hover { background: var(--interaction-hover); }
+  .preview-details:hover { background: var(--interaction-hover); }
+  .back-button:hover { background: var(--interaction-hover); }
+  .actions a:hover { background: var(--interaction-hover); }
+  .sources a:hover { background: var(--interaction-hover); }
 }
 
 @media (forced-colors: active) {
