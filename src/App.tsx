@@ -143,7 +143,6 @@ const motionDuration = (duration: number) =>
 const revealBuilding = (
   map: MapLibreMap | null,
   coordinates: Coordinates,
-  targetSurface: 'current' | 'detail' = 'current',
 ) => {
   if (!map) return
   const canvas = map.getCanvas()
@@ -228,10 +227,8 @@ const revealBuilding = (
   }
   map.easeTo({
     center,
-    duration: targetSurface === 'detail' ? 400 : Math.min(900, Math.max(420, distance * 1.25)),
-    easing: targetSurface === 'detail'
-      ? t => 1 - Math.pow(1 - t, 3)
-      : t => t * t * (3 - 2 * t),
+    duration: Math.min(900, Math.max(420, distance * 1.25)),
+    easing: t => t * t * (3 - 2 * t),
     essential: false,
   })
 }
@@ -801,7 +798,7 @@ function App() {
     previewReleaseTargetRef.current = null
   }, [selectedId])
 
-  const transitionSurfaceDepth = (toExpanded: boolean, building?: Building) => {
+  const transitionSurfaceDepth = (toExpanded: boolean) => {
     const surface = previewSurfaceRef.current
     const outgoing = toExpanded ? previewContentRef.current : detailContentRef.current
     const incoming = toExpanded ? detailContentRef.current : previewContentRef.current
@@ -820,7 +817,6 @@ function App() {
     flushSync(() => setExpanded(toExpanded))
     const last = surface.getBoundingClientRect()
 
-    if (toExpanded && building) revealBuilding(mapRef.current, building.coordinates, 'detail')
 
     if (reduced) {
       const outgoingFade = outgoing.animate([{ opacity: 1 }, { opacity: 0 }], {
@@ -1388,7 +1384,7 @@ function App() {
                 building={selected}
                 locale={locale}
                 t={t}
-                onDetails={() => transitionSurfaceDepth(true, selected)}
+                onDetails={() => transitionSurfaceDepth(true)}
                 onClose={releasePreview}
               />
             </div>
