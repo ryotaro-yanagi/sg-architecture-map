@@ -302,9 +302,10 @@ const categoryIconPaths: Record<MapCategory, string> = {
 
 const createBuildingPinPath = (width: number, height: number, strokeWidth: number) => {
   const inset = strokeWidth / 2
+  const topClearance = .25
   const drawableWidth = width - strokeWidth
   const centerX = width / 2
-  const topY = inset
+  const topY = inset + topClearance
   const tipY = height - inset
   const sideX = width * .07 + inset
   const headCenterY = topY + drawableWidth * .44
@@ -952,7 +953,15 @@ function App() {
       }
 
       map.on('click', (event) => {
-        const nearest = buildings
+        const currentBuilding = buildings.find((building) => building.id === selectedIdRef.current)
+        const currentPoint = currentBuilding ? map.project(currentBuilding.coordinates) : null
+        const currentPin = currentBuilding && currentPoint &&
+          Math.abs(currentPoint.x - event.point.x) <= selectedPinWidth / 2 &&
+          event.point.y >= currentPoint.y - selectedPinHeight &&
+          event.point.y <= currentPoint.y
+          ? currentBuilding
+          : null
+        const nearest = currentPin ?? buildings
           .map((building) => {
             const point = map.project(building.coordinates)
             return { building, distance: Math.hypot(point.x - event.point.x, point.y - event.point.y) }
@@ -961,9 +970,17 @@ function App() {
           .sort((a, b) => a.distance - b.distance)[0]?.building
         if (nearest) {
           // Detail remains nonmodal: map gestures and the current pin keep the
-          // record open. Choosing a different building returns to Preview so
-          // the new place is identified before deeper reading.
+          // record open. In Preview the current pin toggles closed; choosing a
+          // different building returns to Preview for identification.
           if (expandedRef.current && nearest.id === selectedIdRef.current) return
+          if (nearest.id === selectedIdRef.current) {
+            setSelectedId(null)
+            setExpanded(false)
+            setSearchOpen(false)
+            setQuery('')
+            searchInputRef.current?.blur()
+            return
+          }
           setSelectedId(nearest.id)
           setExpanded(false)
           setSearchOpen(false)
