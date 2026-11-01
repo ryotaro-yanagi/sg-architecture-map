@@ -113,11 +113,17 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
   transition: opacity 240ms ease-out;
 }
 .initial-loading-screen.is-fading { opacity: 0; pointer-events: none; }
-.initial-loading-screen p { margin: 0; font: 500 18px/1.35 var(--font-ui); text-align: center; }
+.initial-loading-screen .loading-title { margin: 0; font: 500 18px/1.35 var(--font-ui); text-align: center; animation: sgm-loading-breathe 800ms ease-in-out infinite; }
+.initial-loading-screen.has-error .loading-title { animation: none; opacity: 1; }
 .initial-loading-error { display: grid; justify-items: center; gap: 10px; color: var(--muted); font-size: 14px; line-height: 20px; text-align: center; }
 .initial-loading-error button { min-height: 44px; padding: 0 16px; color: var(--ink); background: var(--paper-strong); border: 1px solid var(--line); border-radius: 22px; cursor: pointer; }
 .initial-loading-error button:hover { background: var(--interaction-hover); }
 .initial-loading-error button:active { background: var(--interaction-pressed); }
+
+@keyframes sgm-loading-breathe {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .3; }
+}
 
 .maplibregl-canvas:focus-visible { outline: 3px solid var(--focus-ring); outline-offset: -4px; }
 .maplibregl-ctrl-bottom-left { bottom: 4px; left: 6px; }
@@ -386,4 +392,5 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
   .sheet-compact, .sheet-expanded { transition: opacity 80ms linear; }
   .notice { animation: none; }
   .initial-loading-screen { transition: none; }
+  .initial-loading-screen .loading-title { animation: none; opacity: 1; }
 }

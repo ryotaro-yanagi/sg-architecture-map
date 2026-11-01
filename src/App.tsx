@@ -626,6 +626,7 @@ class WeatherBoundary extends Component<{ children: ReactNode }, { hasError: boo
 
 function App() {
   const locale = useMemo(getLocaleFromPath, [])
+  const loadingAnimationDelay = useMemo(() => `-${performance.now() % 800}ms`, [])
   const t = translations[locale]
   const nextLocale: Locale = locale === 'en' ? 'ja' : 'en'
   const restoredState = useMemo(readRestoredMapState, [])
@@ -1186,11 +1187,11 @@ function App() {
 
       {initialMapState !== 'hidden' && (
         <div
-          className={`initial-loading-screen ${initialMapState === 'fading' ? 'is-fading' : ''}`}
+          className={`initial-loading-screen ${initialMapState === 'fading' ? 'is-fading' : ''} ${initialMapState === 'error' ? 'has-error' : ''}`}
           role={initialMapState === 'error' ? 'alert' : 'status'}
           aria-live="polite"
         >
-          <p>Singapore Architecture Map</p>
+          <p className="loading-title" style={{ animationDelay: loadingAnimationDelay }}>Singapore Architecture Map</p>
           {initialMapState === 'error' && (
             <div className="initial-loading-error">
               <span>{locale === 'ja' ? '地図を読み込めませんでした。' : 'The map could not be loaded.'}</span>
