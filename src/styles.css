@@ -283,6 +283,19 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
 .locate-button:active { background: var(--interaction-pressed); }
 .locate-button:disabled { opacity: .7; cursor: wait; }
 .locate-button svg { width: 20px; height: 20px; }
+ /* Compass remains a 48px hit target, with a quieter 40px visible surface. */
+.locate-button.compass-button { position: relative; background: transparent; border-color: transparent; }
+.locate-button.compass-button::before {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: var(--paper-strong);
+}
+.locate-button.compass-button svg { position: relative; z-index: 1; }
+.locate-button.compass-button:hover::before { background: var(--interaction-hover); }
+.locate-button.compass-button:active::before { background: var(--interaction-pressed); }
 .state-search .map-tools,
 .details-expanded .map-tools,
 .details-expanded .maplibregl-ctrl-bottom-right { visibility: hidden; }
