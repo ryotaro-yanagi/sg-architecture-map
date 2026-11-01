@@ -1,6 +1,6 @@
 import { Component, useEffect, useMemo, useRef, useState } from 'react'
 import type { CSSProperties } from 'react'
-import { ArrowLeft, ArrowRight, ArrowSquareOut, Cloud, CloudRain, CloudSun, Compass, Crosshair, Lightning, MagnifyingGlass, Moon, NavigationArrow, Sun, X } from '@phosphor-icons/react'
+import { ArrowLeft, ArrowRight, ArrowSquareOut, Cloud, CloudRain, CloudSun, Compass, Lightning, MagnifyingGlass, Moon, NavigationArrow, Sun, X } from '@phosphor-icons/react'
 import * as maplibregl from 'maplibre-gl'
 import type { ExpressionSpecification, GeoJSONSource, Map as MapLibreMap } from 'maplibre-gl'
 import data from './data/buildings.json'
@@ -1249,12 +1249,12 @@ function App() {
 
       <div className="map-tools">
         {Math.abs(((mapBearing + 180) % 360 + 360) % 360 - 180) > 3 && (
-          <button className="locate-button" type="button" onClick={resetNorth} aria-label={locale === 'ja' ? '北を上に戻す' : 'Reset map to north'} title={locale === 'ja' ? '北を上に戻す' : 'Reset map to north'}>
+          <button className="locate-button compass-button" type="button" onClick={resetNorth} aria-label={locale === 'ja' ? '北を上に戻す' : 'Reset map to north'} title={locale === 'ja' ? '北を上に戻す' : 'Reset map to north'}>
             <Compass aria-hidden="true" size={20} weight="regular" style={{ transform: `rotate(${-mapBearing}deg)` }} />
           </button>
         )}
         <button className={`locate-button ${locating ? 'loading' : ''}`} onClick={locate} disabled={locating} aria-label={locating ? t.locating : t.locate}>
-          <Crosshair aria-hidden="true" size={20} weight="regular" />
+          <NavigationArrow aria-hidden="true" size={20} weight="fill" />
         </button>
       </div>
 
@@ -1289,8 +1289,8 @@ function WeatherGlyph({ condition }: { condition: string | null }) {
   const normalized = typeof condition === 'string' ? condition.toLowerCase() : ''
   if (/thunder|lightning/.test(normalized)) return <Lightning aria-hidden="true" size={20} weight="regular" />
   if (/shower|rain/.test(normalized)) return <CloudRain aria-hidden="true" size={20} weight="regular" />
-  if (/cloud|overcast/.test(normalized)) return <Cloud aria-hidden="true" size={20} weight="regular" />
   if (/partly|fair/.test(normalized)) return <CloudSun aria-hidden="true" size={20} weight="regular" />
+  if (/cloud|overcast/.test(normalized)) return <Cloud aria-hidden="true" size={20} weight="regular" />
   return <Sun aria-hidden="true" size={20} weight="regular" />
 }
 
