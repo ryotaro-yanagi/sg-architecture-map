@@ -87,6 +87,7 @@ export const defaultColorTokens: ColorTokens = {
       architectureLabel: '#403625'
     },
     interaction: {
+      identity: '#FF4534',
       primaryAction: '#403625',
       hover: '#F4F4F4',
       pressed: '#E0E0E0',
@@ -139,6 +140,7 @@ export const defaultColorTokens: ColorTokens = {
       architectureLabel: '#F2F4F0'
     },
     interaction: {
+      identity: '#FF4534',
       primaryAction: '#EDF1EA',
       hover: '#35403A',
       pressed: '#45534A',
