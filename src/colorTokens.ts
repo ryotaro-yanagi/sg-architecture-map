@@ -16,6 +16,7 @@ export type TypographyColorTokens = {
 }
 
 export type InteractionColorTokens = {
+  identity: string
   primaryAction: string
   hover: string
   pressed: string
@@ -186,6 +187,7 @@ export const colorTokenCssVariables = (tokens: ColorSchemeTokens): Record<`--${s
   '--ink': tokens.typography.primary,
   '--muted': tokens.typography.secondary,
   '--accent': tokens.interaction.primaryAction,
+  '--identity': tokens.interaction.identity,
   '--interaction-hover': tokens.interaction.hover,
   '--interaction-pressed': tokens.interaction.pressed,
   '--interaction-selected-background': tokens.interaction.selectedBackground,
