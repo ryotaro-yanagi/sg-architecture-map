@@ -78,8 +78,8 @@ export const defaultColorTokens: ColorTokens = {
       border: '#E0E0E0'
     },
     typography: {
-      primary: '#403625',
-      secondary: '#403625',
+      primary: '#FF4534',
+      secondary: '#FF4534',
       geographicPrimary: '#403625',
       geographicSecondary: '#8E8568',
       geographicWater: '#445848',
