@@ -24,6 +24,7 @@ const controls: Record<GroupName, ColorControl[]> = {
     { section: 'typography', token: 'architectureLabel', label: 'Architecture label' },
   ],
   interaction: [
+    { section: 'interaction', token: 'identity', label: 'Identity / Search red' },
     { section: 'interaction', token: 'primaryAction', label: 'Accent / primary action' },
     { section: 'interaction', token: 'hover', label: 'Hover' },
     { section: 'interaction', token: 'pressed', label: 'Pressed' },
