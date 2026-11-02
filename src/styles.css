@@ -163,7 +163,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
   border-radius: 24px;
   box-shadow: none;
 }
-.search-input-wrap > svg { width: 20px; height: 20px; flex: 0 0 20px; color: var(--muted); }
+.search-input-wrap > svg { width: 20px; height: 20px; flex: 0 0 20px; color: var(--identity); }
 .search-bar:focus-within {
   border-color: var(--ink);
   box-shadow: inset 0 0 0 1px var(--ink);
@@ -171,7 +171,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
 .search-input-wrap:focus-within { outline: 0; box-shadow: none; }
 .search-input-wrap input { min-width: 0; flex: 1; border: 0; outline: 0; box-shadow: none; background: transparent; color: var(--ink); font-size: 16px; line-height: 25px; letter-spacing: 0; }
 .search-input-wrap input::-webkit-search-cancel-button { display: none; }
-.search-input-wrap input::placeholder { color: var(--muted); }
+.search-input-wrap input::placeholder { color: var(--identity); opacity: 1; }
 .search-results {
   max-height: min(46dvh, 390px);
   margin-top: 8px;
