@@ -87,7 +87,10 @@ const parsePalette = (raw: string): ColorTokens => {
       const groupRecord = groupData as Record<string, unknown>
       const validated: Record<string, string> = {}
       for (const control of controls[group]) {
-        const color = groupRecord[control.token]
+        // v1 exports created before Identity was added remain importable.
+        const color = group === 'interaction' && control.token === 'identity' && groupRecord[control.token] === undefined
+          ? defaultColorTokens[scheme].interaction.identity
+          : groupRecord[control.token]
         if (typeof color !== 'string' || !/^#[0-9a-fA-F]{6}$/.test(color)) {
           throw new Error('Invalid color at ' + scheme + '.' + group + '.' + control.token)
         }
