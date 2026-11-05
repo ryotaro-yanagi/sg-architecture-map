@@ -9,6 +9,7 @@
     "preview": "vite preview",
     "typecheck": "tsc -b --pretty false",
     "check:publish": "node scripts/check-publish.mjs",
+    "test:publish-url": "node --test scripts/publication-url.test.mjs",
     "test:weather": "node --test scripts/weather.test.ts"
   },
   "dependencies": {

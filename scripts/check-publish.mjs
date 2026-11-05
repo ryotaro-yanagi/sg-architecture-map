@@ -1,4 +1,5 @@
 import { readFile } from 'node:fs/promises'
+import { getSourceUrlFailures, isValidPublicationUrl } from './publication-url.mjs'
 
 const dataUrl = new URL('../src/data/buildings.json', import.meta.url)
 const data = JSON.parse(await readFile(dataUrl, 'utf8'))
@@ -20,9 +21,9 @@ for (const building of data.buildings ?? []) {
       assert(Number.isInteger(value) && value >= 1800 && value <= 2100, `${label}: invalid ${field}.`)
   }
   if (building.openingYear != null)
-    assert(/^https:\/\//.test(building.openingSource ?? building.yearSource ?? building.officialSource ?? ''), `${label}: opening year has no linked source.`)
+    assert(isValidPublicationUrl(building.openingSource ?? building.yearSource ?? building.officialSource), `${label}: opening year has no linked source.`)
   if (building.pdaAwardYear != null)
-    assert(/^https:\/\//.test(building.pdaAwardSource ?? ''), `${label}: award year must have an award record.`)
+    assert(isValidPublicationUrl(building.pdaAwardSource), `${label}: award year must have an award record.`)
 
   ids.add(building.id)
   if (building.aliases !== undefined) {
@@ -32,8 +33,7 @@ for (const building of data.buildings ?? []) {
   assert(building.coordinates[0] >= 103.6 && building.coordinates[0] <= 104.1 && building.coordinates[1] >= 1.15 && building.coordinates[1] <= 1.50, `${label}: outside Singapore bounds or wrong coordinate order.`)
   assert(building.coordinatePrecision?.includes('approximate'), `${label}: coordinate precision must remain approximate.`)
   assert(!/bus_stop/.test(building.coordinatePrecision ?? ''), `${label}: architecture pin must not use a nearby bus stop as its representative point.`)
-  assert(/^https:\/\//.test(building.coordinateSource ?? ''), `${label}: coordinate source must be an HTTPS URL.`)
-  assert(/^https:\/\//.test(building.officialSource ?? ''), `${label}: official source must be an HTTPS URL.`)
+  for (const failure of getSourceUrlFailures(building)) assert(false, `${label}: ${failure}`)
   assert(building.photo === null, `${label}: a photo was added without the publication review workflow.`)
   assert(building.publicAccess === 'unverified', `${label}: public access must remain unverified.`)
 }
