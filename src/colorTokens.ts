@@ -75,24 +75,24 @@ export const defaultColorTokens: ColorTokens = {
       canvas: '#FAFAFA',
       surface: '#FFFFFF',
       subtleSurface: '#F2F2F2',
-      border: '#E0E0E0'
+      border: '#D9D9D9'
     },
     typography: {
       primary: '#FF4534',
       secondary: '#FF4534',
-      geographicPrimary: '#403625',
-      geographicSecondary: '#8E8568',
-      geographicWater: '#445848',
-      geographicHalo: '#FFFFFF',
-      architectureLabel: '#403625'
+      geographicPrimary: '#515552',
+      geographicSecondary: '#515552',
+      geographicWater: '#85C8E1',
+      geographicHalo: '#EAEAEA',
+      architectureLabel: '#515552'
     },
     interaction: {
       identity: '#FF4534',
       primaryAction: '#403625',
-      hover: '#F4F4F4',
-      pressed: '#E0E0E0',
+      hover: '#F2F2F2',
+      pressed: '#D9D9D9',
       selectedBackground: '#FAFAFA',
-      selectedIndicator: '#E0E0E0',
+      selectedIndicator: '#D9D9D9',
       focus: '#403625'
     },
     architecture: {
@@ -103,24 +103,24 @@ export const defaultColorTokens: ColorTokens = {
       hospitality: '#5973B8',
       residential: '#FE7A3E',
       genericFill: '#8BC084',
-      categoryGlyph: '#FFFFFF',
-      genericGlyph: '#FFFFFF',
-      markerOutline: '#FFFFFF'
+      categoryGlyph: '#EAEAEA',
+      genericGlyph: '#EAEAEA',
+      markerOutline: '#EAEAEA'
     },
     geographic: {
-      background: '#F1E5C7',
-      residential: '#F1E5C7',
-      park: '#E5E5A3',
-      wood: '#7E7D39',
-      grass: '#E5E5A3',
-      water: '#D1DACE',
-      waterway: '#A1B8AA',
-      roadMinor: '#DACFB3',
-      roadMajor: '#DACFB3',
-      roadMotorway: '#DACFB3',
-      roadCasing: '#DACFB3',
-      building: '#AE6670',
-      buildingOutline: '#AE6670'
+      background: '#EAEAEA',
+      residential: '#EAEAEA',
+      park: '#E1E5C8',
+      wood: '#B7CD7C',
+      grass: '#E1E5C8',
+      water: '#DFE3E2',
+      waterway: '#85C8E1',
+      roadMinor: '#E3C59D',
+      roadMajor: '#E3C59D',
+      roadMotorway: '#E3C59D',
+      roadCasing: '#E3C59D',
+      building: '#989795',
+      buildingOutline: '#989795'
     }
   },
   night: {
