@@ -61,12 +61,24 @@ const controls: Record<GroupName, ColorControl[]> = {
   ],
 }
 
-const groupLabels: Record<GroupName, string> = {
-  neutral: 'Neutral',
-  typography: 'Typography',
-  interaction: 'Interaction',
-  architecture: 'Architecture',
-  geographic: 'Geographic',
+// Display groups reflect SGM's UI-over-Map structure. The underlying token
+// keys and exported JSON schema remain unchanged.
+type LayerName = 'ui' | 'map'
+type ViewGroup = 'identityText' | 'surface' | 'interaction' | 'geographic' | 'architecture' | 'mapLabels'
+const viewGroups: Record<ViewGroup, { label: string; layer: LayerName; entries: ColorControl[] }> = {
+  identityText: {
+    label: 'Identity & Text', layer: 'ui',
+    entries: [controls.interaction[0], ...controls.typography.slice(0, 2)],
+  },
+  surface: { label: 'Surface', layer: 'ui', entries: controls.neutral },
+  interaction: { label: 'Interaction', layer: 'ui', entries: controls.interaction.slice(1) },
+  geographic: { label: 'Geographic', layer: 'map', entries: controls.geographic },
+  architecture: { label: 'Architecture', layer: 'map', entries: controls.architecture },
+  mapLabels: { label: 'Map Labels', layer: 'map', entries: controls.typography.slice(2) },
+}
+const layerGroups: Record<LayerName, ViewGroup[]> = {
+  ui: ['identityText', 'surface', 'interaction'],
+  map: ['geographic', 'architecture', 'mapLabels'],
 }
 
 // Validate an exported palette before replacing the active preview.
@@ -153,7 +165,8 @@ type ColorLabPanelProps = {
 
 export default function ColorLabPanel({ tokens, activeScheme, onChange }: ColorLabPanelProps) {
   const [editingScheme, setEditingScheme] = useState<SchemeName>('day')
-  const [group, setGroup] = useState<GroupName>('neutral')
+  const [layer, setLayer] = useState<LayerName>('ui')
+  const [group, setGroup] = useState<ViewGroup>('identityText')
   const [importOpen, setImportOpen] = useState(false)
   const [importText, setImportText] = useState('')
   const [importMessage, setImportMessage] = useState('')
@@ -170,10 +183,12 @@ export default function ColorLabPanel({ tokens, activeScheme, onChange }: ColorL
   }
 
   const resetGroup = () => {
-    const nextScheme = { ...tokens[editingScheme] }
-    const touchedSections = new Set(controls[group].map((control) => control.section))
-    touchedSections.forEach((section) => {
-      nextScheme[section] = { ...defaultColorTokens[editingScheme][section] } as never
+    const nextScheme = structuredClone(tokens[editingScheme])
+    // A display group can contain tokens from multiple source sections.
+    // Only reset the visible controls, not their entire underlying sections.
+    viewGroups[group].entries.forEach((control) => {
+      const section = nextScheme[control.section] as unknown as Record<string, string>
+      section[control.token] = getValue(defaultColorTokens, editingScheme, control)
     })
     onChange({ ...tokens, [editingScheme]: nextScheme })
   }
@@ -215,20 +230,36 @@ export default function ColorLabPanel({ tokens, activeScheme, onChange }: ColorL
         ))}
       </div>
 
-      <nav className="color-lab-groups" aria-label="Color groups">
-        {(Object.keys(groupLabels) as GroupName[]).map((name) => (
+      <div className="color-lab-layers color-lab-segmented" role="group" aria-label="Color system layer">
+        {(['ui', 'map'] as const).map((name) => (
+          <button key={name} type="button" aria-pressed={layer === name} onClick={() => {
+            setLayer(name)
+            setGroup(layerGroups[name][0])
+          }}>{name === 'ui' ? 'UI' : 'Map'}</button>
+        ))}
+      </div>
+      <nav className="color-lab-groups" aria-label={layer === 'ui' ? 'UI groups' : 'Map groups'}>
+        {layerGroups[layer].map((name) => (
           <button key={name} type="button" aria-current={group === name ? 'page' : undefined} onClick={() => setGroup(name)}>
-            {groupLabels[name]}
+            {viewGroups[name].label}
           </button>
         ))}
       </nav>
 
       <section className="color-lab-controls" aria-labelledby="color-lab-group-heading">
         <div className="color-lab-section-heading">
-          <h2 id="color-lab-group-heading">{groupLabels[group]}</h2>
+          <h2 id="color-lab-group-heading">{viewGroups[group].label}</h2>
           {editingScheme !== activeScheme && <span>Editing off-preview</span>}
         </div>
-        {controls[group].map((control) => (
+        <div className="color-lab-palette-preview" role="img" aria-label={viewGroups[group].label + ' palette preview'}>
+          {viewGroups[group].entries.map((control) => (
+            <span key={control.section + '.' + control.token} className="color-lab-palette-swatch"
+              style={{ backgroundColor: getValue(tokens, editingScheme, control) }}
+              title={control.label + ': ' + getValue(tokens, editingScheme, control)}
+            />
+          ))}
+        </div>
+        {viewGroups[group].entries.map((control) => (
           <ColorRow
             key={`${control.section}.${control.token}`}
             control={control}
