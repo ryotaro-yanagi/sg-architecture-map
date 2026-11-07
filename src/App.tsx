@@ -1119,7 +1119,7 @@ function App() {
       map.addLayer({
         id: 'building-labels', type: 'symbol', source: 'buildings', minzoom: markerSwitchZoom,
         filter: ['==', ['get', 'selected'], false],
-        layout: { 'text-field': ['get', 'name'], 'text-size': 13, 'text-anchor': 'left', 'text-justify': 'auto', 'text-variable-anchor-offset': ['left', [1.55, -1.3], 'right', [-1.55, -1.3]], 'text-max-width': 12 },
+        layout: { 'text-field': ['get', 'name'], 'text-size': 13, 'text-anchor': 'left', 'text-justify': 'auto', 'text-variable-anchor-offset': ['left', [1.55, -1.3], 'right', [-1.55, -1.3], 'bottom', [0, -1.7], 'top', [0, 1.7]], 'text-max-width': 12 },
         paint: { 'text-color': initialTokens.typography.architectureLabel, 'text-halo-color': initialTokens.typography.geographicHalo, 'text-halo-width': 1 },
       })
       applyMapTheme(map, initialTokens, nightPreviewRef.current)
