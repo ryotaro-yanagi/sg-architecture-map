@@ -480,10 +480,11 @@ const applyMapStructure = (map: MapLibreMap) => {
     map.setPaintProperty('boundary_3', 'line-dasharray', [1, 0])
     map.setPaintProperty('boundary_3', 'line-width', 0.8)
   }
-  // Liberty's 2D buildings otherwise stop at z14 when 3D buildings begin.
-  if (map.getLayer('building')) map.setLayerZoomRange('building', 14, 24)
-  // Reveal 2D footprints with a brief zoom transition rather than prolonged translucency.
-  setPaint(map, 'building', 'fill-opacity', ['interpolate', ['linear'], ['zoom'], 14, 0, 14.2, 1])
+  // Reveal building footprints before architecture pins; at the distant-selection
+  // destination (z13.8), the surrounding built fabric should already be visible.
+  if (map.getLayer('building')) map.setLayerZoomRange('building', 13.2, 24)
+  // Keep the same short, zoom-driven fade rather than adding a new visibility mode.
+  setPaint(map, 'building', 'fill-opacity', ['interpolate', ['linear'], ['zoom'], 13.2, 0, 13.4, 1])
   if (map.getLayer('building-3d')) map.setLayoutProperty('building-3d', 'visibility', 'none')
 
   // Keep line-based water labels subordinate to district names.
