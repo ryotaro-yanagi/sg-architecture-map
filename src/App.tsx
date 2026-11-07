@@ -486,17 +486,6 @@ const applyMapStructure = (map: MapLibreMap) => {
   setPaint(map, 'building', 'fill-opacity', ['interpolate', ['linear'], ['zoom'], 14, 0, 14.2, 1])
   if (map.getLayer('building-3d')) map.setLayoutProperty('building-3d', 'visibility', 'none')
 
-  // Minor streets: a single hollow stroke, not a solid line beneath a casing.
-  // Reuse Liberty's existing zoom-dependent road width as the transparent inner gap.
-  // This preserves underlying land/park colors without a fake background-colored stroke.
-  ;['road_minor', 'road_service_track', 'bridge_street', 'bridge_service_track', 'tunnel_minor', 'tunnel_service_track'].forEach((id) => {
-    if (!map.getLayer(id)) return
-    const streetWidth = map.getPaintProperty(id, 'line-width')
-    if (streetWidth === undefined) return
-    setPaint(map, id, 'line-gap-width', streetWidth)
-    setPaint(map, id, 'line-width', 0.75)
-  })
-
   // Keep line-based water labels subordinate to district names.
   if (map.getLayer('waterway_line_label')) map.setLayoutProperty('waterway_line_label', 'text-size', 12)
   if (map.getLayer('water_name_line_label')) map.setLayoutProperty('water_name_line_label', 'text-size', 13)
