@@ -482,8 +482,8 @@ const applyMapStructure = (map: MapLibreMap) => {
   }
   // Liberty's 2D buildings otherwise stop at z14 when 3D buildings begin.
   if (map.getLayer('building')) map.setLayerZoomRange('building', 14, 24)
-  // Reveal building footprints gradually as the viewer zooms into street scale.
-  setPaint(map, 'building', 'fill-opacity', ['interpolate', ['linear'], ['zoom'], 14, 0, 15.5, 1])
+  // Reveal 2D footprints with a brief zoom transition rather than prolonged translucency.
+  setPaint(map, 'building', 'fill-opacity', ['interpolate', ['linear'], ['zoom'], 14, 0, 14.2, 1])
   if (map.getLayer('building-3d')) map.setLayoutProperty('building-3d', 'visibility', 'none')
 
   // Keep line-based water labels subordinate to district names.
@@ -581,41 +581,14 @@ const applyMapColors = (map: MapLibreMap, palette: MapPalette) => {
     }
   })
 }
-// Developer-only study: a single ink-color dot pattern replaces the solid building fill.
-// Try /en/?stipple=building in Vite dev. Not included in the production behavior.
-const applyBuildingStippleStudy = (map: MapLibreMap, tokens: ColorSchemeTokens, nightPreview: boolean) => {
-  if (!import.meta.env.DEV || new URLSearchParams(window.location.search).get('stipple') !== 'building') return
-  if (nightPreview) {
-    setPaint(map, 'building', 'fill-pattern', null)
-    return
-  }
-  // 16 physical pixels at 2x: 2 CSS px between dot centers.
-  // The texture has alpha between ink dots; it is not dots over a solid fill.
-  const canvas = document.createElement('canvas')
-  canvas.width = 16
-  canvas.height = 16
-  const context = canvas.getContext('2d')
-  if (!context) return
-  context.clearRect(0, 0, 16, 16)
-  context.fillStyle = tokens.geographic.building
-  for (let y = 2; y < 16; y += 4) {
-    for (let x = 2; x < 16; x += 4) {
-      context.beginPath()
-      context.arc(x, y, 1.55, 0, Math.PI * 2)
-      context.fill()
-    }
-  }
-  const pattern = context.getImageData(0, 0, 16, 16)
-  const imageId = 'sgm-building-stipple-study'
-  if (map.hasImage(imageId)) map.updateImage(imageId, pattern)
-  else map.addImage(imageId, pattern, { pixelRatio: 2 })
-  setPaint(map, 'building', 'fill-pattern', imageId)
-}
-
 const applyMapTheme = (map: MapLibreMap, tokens: ColorSchemeTokens, nightPreview = false) => {
   const palette = mapPaletteFromTokens(tokens)
   applyMapColors(map, palette)
-  applyBuildingStippleStudy(map, tokens, nightPreview)
+  // Day: use the chosen landcover palette directly, without Liberty's inherited alpha blending.
+  // Night keeps its previous softer landcover opacity until its palette is evaluated separately.
+  setPaint(map, 'park', 'fill-opacity', nightPreview ? 0.7 : 1)
+  setPaint(map, 'landcover_wood', 'fill-opacity', nightPreview ? 0.4 : 1)
+  setPaint(map, 'landcover_grass', 'fill-opacity', nightPreview ? 0.3 : 1)
   if (map.getLayer('building-pins')) {
     map.setLayoutProperty('building-pins', 'icon-image', ['concat', nightPreview ? 'building-pin-night-' : 'building-pin-day-', ['coalesce', ['get', 'mapCategory'], 'fallback']])
   }
