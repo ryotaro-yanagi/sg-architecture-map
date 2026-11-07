@@ -584,11 +584,10 @@ const applyMapColors = (map: MapLibreMap, palette: MapPalette) => {
 const applyMapTheme = (map: MapLibreMap, tokens: ColorSchemeTokens, nightPreview = false) => {
   const palette = mapPaletteFromTokens(tokens)
   applyMapColors(map, palette)
-  // Developer-only water boundary test. A dedicated line layer permits 1.4px
-  // strokes; fill-outline-color has a fixed approximately 1px outline.
+  // Developer-only test: Liberty's native water polygons, with its understated
+  // approximately 1px fill outline (no separate line layer or external geometry).
   if (import.meta.env.DEV && new URLSearchParams(window.location.search).get('coastline') === 'water') {
-    setPaint(map, 'water', 'fill-outline-color', palette.water)
-    setPaint(map, 'sgm-water-outline-study', 'line-color', palette.waterway)
+    setPaint(map, 'water', 'fill-outline-color', palette.waterway)
   }
   // Day: use the chosen landcover palette directly, without Liberty's inherited alpha blending.
   // Night keeps its previous softer landcover opacity until its palette is evaluated separately.
@@ -1084,28 +1083,6 @@ function App() {
       applyMapStructure(map)
       addSingaporeCityLabel(map, mapPaletteFromTokens(initialTokens))
       applyMapColors(map, mapPaletteFromTokens(initialTokens))
-      // Study only: draw a slightly heavier coastline using Liberty's own
-      // water polygons and filter, without loading any external geometry.
-      if (import.meta.env.DEV && new URLSearchParams(window.location.search).get('coastline') === 'water') {
-        const layers = map.getStyle().layers ?? []
-        const waterIndex = layers.findIndex((layer) => layer.id === 'water')
-        const waterLayer = layers[waterIndex]
-        if (waterLayer?.type === 'fill' && waterLayer.source && 'source-layer' in waterLayer) {
-          map.addLayer({
-            id: 'sgm-water-outline-study',
-            type: 'line',
-            source: waterLayer.source,
-            'source-layer': waterLayer['source-layer'],
-            ...(waterLayer.filter ? { filter: waterLayer.filter } : {}),
-            paint: {
-              'line-color': mapPaletteFromTokens(initialTokens).waterway,
-              'line-width': 1.4,
-              'line-opacity': 1,
-            },
-          }, layers[waterIndex + 1]?.id)
-          setPaint(map, 'water', 'fill-outline-color', mapPaletteFromTokens(initialTokens).water)
-        }
-      }
       await Promise.all([
         updateMarkerImages(map, colorTokensRef.current.day.architecture, 'day'),
         updateMarkerImages(map, colorTokensRef.current.night.architecture, 'night'),
