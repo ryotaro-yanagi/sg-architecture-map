@@ -584,6 +584,8 @@ const applyMapColors = (map: MapLibreMap, palette: MapPalette) => {
 const applyMapTheme = (map: MapLibreMap, tokens: ColorSchemeTokens, nightPreview = false) => {
   const palette = mapPaletteFromTokens(tokens)
   applyMapColors(map, palette)
+  // Keep the developer coastline preview in sync with the current waterway palette.
+  setPaint(map, 'sgm-coastline-preview', 'line-color', palette.waterway)
   // Day: use the chosen landcover palette directly, without Liberty's inherited alpha blending.
   // Night keeps its previous softer landcover opacity until its palette is evaluated separately.
   setPaint(map, 'park', 'fill-opacity', nightPreview ? 0.7 : 1)
@@ -1078,6 +1080,27 @@ function App() {
       applyMapStructure(map)
       addSingaporeCityLabel(map, mapPaletteFromTokens(initialTokens))
       applyMapColors(map, mapPaletteFromTokens(initialTokens))
+      // Local-only coastline check. Copy the supplied NParks GeoJSON to public/ first.
+      // No data or visual changes are shipped to the production map.
+      if (import.meta.env.DEV && new URLSearchParams(window.location.search).get('coastline') === 'preview') {
+        void fetch('/sgm-coastline.geojson')
+          .then((response) => {
+            if (!response.ok) throw new Error('Coastline file missing: public/sgm-coastline.geojson')
+            return response.json()
+          })
+          .then((geojson) => {
+            if (disposed) return
+            map.addSource('sgm-coastline-preview', { type: 'geojson', data: geojson })
+            map.addLayer({
+              id: 'sgm-coastline-preview',
+              type: 'line',
+              source: 'sgm-coastline-preview',
+              layout: { 'line-join': 'round', 'line-cap': 'round' },
+              paint: { 'line-color': mapPaletteFromTokens(colorTokensRef.current[nightPreviewRef.current ? 'night' : 'day']).waterway, 'line-width': 1.2, 'line-opacity': 1 },
+            }, map.getLayer('building') ? 'building' : undefined)
+          })
+          .catch((error) => console.warn('[SGM coastline preview]', error))
+      }
       await Promise.all([
         updateMarkerImages(map, colorTokensRef.current.day.architecture, 'day'),
         updateMarkerImages(map, colorTokensRef.current.night.architecture, 'night'),
