@@ -506,7 +506,8 @@ const applyMapStructure = (map: MapLibreMap) => {
 
   // Let district names lead until the viewer zooms closer to street level.
   // Preserve district names as the primary context until architecture markers appear.
-  if (map.getLayer('highway-name-major')) map.setLayerZoomRange('highway-name-major', 13.2, 24)
+  // Study: bring major road names into the district view before footprints and pins.
+  if (map.getLayer('highway-name-major')) map.setLayerZoomRange('highway-name-major', 12.5, 24)
   if (map.getLayer('highway-name-minor')) map.setLayerZoomRange('highway-name-minor', 15.5, 24)
 
   const layers = map.getStyle().layers ?? []
