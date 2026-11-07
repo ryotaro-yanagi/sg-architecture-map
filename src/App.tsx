@@ -504,6 +504,10 @@ const applyMapStructure = (map: MapLibreMap) => {
     ])
   })
 
+  // Allow more existing district/place names at city scale without forcing overlaps.
+  // Liberty's label_other covers suburbs/neighbourhoods; keep its tiny type size.
+  if (map.getLayer('label_other')) map.setLayoutProperty('label_other', 'text-padding', 1)
+
   // Let district names lead until the viewer zooms closer to street level.
   // Preserve district names as the primary context until architecture markers appear.
   if (map.getLayer('highway-name-major')) map.setLayerZoomRange('highway-name-major', 13.2, 24)
