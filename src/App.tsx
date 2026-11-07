@@ -551,6 +551,8 @@ const applyMapColors = (map: MapLibreMap, palette: MapPalette) => {
   setPaint(map, 'landcover_grass', 'fill-color', palette.grass)
   ;['landuse_pitch', 'landuse_track', 'landuse_cemetery', 'landuse_hospital', 'landuse_school'].forEach((id) => setPaint(map, id, 'fill-color', palette.grass))
   setPaint(map, 'water', 'fill-color', palette.water)
+  // Keep water boundaries consistent with the same OpenMapTiles water polygons.
+  setPaint(map, 'water', 'fill-outline-color', palette.waterway)
   setPaint(map, 'landuse_residential', 'fill-color', palette.residential)
   ;['waterway_tunnel', 'waterway_river', 'waterway_other'].forEach((id) => setPaint(map, id, 'line-color', palette.waterway))
   setPaint(map, 'building', 'fill-color', palette.building)
@@ -584,11 +586,6 @@ const applyMapColors = (map: MapLibreMap, palette: MapPalette) => {
 const applyMapTheme = (map: MapLibreMap, tokens: ColorSchemeTokens, nightPreview = false) => {
   const palette = mapPaletteFromTokens(tokens)
   applyMapColors(map, palette)
-  // Developer-only test: Liberty's native water polygons, with its understated
-  // approximately 1px fill outline (no separate line layer or external geometry).
-  if (import.meta.env.DEV && new URLSearchParams(window.location.search).get('coastline') === 'water') {
-    setPaint(map, 'water', 'fill-outline-color', palette.waterway)
-  }
   // Day: use the chosen landcover palette directly, without Liberty's inherited alpha blending.
   // Night keeps its previous softer landcover opacity until its palette is evaluated separately.
   setPaint(map, 'park', 'fill-opacity', nightPreview ? 0.7 : 1)
