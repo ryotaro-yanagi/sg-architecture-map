@@ -1095,10 +1095,11 @@ function App() {
         id: 'building-dots', type: 'circle', source: 'buildings', maxzoom: markerSwitchZoom,
         filter: ['==', ['get', 'selected'], false],
         paint: {
-          'circle-radius': 5,
+          // Overview study: slightly quieter dots retain the existing category colors.
+          'circle-radius': 4.5,
           'circle-color': ['coalesce', ['get', 'mapCategoryColor'], initialTokens.architecture.genericFill],
           'circle-stroke-color': initialTokens.architecture.markerOutline,
-          'circle-stroke-width': 1,
+          'circle-stroke-width': 0.75,
           'circle-opacity': 1,
         },
       })
