@@ -442,7 +442,7 @@ const addSingaporeCityLabel = (map: MapLibreMap, palette: MapPalette) => {
     layout: {
       'text-field': ['get', 'name'],
       'text-font': ['Noto Sans Bold'],
-      'text-size': ['interpolate', ['linear'], ['zoom'], 9, 18, 10, 22, 11, 26, 12, 28, 12.5, 30],
+      'text-size': ['interpolate', ['linear'], ['zoom'], 9, 17, 10, 19, 11, 22, 12, 24, 12.5, 25],
       'text-anchor': 'center',
       'text-justify': 'center',
       'text-max-width': 8,
