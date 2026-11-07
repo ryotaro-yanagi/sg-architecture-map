@@ -504,10 +504,6 @@ const applyMapStructure = (map: MapLibreMap) => {
     ])
   })
 
-  // Allow more existing district/place names at city scale without forcing overlaps.
-  // Liberty's label_other covers suburbs/neighbourhoods; keep its tiny type size.
-  if (map.getLayer('label_other')) map.setLayoutProperty('label_other', 'text-padding', 1)
-
   // Let district names lead until the viewer zooms closer to street level.
   // Preserve district names as the primary context until architecture markers appear.
   if (map.getLayer('highway-name-major')) map.setLayerZoomRange('highway-name-major', 13.2, 24)
@@ -1132,38 +1128,6 @@ function App() {
       // no outstanding camera/style/tile work for this initial frame.
       map.triggerRepaint()
       map.once('render', () => map.once('idle', finishInitialLoad))
-      // Development-only place audit: report the loaded tile content at each
-      // integer zoom bucket, not just at the first city overview.
-      // This distinguishes missing source data from label collision.
-      if (import.meta.env.DEV && new URLSearchParams(window.location.search).get('audit') === 'places') {
-        let lastZoomBucket = -1
-        const reportPlaces = () => {
-          if (disposed) return
-          const zoomBucket = Math.floor(map.getZoom())
-          if (zoomBucket === lastZoomBucket) return
-          lastZoomBucket = zoomBucket
-          const features = map.querySourceFeatures('openmaptiles', { sourceLayer: 'place' })
-          const places = new Map<string, { name: string; className: string }>()
-          for (const feature of features) {
-            if (feature.geometry.type !== 'Point') continue
-            const [lng, lat] = feature.geometry.coordinates
-            if (lng < 103.6 || lng > 104.1 || lat < 1.18 || lat > 1.48) continue
-            const name = String(feature.properties?.name_en || feature.properties?.name || '')
-            const className = String(feature.properties?.class || '')
-            if (name) places.set(`${className}:${name}`, { name, className })
-          }
-          const results = [...places.values()].sort((a, b) =>
-            a.className.localeCompare(b.className) || a.name.localeCompare(b.name))
-          const counts: Record<string, number> = {}
-          for (const place of results) counts[place.className] = (counts[place.className] || 0) + 1
-          console.info(`[SGM place audit] Zoom ${map.getZoom().toFixed(1)} — loaded SG-area places:`, counts)
-          console.table(results)
-          console.info('[SGM place audit] Counts cover loaded viewport tiles, not the whole country.')
-        }
-        map.once('idle', reportPlaces)
-        map.on('zoomend', () => map.once('idle', reportPlaces))
-      }
-
       const deepLinkedBuilding = buildings.find((building) => building.id === requestedSelectedId)
       if (deepLinkedBuilding && !restoredState) {
         window.requestAnimationFrame(() => revealBuilding(map, deepLinkedBuilding.coordinates))
