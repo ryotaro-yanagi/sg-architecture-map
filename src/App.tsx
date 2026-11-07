@@ -581,9 +581,41 @@ const applyMapColors = (map: MapLibreMap, palette: MapPalette) => {
     }
   })
 }
+// Developer-only study: a single ink-color dot pattern replaces the solid building fill.
+// Try /en/?stipple=building in Vite dev. Not included in the production behavior.
+const applyBuildingStippleStudy = (map: MapLibreMap, tokens: ColorSchemeTokens, nightPreview: boolean) => {
+  if (!import.meta.env.DEV || new URLSearchParams(window.location.search).get('stipple') !== 'building') return
+  if (nightPreview) {
+    setPaint(map, 'building', 'fill-pattern', null)
+    return
+  }
+  // 16 physical pixels at 2x: 2 CSS px between dot centers.
+  // The texture has alpha between ink dots; it is not dots over a solid fill.
+  const canvas = document.createElement('canvas')
+  canvas.width = 16
+  canvas.height = 16
+  const context = canvas.getContext('2d')
+  if (!context) return
+  context.clearRect(0, 0, 16, 16)
+  context.fillStyle = tokens.geographic.building
+  for (let y = 2; y < 16; y += 4) {
+    for (let x = 2; x < 16; x += 4) {
+      context.beginPath()
+      context.arc(x, y, 1.55, 0, Math.PI * 2)
+      context.fill()
+    }
+  }
+  const pattern = context.getImageData(0, 0, 16, 16)
+  const imageId = 'sgm-building-stipple-study'
+  if (map.hasImage(imageId)) map.updateImage(imageId, pattern)
+  else map.addImage(imageId, pattern, { pixelRatio: 2 })
+  setPaint(map, 'building', 'fill-pattern', imageId)
+}
+
 const applyMapTheme = (map: MapLibreMap, tokens: ColorSchemeTokens, nightPreview = false) => {
   const palette = mapPaletteFromTokens(tokens)
   applyMapColors(map, palette)
+  applyBuildingStippleStudy(map, tokens, nightPreview)
   if (map.getLayer('building-pins')) {
     map.setLayoutProperty('building-pins', 'icon-image', ['concat', nightPreview ? 'building-pin-night-' : 'building-pin-day-', ['coalesce', ['get', 'mapCategory'], 'fallback']])
   }
