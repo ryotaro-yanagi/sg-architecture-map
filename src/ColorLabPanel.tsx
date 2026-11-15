@@ -218,10 +218,12 @@ type ColorLabPanelProps = {
   tokens: ColorTokens
   activeScheme: SchemeName
   onChange: (tokens: ColorTokens) => void
+  onPreviewSchemeChange: (scheme: SchemeName) => void
 }
 
-export default function ColorLabPanel({ tokens, activeScheme, onChange }: ColorLabPanelProps) {
-  const [editingScheme, setEditingScheme] = useState<SchemeName>('day')
+export default function ColorLabPanel({ tokens, activeScheme, onChange, onPreviewSchemeChange }: ColorLabPanelProps) {
+  const [editingScheme, setEditingScheme] = useState<SchemeName>(activeScheme)
+  useEffect(() => setEditingScheme(activeScheme), [activeScheme])
   const [layer, setLayer] = useState<LayerName>('ui')
   const [group, setGroup] = useState<ViewGroup>('identityText')
   const [importOpen, setImportOpen] = useState(false)
@@ -281,7 +283,7 @@ export default function ColorLabPanel({ tokens, activeScheme, onChange }: ColorL
 
       <div className="color-lab-segmented" aria-label="Editing target">
         {(['day', 'night'] as const).map((scheme) => (
-          <button key={scheme} type="button" aria-pressed={editingScheme === scheme} onClick={() => setEditingScheme(scheme)}>
+          <button key={scheme} type="button" aria-pressed={editingScheme === scheme} onClick={() => { setEditingScheme(scheme); onPreviewSchemeChange(scheme) }}>
             {scheme === 'day' ? 'Day' : 'Night'}
           </button>
         ))}
@@ -320,7 +322,7 @@ export default function ColorLabPanel({ tokens, activeScheme, onChange }: ColorL
                 borderColor: tokens[editingScheme].interaction.identity,
               }}>
                 <span style={{ color: tokens[editingScheme].interaction.identity }}>⌕</span>
-                <span>Search architecture</span>
+                <span>Focused search</span>
               </div>
               <div className="color-lab-ui-example-title">Building name</div>
               <div className="color-lab-ui-example-meta" style={{
@@ -334,7 +336,7 @@ export default function ColorLabPanel({ tokens, activeScheme, onChange }: ColorL
                 background: tokens[editingScheme].interaction.hover,
               }}>Hover surface</div>
             </div>
-            <p>UI example · edits update these colors; divider is shown only where needed.</p>
+            <p>UI example · focused search and one divider; colors update as you edit.</p>
           </div>
         )}
         <div className="color-lab-palette-preview" role="img" aria-label={viewGroups[group].label + ' palette preview'}>
