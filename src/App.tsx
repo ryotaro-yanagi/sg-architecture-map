@@ -987,10 +987,13 @@ function App() {
     return () => window.clearTimeout(timer)
   }, [initialMapState])
 
-  const toggleAppearance = () => {
-    const nextAppearance: Appearance = nightPreview ? 'day' : 'night'
+  const selectAppearance = (nextAppearance: 'day' | 'night') => {
     setAppearance(nextAppearance)
     try { window.localStorage.setItem(appearanceKey, nextAppearance) } catch { /* Private browsing can restrict storage. */ }
+  }
+
+  const toggleAppearance = () => {
+    selectAppearance(nightPreview ? 'day' : 'night')
   }
 
   useEffect(() => {
@@ -1502,7 +1505,7 @@ function App() {
       )}
       </div>
       {colorLabEnabled && (
-        <ColorLabPanel tokens={colorTokens} activeScheme={activeScheme} onChange={setColorTokens} />
+        <ColorLabPanel tokens={colorTokens} activeScheme={activeScheme} onChange={setColorTokens} onPreviewSchemeChange={selectAppearance} />
       )}
     </main>
   )
