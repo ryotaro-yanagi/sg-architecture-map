@@ -181,6 +181,35 @@ export const defaultColorTokens: ColorTokens = {
 export const cloneColorTokens = (tokens: ColorTokens = defaultColorTokens): ColorTokens =>
   structuredClone(tokens)
 
+// Developer Color Lab draft. Keep independent from production appearance preferences.
+const draftStorageKey = 'sgm-color-lab-draft-v1'
+export const readColorLabDraft = (): ColorTokens => {
+  try {
+    const raw = window.localStorage.getItem(draftStorageKey)
+    if (!raw) return cloneColorTokens()
+    const parsed: unknown = JSON.parse(raw)
+    if (!parsed || typeof parsed !== 'object') return cloneColorTokens()
+    const candidate = parsed as Record<string, unknown>
+    for (const scheme of ['day', 'night'] as const) {
+      const schemeData = candidate[scheme] as Record<string, unknown> | undefined
+      if (!schemeData || typeof schemeData !== 'object') return cloneColorTokens()
+      for (const group of Object.keys(defaultColorTokens[scheme]) as (keyof ColorSchemeTokens)[]) {
+        const groupData = schemeData[group] as Record<string, unknown> | undefined
+        if (!groupData || typeof groupData !== 'object') return cloneColorTokens()
+        for (const token of Object.keys(defaultColorTokens[scheme][group])) {
+          const color = groupData[token]
+          if (typeof color !== 'string' || !/^#[0-9a-f]{6}$/i.test(color)) return cloneColorTokens()
+        }
+      }
+    }
+    return candidate as ColorTokens
+  } catch { return cloneColorTokens() }
+}
+export const saveColorLabDraft = (tokens: ColorTokens): void => {
+  try { window.localStorage.setItem(draftStorageKey, JSON.stringify(tokens)) }
+  catch { /* Storage may be unavailable in private browsing. Export JSON remains available. */ }
+}
+
 export const colorTokenCssVariables = (tokens: ColorSchemeTokens): Record<`--${string}`, string> => ({
   '--paper': tokens.neutral.canvas,
   '--paper-strong': tokens.neutral.surface,
