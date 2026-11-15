@@ -202,7 +202,7 @@ export const readColorLabDraft = (): ColorTokens => {
         }
       }
     }
-    return candidate as ColorTokens
+    return candidate as unknown as ColorTokens
   } catch { return cloneColorTokens() }
 }
 export const saveColorLabDraft = (tokens: ColorTokens): void => {
