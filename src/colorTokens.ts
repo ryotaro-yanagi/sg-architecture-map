@@ -97,15 +97,15 @@ export const defaultColorTokens: ColorTokens = {
     },
     architecture: {
       cultureCivic: '#FF3B32',
-      mixedUse: '#9CDCFF',
-      commercial: '#51A0D9',
-      education: '#FFE030',
-      hospitality: '#5973B8',
-      residential: '#FE7A3E',
-      genericFill: '#8BC084',
-      categoryGlyph: '#EAEAEA',
-      genericGlyph: '#EAEAEA',
-      markerOutline: '#EAEAEA'
+      mixedUse: '#29BCD1',
+      commercial: '#0283B9',
+      education: '#F7C904',
+      hospitality: '#C55FC6',
+      residential: '#FF6B0F',
+      genericFill: '#52AE54',
+      categoryGlyph: '#FAFAFA',
+      genericGlyph: '#FAFAFA',
+      markerOutline: '#FAFAFA'
     },
     geographic: {
       background: '#EAEAEA',
