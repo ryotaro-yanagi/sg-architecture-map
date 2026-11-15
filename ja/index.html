@@ -3,23 +3,21 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#fafafa" />
+    <meta name="theme-color" content="" />
     <script>
       (() => {
         let appearance = 'system'
         try { appearance = localStorage.getItem('sgm-appearance') || 'system' } catch {}
         const night = appearance === 'night' || (appearance === 'system' && matchMedia('(prefers-color-scheme: dark)').matches)
         document.documentElement.dataset.appearance = night ? 'night' : 'day'
-        document.querySelector('meta[name="theme-color"]').content = night ? '#1B211F' : '#fafafa'
       })()
     </script>
     <style>
       html, body, #root { width: 100%; height: 100%; margin: 0; }
-      body { background: #fafafa; }
-      html[data-appearance='night'] body { background: #1B211F; }
-      .initial-page-loading { position: fixed; inset: 0; display: grid; place-content: center; padding: 24px; color: #212121; background: #fafafa; font: 500 18px/1.35 'Source Sans 3', 'Hiragino Sans', 'Yu Gothic', system-ui, -apple-system, sans-serif; text-align: center; }
+      body { background: Canvas; }
+      html[data-appearance='night'] { color-scheme: dark; }
+      .initial-page-loading { position: fixed; inset: 0; display: grid; place-content: center; padding: 24px; color: CanvasText; background: Canvas; font: 500 18px/1.35 'Source Sans 3', 'Hiragino Sans', 'Yu Gothic', system-ui, -apple-system, sans-serif; text-align: center; }
       .initial-page-loading .loading-title { margin: 0; animation: sgm-loading-breathe 600ms ease-in-out infinite; }
-      html[data-appearance='night'] .initial-page-loading { color: #F2F4F0; background: #1B211F; }
       @keyframes sgm-loading-breathe { 0%, 100% { opacity: 1; } 50% { opacity: .3; } }
       @media (prefers-reduced-motion: reduce) { .initial-page-loading .loading-title { animation: none; opacity: 1; } }
     </style>

@@ -103,6 +103,7 @@ const mapCategoryByType = {
 type MapCategory = typeof mapCategoryByType[keyof typeof mapCategoryByType]
 
 const mapCategories: MapCategory[] = ['culture_civic', 'mixed_use', 'commercial', 'education', 'hospitality', 'residential']
+const lightGlyphCategories = new Set<MapCategory>(['culture_civic', 'hospitality'])
 
 const categoryColor = (tokens: ArchitectureColorTokens, category: MapCategory): string => ({
   culture_civic: tokens.cultureCivic,
@@ -112,6 +113,9 @@ const categoryColor = (tokens: ArchitectureColorTokens, category: MapCategory): 
   hospitality: tokens.hospitality,
   residential: tokens.residential,
 })[category]
+
+const categoryGlyphColor = (tokens: ArchitectureColorTokens, category: MapCategory): string =>
+  lightGlyphCategories.has(category) ? tokens.categoryGlyph : tokens.genericGlyph
 
 const getMapCategory = (buildingType: string): MapCategory | null =>
   Object.prototype.hasOwnProperty.call(mapCategoryByType, buildingType)
@@ -356,14 +360,13 @@ const createBuildingPinSvg = (
   architecture: ArchitectureColorTokens,
   fill = architecture.genericFill,
   category: MapCategory | null = null,
-  glyphColor = architecture.categoryGlyph,
 ) => {
   const shape = createBuildingPinPath(width, height, strokeWidth)
   const iconX = (width - iconSize) / 2
   const iconY = shape.headCenterY - iconSize / 2
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${width * markerPixelRatio}" height="${height * markerPixelRatio}" viewBox="0 0 ${width} ${height}">
     <path d="${shape.path}" fill="${fill}" stroke="${architecture.markerOutline}" stroke-width="${strokeWidth}" stroke-linejoin="round"/>
-    ${category ? `<svg x="${iconX}" y="${iconY}" width="${iconSize}" height="${iconSize}" viewBox="0 -960 960 960" fill="${glyphColor}"><path d="${categoryIconPaths[category]}"/></svg>` : `<svg x="${iconX}" y="${iconY}" width="${iconSize}" height="${iconSize}" viewBox="0 0 256 256" fill="${architecture.genericGlyph}"><path d="${phosphorBuildingFillPath}"/></svg>`}
+    ${category ? `<svg x="${iconX}" y="${iconY}" width="${iconSize}" height="${iconSize}" viewBox="0 -960 960 960" fill="${categoryGlyphColor(architecture, category)}"><path d="${categoryIconPaths[category]}"/></svg>` : `<svg x="${iconX}" y="${iconY}" width="${iconSize}" height="${iconSize}" viewBox="0 0 256 256" fill="${architecture.genericGlyph}"><path d="${phosphorBuildingFillPath}"/></svg>`}
   </svg>`
 }
 const loadSvgMarker = (svg: string) => new Promise<HTMLImageElement>((resolve, reject) => {
@@ -980,8 +983,10 @@ function App() {
 
   useEffect(() => {
     document.documentElement.dataset.appearance = nightPreview ? 'night' : 'day'
-    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', nightPreview ? '#1B211F' : '#fafafa')
-  }, [nightPreview])
+    document.documentElement.style.backgroundColor = activeColorTokens.neutral.canvas
+    document.body.style.backgroundColor = activeColorTokens.neutral.canvas
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', activeColorTokens.neutral.canvas)
+  }, [activeColorTokens.neutral.canvas, nightPreview])
 
   useEffect(() => {
     if (initialMapState !== 'fading') return

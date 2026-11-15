@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import type { ColorSchemeTokens, ColorTokens } from './colorTokens'
-import { defaultColorTokens } from './colorTokens'
+import { defaultColorTokens, deriveUiColorTokens, parseColorPaletteV1 } from './colorTokens'
 import './ColorLabPanel.css'
 
 type SchemeName = keyof ColorTokens
@@ -9,13 +9,13 @@ type ColorControl = { section: GroupName; token: string; label: string }
 
 const controls: Record<GroupName, ColorControl[]> = {
   neutral: [
-    { section: 'neutral', token: 'canvas', label: 'Canvas' },
+    { section: 'neutral', token: 'canvas', label: 'Background' },
     { section: 'neutral', token: 'surface', label: 'Surface' },
     { section: 'neutral', token: 'subtleSurface', label: 'Subtle surface' },
     { section: 'neutral', token: 'border', label: 'Border' },
   ],
   typography: [
-    { section: 'typography', token: 'primary', label: 'Primary UI text' },
+    { section: 'typography', token: 'primary', label: 'Foreground' },
     { section: 'typography', token: 'secondary', label: 'Secondary UI text' },
     { section: 'typography', token: 'geographicPrimary', label: 'Geographic primary label' },
     { section: 'typography', token: 'geographicSecondary', label: 'Geographic secondary label' },
@@ -24,7 +24,7 @@ const controls: Record<GroupName, ColorControl[]> = {
     { section: 'typography', token: 'architectureLabel', label: 'Architecture label' },
   ],
   interaction: [
-    { section: 'interaction', token: 'identity', label: 'Identity / Search red' },
+    { section: 'interaction', token: 'identity', label: 'Accent' },
     { section: 'interaction', token: 'primaryAction', label: 'Accent / primary action' },
     { section: 'interaction', token: 'hover', label: 'Hover' },
     { section: 'interaction', token: 'pressed', label: 'Pressed' },
@@ -40,8 +40,8 @@ const controls: Record<GroupName, ColorControl[]> = {
     { section: 'architecture', token: 'hospitality', label: 'Hospitality' },
     { section: 'architecture', token: 'residential', label: 'Residential' },
     { section: 'architecture', token: 'genericFill', label: 'Generic marker fill' },
-    { section: 'architecture', token: 'categoryGlyph', label: 'Category glyph' },
-    { section: 'architecture', token: 'genericGlyph', label: 'Generic glyph' },
+    { section: 'architecture', token: 'categoryGlyph', label: 'Light category glyph' },
+    { section: 'architecture', token: 'genericGlyph', label: 'Dark / generic glyph' },
     { section: 'architecture', token: 'markerOutline', label: 'Marker outline' },
   ],
   geographic: [
@@ -61,21 +61,21 @@ const controls: Record<GroupName, ColorControl[]> = {
   ],
 }
 
-// Explain where each token appears. Some source layers are intentionally hidden
-// in SGM; keep their tokens editable for compatible JSON import/export.
+// Explain where each visible token appears. Legacy UI tokens remain in the v1
+// JSON contract, while the lab exposes only their three independent inputs.
 const tokenHelp: Record<string, string> = {
-  'neutral.canvas': 'Main UI canvas and floating building panel.',
+  'neutral.canvas': 'All UI surfaces. Hover, pressed, and selected fills are derived from it.',
   'neutral.surface': 'Search bar, controls, and other white surfaces.',
   'neutral.subtleSurface': 'Subtle UI surfaces, where used.',
   'neutral.border': 'Internal dividers; outer borders are hidden in this UI study.',
-  'typography.primary': 'Main UI text, including titles and search input.',
+  'typography.primary': 'All primary UI text and icons. Secondary text and borders are derived from it.',
   'typography.secondary': 'Supporting UI text such as credits and metadata.',
   'typography.geographicPrimary': 'City, town, and district names on the map.',
   'typography.geographicSecondary': 'Road, railway, airport, and secondary map labels.',
   'typography.geographicWater': 'Waterbody and waterway names.',
   'typography.geographicHalo': 'Thin contrast outline behind map labels.',
   'typography.architectureLabel': 'Building names beside SGM architecture pins.',
-  'interaction.identity': 'Brand button, search icon, and identity accents.',
+  'interaction.identity': 'Brand, search, primary actions, selected indicators, and keyboard focus.',
   'interaction.primaryAction': 'Primary action background and emphasis.',
   'interaction.hover': 'Hover fill on non-search controls; search results use red text.',
   'interaction.pressed': 'Pressed state where used.',
@@ -102,71 +102,33 @@ const tokenHelp: Record<string, string> = {
   'architecture.hospitality': 'SGM architecture pins for hotels and hospitality.',
   'architecture.residential': 'SGM architecture pins for housing.',
   'architecture.genericFill': 'Fallback color when architecture has no category color.',
-  'architecture.categoryGlyph': 'Symbol inside category-specific pins.',
-  'architecture.genericGlyph': 'Symbol inside the generic fallback pin.',
+  'architecture.categoryGlyph': 'Light symbol used by Culture / Civic and Hospitality pins.',
+  'architecture.genericGlyph': 'Dark symbol used by Mixed Use, Commercial, Education, Residential, and generic pins.',
   'architecture.markerOutline': 'Outline around architecture markers and overview dots.',
 }
 
 // Display groups reflect SGM's UI-over-Map structure. The underlying token
 // keys and exported JSON schema remain unchanged.
 type LayerName = 'ui' | 'map'
-type ViewGroup = 'identityText' | 'surface' | 'interaction' | 'geographic' | 'architecture' | 'mapLabels'
+type ViewGroup = 'uiCore' | 'geographic' | 'architecture' | 'mapLabels'
 const viewGroups: Record<ViewGroup, { label: string; layer: LayerName; entries: ColorControl[] }> = {
-  identityText: {
-    label: 'Identity & Text', layer: 'ui',
-    entries: [controls.interaction[0], ...controls.typography.slice(0, 2)],
+  uiCore: {
+    label: 'Core UI', layer: 'ui',
+    entries: [controls.neutral[0], controls.typography[0], controls.interaction[0]],
   },
-  surface: { label: 'Surface', layer: 'ui', entries: controls.neutral },
-  interaction: { label: 'Interaction', layer: 'ui', entries: controls.interaction.slice(1) },
   geographic: { label: 'Geographic', layer: 'map', entries: controls.geographic },
   architecture: { label: 'Architecture', layer: 'map', entries: controls.architecture },
   mapLabels: { label: 'Map Labels', layer: 'map', entries: controls.typography.slice(2) },
 }
 const groupHelp: Record<ViewGroup, string> = {
-  identityText: 'UI text and brand accents.',
-  surface: 'Colors for the floating interface, not the map base.',
-  interaction: 'Interaction states and accents; some only appear when active.',
+  uiCore: 'Background, foreground, and accent drive every UI color. Secondary text, borders, surfaces, and interaction states are derived automatically.',
   geographic: 'Each color corresponds to a specific map feature layer.',
   architecture: 'Category pins for SGM buildings, not ordinary map footprints.',
   mapLabels: 'Names and text outlines for places, roads, and buildings.',
 }
 const layerGroups: Record<LayerName, ViewGroup[]> = {
-  ui: ['identityText', 'surface', 'interaction'],
+  ui: ['uiCore'],
   map: ['geographic', 'architecture', 'mapLabels'],
-}
-
-// Validate an exported palette before replacing the active preview.
-const parsePalette = (raw: string): ColorTokens => {
-  const value: unknown = JSON.parse(raw)
-  if (!value || typeof value !== 'object') throw new Error('Invalid JSON palette.')
-  const record = value as Record<string, unknown>
-  if (record.schemaVersion !== 1) throw new Error('Unsupported palette version (expected 1).')
-  const result = {} as ColorTokens
-  for (const scheme of ['day', 'night'] as const) {
-    const schemeData = record[scheme]
-    if (!schemeData || typeof schemeData !== 'object') throw new Error('Missing ' + scheme + ' palette.')
-    const schemeRecord = schemeData as Record<string, unknown>
-    const next = {} as ColorSchemeTokens
-    for (const group of Object.keys(controls) as GroupName[]) {
-      const groupData = schemeRecord[group]
-      if (!groupData || typeof groupData !== 'object') throw new Error('Missing ' + scheme + '.' + group + '.')
-      const groupRecord = groupData as Record<string, unknown>
-      const validated: Record<string, string> = {}
-      for (const control of controls[group]) {
-        // v1 exports created before Identity was added remain importable.
-        const color = group === 'interaction' && control.token === 'identity' && groupRecord[control.token] === undefined
-          ? defaultColorTokens[scheme].interaction.identity
-          : groupRecord[control.token]
-        if (typeof color !== 'string' || !/^#[0-9a-fA-F]{6}$/.test(color)) {
-          throw new Error('Invalid color at ' + scheme + '.' + group + '.' + control.token)
-        }
-        validated[control.token] = color.toUpperCase()
-      }
-      Object.assign(next, { [group]: validated })
-    }
-    result[scheme] = next
-  }
-  return result
 }
 
 const getValue = (tokens: ColorTokens, scheme: SchemeName, control: ColorControl) =>
@@ -225,7 +187,7 @@ export default function ColorLabPanel({ tokens, activeScheme, onChange, onPrevie
   const [editingScheme, setEditingScheme] = useState<SchemeName>(activeScheme)
   useEffect(() => setEditingScheme(activeScheme), [activeScheme])
   const [layer, setLayer] = useState<LayerName>('ui')
-  const [group, setGroup] = useState<ViewGroup>('identityText')
+  const [group, setGroup] = useState<ViewGroup>('uiCore')
   const [importOpen, setImportOpen] = useState(false)
   const [importText, setImportText] = useState('')
   const [importMessage, setImportMessage] = useState('')
@@ -235,10 +197,10 @@ export default function ColorLabPanel({ tokens, activeScheme, onChange, onPrevie
       ...(tokens[editingScheme][control.section] as unknown as Record<string, string>),
       [control.token]: value,
     }
-    onChange({
+    onChange(deriveUiColorTokens({
       ...tokens,
       [editingScheme]: { ...tokens[editingScheme], [control.section]: section },
-    } as ColorTokens)
+    } as ColorTokens))
   }
 
   const resetGroup = () => {
@@ -249,7 +211,7 @@ export default function ColorLabPanel({ tokens, activeScheme, onChange, onPrevie
       const section = nextScheme[control.section] as unknown as Record<string, string>
       section[control.token] = getValue(defaultColorTokens, editingScheme, control)
     })
-    onChange({ ...tokens, [editingScheme]: nextScheme })
+    onChange(deriveUiColorTokens({ ...tokens, [editingScheme]: nextScheme }))
   }
 
   const exportJson = () => {
@@ -264,7 +226,7 @@ export default function ColorLabPanel({ tokens, activeScheme, onChange, onPrevie
 
   const importJson = (raw: string) => {
     try {
-      const parsed = parsePalette(raw)
+      const parsed = parseColorPaletteV1(raw)
       onChange(parsed)
       setImportMessage('Imported Day and Night colors.')
       setImportOpen(false)
@@ -277,7 +239,7 @@ export default function ColorLabPanel({ tokens, activeScheme, onChange, onPrevie
   return (
     <aside className="color-lab-panel" aria-label="SGM Color Lab">
       <header className="color-lab-header">
-        <div><span>SGM Color Study · v0.4</span><h1>Color Lab</h1></div>
+        <div><span>SGM Color Study · v0.5</span><h1>Color Lab</h1></div>
         <span className="color-lab-preview-state">Preview: {activeScheme === 'day' ? 'Day' : 'Night'}</span>
       </header>
 
