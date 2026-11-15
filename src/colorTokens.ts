@@ -72,14 +72,14 @@ export type ColorTokens = {
 export const defaultColorTokens: ColorTokens = {
   day: {
     neutral: {
-      canvas: '#FAFAFA',
+      canvas: '#FFFFFF',
       surface: '#FFFFFF',
       subtleSurface: '#F2F2F2',
       border: '#D9D9D9'
     },
     typography: {
-      primary: '#FF4534',
-      secondary: '#FF4534',
+      primary: '#0A0A0A',
+      secondary: '#0A0A0A',
       geographicPrimary: '#515552',
       geographicSecondary: '#515552',
       geographicWater: '#85C8E1',
@@ -87,13 +87,13 @@ export const defaultColorTokens: ColorTokens = {
       architectureLabel: '#515552'
     },
     interaction: {
-      identity: '#FF4534',
-      primaryAction: '#403625',
+      identity: '#FF463A',
+      primaryAction: '#0A0A0A',
       hover: '#F2F2F2',
       pressed: '#D9D9D9',
       selectedBackground: '#FAFAFA',
       selectedIndicator: '#D9D9D9',
-      focus: '#403625'
+      focus: '#FF463A'
     },
     architecture: {
       cultureCivic: '#FF3B32',
