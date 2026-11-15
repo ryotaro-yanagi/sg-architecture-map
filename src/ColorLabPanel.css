@@ -108,3 +108,5 @@
 .color-lab-ui-example-action { display: flex; justify-content: space-between; font-size: 12px; font-weight: 600; }
 .color-lab-ui-example-hover { margin-top: 10px; padding: 7px 9px; border-radius: 6px; font-size: 11px; }
 .color-lab-ui-example > p { margin: 5px 2px 0; color: #666; font-size: 10px; line-height: 14px; }
+
+.color-lab-draft-notice { margin: 0; padding: 6px 18px 10px; color: #666; background: #f7f7f5; font-size: 10px; line-height: 14px; }
