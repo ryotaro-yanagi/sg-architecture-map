@@ -310,7 +310,7 @@ export default function ColorLabPanel({ tokens, activeScheme, onChange, onPrevie
           <h2 id="color-lab-group-heading">{viewGroups[group].label}</h2>
           {editingScheme !== activeScheme && <span>Editing off-preview</span>}
         </div>
-        <p className="color-lab-group-help">{groupHelp[group]}</p>
+        <p className="color-lab-group-help">{groupHelp[group]}{group === 'geographic' && editingScheme === 'night' ? ' Night greens are partially transparent: Park 70%, Wood 40%, Grass 30%. The map blends them with underlying colors.' : ''}</p>
 
         {layer === 'ui' && (
           <div className="color-lab-ui-example" aria-label="UI color preview">
