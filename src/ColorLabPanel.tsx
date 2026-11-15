@@ -277,7 +277,7 @@ export default function ColorLabPanel({ tokens, activeScheme, onChange, onPrevie
   return (
     <aside className="color-lab-panel" aria-label="SGM Color Lab">
       <header className="color-lab-header">
-        <div><span>Developer tool</span><h1>Color Lab</h1></div>
+        <div><span>SGM Color Study · v0.4</span><h1>Color Lab</h1></div>
         <span className="color-lab-preview-state">Preview: {activeScheme === 'day' ? 'Day' : 'Night'}</span>
       </header>
 
@@ -359,7 +359,7 @@ export default function ColorLabPanel({ tokens, activeScheme, onChange, onPrevie
 
       <footer className="color-lab-footer">
         <button type="button" onClick={resetGroup}>Reset group</button>
-        <button type="button" onClick={() => onChange(structuredClone(defaultColorTokens))}>Reset all</button>
+        <button type="button" onClick={() => onChange(structuredClone(defaultColorTokens))} title="Load the latest study palette. Saved edits are replaced in this browser.">Load defaults</button>
         <button type="button" onClick={() => { setImportOpen(open => !open); setImportMessage('') }}>Import JSON</button>
         <button type="button" className="color-lab-copy" onClick={exportJson}>Export JSON</button>
       </footer>
@@ -379,7 +379,8 @@ export default function ColorLabPanel({ tokens, activeScheme, onChange, onPrevie
           </div>
         </section>
       )}
-      {importMessage && <p className="color-lab-import-message" role="status">{importMessage}</p>}
+      <p className="color-lab-draft-notice">Colors are saved in this browser. Use Export JSON before loading defaults.</p>
+      {importMessage && <p className="color-lab-import-message" role="status">{importMessage}</p>
     </aside>
   )
 }
