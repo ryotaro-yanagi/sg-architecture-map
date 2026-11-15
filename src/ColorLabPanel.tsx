@@ -380,7 +380,7 @@ export default function ColorLabPanel({ tokens, activeScheme, onChange, onPrevie
         </section>
       )}
       <p className="color-lab-draft-notice">Colors are saved in this browser. Use Export JSON before loading defaults.</p>
-      {importMessage && <p className="color-lab-import-message" role="status">{importMessage}</p>
+      {importMessage && <p className="color-lab-import-message" role="status">{importMessage}</p>}
     </aside>
   )
 }
