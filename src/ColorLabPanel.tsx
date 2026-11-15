@@ -61,6 +61,52 @@ const controls: Record<GroupName, ColorControl[]> = {
   ],
 }
 
+// Explain where each token appears. Some source layers are intentionally hidden
+// in SGM; keep their tokens editable for compatible JSON import/export.
+const tokenHelp: Record<string, string> = {
+  'neutral.canvas': 'Main UI canvas and floating building panel.',
+  'neutral.surface': 'Search bar, controls, and other white surfaces.',
+  'neutral.subtleSurface': 'Subtle UI surfaces, where used.',
+  'neutral.border': 'Internal dividers; outer borders are hidden in this UI study.',
+  'typography.primary': 'Main UI text, including titles and search input.',
+  'typography.secondary': 'Supporting UI text such as credits and metadata.',
+  'typography.geographicPrimary': 'City, town, and district names on the map.',
+  'typography.geographicSecondary': 'Road, railway, airport, and secondary map labels.',
+  'typography.geographicWater': 'Waterbody and waterway names.',
+  'typography.geographicHalo': 'Thin contrast outline behind map labels.',
+  'typography.architectureLabel': 'Building names beside SGM architecture pins.',
+  'interaction.identity': 'Brand button, search icon, and identity accents.',
+  'interaction.primaryAction': 'Primary action background and emphasis.',
+  'interaction.hover': 'Hover fill on non-search controls; search results use red text.',
+  'interaction.pressed': 'Pressed state where used.',
+  'interaction.selectedBackground': 'Selected UI surfaces where used.',
+  'interaction.selectedIndicator': 'Selected indicators where used.',
+  'interaction.focus': 'Keyboard focus ring; search bar uses identity red.',
+  'geographic.background': 'Base land under all other map features.',
+  'geographic.residential': 'Mapped residential land-use polygons above base land.',
+  'geographic.park': 'Mapped parks and public green spaces.',
+  'geographic.wood': 'Woodland and forest land-cover polygons.',
+  'geographic.grass': 'Grass land-cover plus school, hospital, and sports areas.',
+  'geographic.water': 'Seas, reservoirs, and mapped water polygons.',
+  'geographic.waterway': 'Rivers, canals, and water polygon boundaries.',
+  'geographic.roadMinor': 'Minor, service, and local road lines.',
+  'geographic.roadMajor': 'Secondary and tertiary roads, plus some links.',
+  'geographic.roadMotorway': 'Motorways, trunk roads, and primary routes.',
+  'geographic.roadCasing': 'Not visible: road casing layers are hidden in SGM.',
+  'geographic.building': 'Building footprint fill, visible from zoom 13.2.',
+  'geographic.buildingOutline': 'Boundary around each building footprint.',
+  'architecture.cultureCivic': 'SGM architecture pins for culture and civic buildings.',
+  'architecture.mixedUse': 'SGM architecture pins for mixed-use buildings.',
+  'architecture.commercial': 'SGM architecture pins for offices and commercial buildings.',
+  'architecture.education': 'SGM architecture pins for educational buildings.',
+  'architecture.hospitality': 'SGM architecture pins for hotels and hospitality.',
+  'architecture.residential': 'SGM architecture pins for housing.',
+  'architecture.genericFill': 'Fallback color when architecture has no category color.',
+  'architecture.categoryGlyph': 'Symbol inside category-specific pins.',
+  'architecture.genericGlyph': 'Symbol inside the generic fallback pin.',
+  'architecture.markerOutline': 'Outline around architecture markers and overview dots.',
+}
+
 // Display groups reflect SGM's UI-over-Map structure. The underlying token
 // keys and exported JSON schema remain unchanged.
 type LayerName = 'ui' | 'map'
@@ -132,7 +178,10 @@ function ColorRow({ control, value, onChange }: { control: ColorControl; value: 
 
   return (
     <div className="color-lab-row">
-      <label htmlFor={`color-lab-${control.section}-${control.token}`}>{control.label}</label>
+      <div className="color-lab-row-copy">
+        <label htmlFor={`color-lab-${control.section}-${control.token}`}>{control.label}</label>
+        <span className="color-lab-help">{tokenHelp[`${control.section}.${control.token}`]}</span>
+      </div>
       <div className="color-lab-inputs">
         <input
           className="color-lab-picker"
@@ -251,6 +300,7 @@ export default function ColorLabPanel({ tokens, activeScheme, onChange }: ColorL
           <h2 id="color-lab-group-heading">{viewGroups[group].label}</h2>
           {editingScheme !== activeScheme && <span>Editing off-preview</span>}
         </div>
+        <p className="color-lab-group-help">{{"geographic":"Color a map feature using its actual source-layer role.","surface":"Colors for the floating interface, not the map base.","interaction":"Interaction states and accents; some only appear when active.","mapLabels":"Text and halo colors for named places, roads, and buildings.","architecture":"Category pins for SGM buildings, not ordinary map footprints.","identityText":"UI text and brand accents."}[group]}</p>
         <div className="color-lab-palette-preview" role="img" aria-label={viewGroups[group].label + ' palette preview'}>
           {viewGroups[group].entries.map((control) => (
             <span key={control.section + '.' + control.token} className="color-lab-palette-swatch"
