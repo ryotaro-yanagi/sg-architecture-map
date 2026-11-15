@@ -94,3 +94,10 @@
   border: 1px solid rgba(0,0,0,.10);
   border-radius: 3px;
 }
+
+/* Keep the token name and its actual rendering role visible together. */
+.color-lab-row { min-height: 64px; padding: 9px 0; }
+.color-lab-row-copy { min-width: 0; display: grid; gap: 3px; }
+.color-lab-row-copy > label { color: #242424; font-size: 12px; font-weight: 600; line-height: 16px; }
+.color-lab-help { color: #666; font-size: 11px; line-height: 15px; }
+.color-lab-group-help { margin: 0 0 10px; color: #666; font-size: 11px; line-height: 16px; }
