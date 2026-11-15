@@ -309,6 +309,34 @@ export default function ColorLabPanel({ tokens, activeScheme, onChange }: ColorL
           {editingScheme !== activeScheme && <span>Editing off-preview</span>}
         </div>
         <p className="color-lab-group-help">{groupHelp[group]}</p>
+
+        {layer === 'ui' && (
+          <div className="color-lab-ui-example" aria-label="UI color preview">
+            <div className="color-lab-ui-example-surface" style={{
+              background: tokens[editingScheme].neutral.surface,
+              color: tokens[editingScheme].typography.primary,
+            }}>
+              <div className="color-lab-ui-example-search" style={{
+                borderColor: tokens[editingScheme].interaction.identity,
+              }}>
+                <span style={{ color: tokens[editingScheme].interaction.identity }}>⌕</span>
+                <span>Search architecture</span>
+              </div>
+              <div className="color-lab-ui-example-title">Building name</div>
+              <div className="color-lab-ui-example-meta" style={{
+                color: tokens[editingScheme].typography.secondary,
+              }}>Architect · Completed 2020</div>
+              <div className="color-lab-ui-example-divider" style={{
+                background: tokens[editingScheme].neutral.border,
+              }} />
+              <div className="color-lab-ui-example-action">View details <span>→</span></div>
+              <div className="color-lab-ui-example-hover" style={{
+                background: tokens[editingScheme].interaction.hover,
+              }}>Hover surface</div>
+            </div>
+            <p>UI example · edits update these colors; divider is shown only where needed.</p>
+          </div>
+        )}
         <div className="color-lab-palette-preview" role="img" aria-label={viewGroups[group].label + ' palette preview'}>
           {viewGroups[group].entries.map((control) => (
             <span key={control.section + '.' + control.token} className="color-lab-palette-swatch"
