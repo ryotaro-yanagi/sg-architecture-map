@@ -11,7 +11,7 @@ import type { Locale, Translation } from './i18n'
 import { parseWeatherPayloads } from './weather'
 import type { WeatherState } from './weather'
 import ColorLabPanel from './ColorLabPanel'
-import { cloneColorTokens, colorTokenCssVariables } from './colorTokens'
+import { cloneColorTokens, colorTokenCssVariables, readColorLabDraft, saveColorLabDraft } from './colorTokens'
 import type { ArchitectureColorTokens, ColorSchemeTokens, ColorTokens } from './colorTokens'
 
 type Coordinates = [number, number]
@@ -761,7 +761,12 @@ function App() {
     () => import.meta.env.DEV && new URLSearchParams(window.location.search).get('lab') === 'color',
     [],
   )
-  const [colorTokens, setColorTokens] = useState<ColorTokens>(cloneColorTokens)
+  const [colorTokens, setColorTokens] = useState<ColorTokens>(() =>
+    colorLabEnabled ? readColorLabDraft() : cloneColorTokens(),
+  )
+  useEffect(() => {
+    if (colorLabEnabled) saveColorLabDraft(colorTokens)
+  }, [colorLabEnabled, colorTokens])
   const activeColorTokens = colorTokens[activeScheme]
   const activeArchitecture = activeColorTokens.architecture
   const colorTokensRef = useRef(colorTokens)
