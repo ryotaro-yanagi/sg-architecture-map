@@ -332,11 +332,14 @@ export default function ColorLabPanel({ tokens, activeScheme, onChange, onPrevie
                 background: tokens[editingScheme].neutral.border,
               }} />
               <div className="color-lab-ui-example-action">View details <span>→</span></div>
+              <div className="color-lab-ui-example-result" style={{
+                color: tokens[editingScheme].interaction.identity,
+              }}>Search result hover <span>→</span></div>
               <div className="color-lab-ui-example-hover" style={{
                 background: tokens[editingScheme].interaction.hover,
-              }}>Hover surface</div>
+              }}>Control hover</div>
             </div>
-            <p>UI example · focused search and one divider; colors update as you edit.</p>
+            <p>UI example · search hover changes text, control hover changes background.</p>
           </div>
         )}
         <div className="color-lab-palette-preview" role="img" aria-label={viewGroups[group].label + ' palette preview'}>
