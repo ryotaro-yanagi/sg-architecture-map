@@ -122,6 +122,14 @@ const viewGroups: Record<ViewGroup, { label: string; layer: LayerName; entries: 
   architecture: { label: 'Architecture', layer: 'map', entries: controls.architecture },
   mapLabels: { label: 'Map Labels', layer: 'map', entries: controls.typography.slice(2) },
 }
+const groupHelp: Record<ViewGroup, string> = {
+  identityText: 'UI text and brand accents.',
+  surface: 'Colors for the floating interface, not the map base.',
+  interaction: 'Interaction states and accents; some only appear when active.',
+  geographic: 'Each color corresponds to a specific map feature layer.',
+  architecture: 'Category pins for SGM buildings, not ordinary map footprints.',
+  mapLabels: 'Names and text outlines for places, roads, and buildings.',
+}
 const layerGroups: Record<LayerName, ViewGroup[]> = {
   ui: ['identityText', 'surface', 'interaction'],
   map: ['geographic', 'architecture', 'mapLabels'],
@@ -300,7 +308,7 @@ export default function ColorLabPanel({ tokens, activeScheme, onChange }: ColorL
           <h2 id="color-lab-group-heading">{viewGroups[group].label}</h2>
           {editingScheme !== activeScheme && <span>Editing off-preview</span>}
         </div>
-        <p className="color-lab-group-help">{{"geographic":"Color a map feature using its actual source-layer role.","surface":"Colors for the floating interface, not the map base.","interaction":"Interaction states and accents; some only appear when active.","mapLabels":"Text and halo colors for named places, roads, and buildings.","architecture":"Category pins for SGM buildings, not ordinary map footprints.","identityText":"UI text and brand accents."}[group]}</p>
+        <p className="color-lab-group-help">{groupHelp[group]}</p>
         <div className="color-lab-palette-preview" role="img" aria-label={viewGroups[group].label + ' palette preview'}>
           {viewGroups[group].entries.map((control) => (
             <span key={control.section + '.' + control.token} className="color-lab-palette-swatch"
