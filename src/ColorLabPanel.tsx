@@ -40,8 +40,8 @@ const controls: Record<GroupName, ColorControl[]> = {
     { section: 'architecture', token: 'hospitality', label: 'Hospitality' },
     { section: 'architecture', token: 'residential', label: 'Residential' },
     { section: 'architecture', token: 'genericFill', label: 'Generic marker fill' },
-    { section: 'architecture', token: 'categoryGlyph', label: 'Light category glyph' },
-    { section: 'architecture', token: 'genericGlyph', label: 'Dark / generic glyph' },
+    { section: 'architecture', token: 'categoryGlyph', label: 'Category glyph' },
+    { section: 'architecture', token: 'genericGlyph', label: 'Generic glyph' },
     { section: 'architecture', token: 'markerOutline', label: 'Marker outline' },
   ],
   geographic: [
@@ -102,8 +102,8 @@ const tokenHelp: Record<string, string> = {
   'architecture.hospitality': 'SGM architecture pins for hotels and hospitality.',
   'architecture.residential': 'SGM architecture pins for housing.',
   'architecture.genericFill': 'Fallback color when architecture has no category color.',
-  'architecture.categoryGlyph': 'Light symbol used by Culture / Civic and Hospitality pins.',
-  'architecture.genericGlyph': 'Dark symbol used by Mixed Use, Commercial, Education, Residential, and generic pins.',
+  'architecture.categoryGlyph': 'Symbol used by every categorized architecture pin.',
+  'architecture.genericGlyph': 'Symbol used by generic fallback pins.',
   'architecture.markerOutline': 'Outline around architecture markers and overview dots.',
 }
 

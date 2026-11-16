@@ -51,7 +51,7 @@ test('changing core UI colors does not alter map or architecture palettes', () =
   assert.equal(derived.typography.architectureLabel, original.typography.architectureLabel)
 })
 
-test('architecture categories share one Day/Night palette with legible glyphs', () => {
+test('architecture categories share one Day/Night fill palette with appearance-specific pin foregrounds', () => {
   const categoryPalette = {
     cultureCivic: '#FF3B32',
     mixedUse: '#A5E3E8',
@@ -60,17 +60,14 @@ test('architecture categories share one Day/Night palette with legible glyphs', 
     hospitality: '#9550A8',
     residential: '#F59A36',
   } as const
-  const lightGlyphCategories = new Set<keyof typeof categoryPalette>(['cultureCivic', 'hospitality'])
-
-  for (const scheme of Object.values(defaultColorTokens)) {
+  for (const [appearance, scheme] of Object.entries(defaultColorTokens)) {
+    const pinForeground = appearance === 'day' ? '#FFFFFF' : '#000000'
     for (const [category, fill] of Object.entries(categoryPalette) as [keyof typeof categoryPalette, string][]) {
       assert.equal(scheme.architecture[category], fill)
-      const glyph = lightGlyphCategories.has(category)
-        ? scheme.architecture.categoryGlyph
-        : scheme.architecture.genericGlyph
-      assert.ok(contrastRatio(fill, glyph) >= 3, `${category} glyph contrast`)
     }
-    assert.ok(contrastRatio(scheme.architecture.genericFill, scheme.architecture.genericGlyph) >= 3)
+    assert.equal(scheme.architecture.categoryGlyph, pinForeground)
+    assert.equal(scheme.architecture.genericGlyph, pinForeground)
+    assert.equal(scheme.architecture.markerOutline, pinForeground)
   }
 
   assert.deepEqual(

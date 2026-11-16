@@ -200,8 +200,8 @@ export const defaultColorTokens: ColorTokens = {
       residential: '#F59A36',
       genericFill: '#52AE54',
       categoryGlyph: '#FFFFFF',
-      genericGlyph: '#000000',
-      markerOutline: '#FAFAFA'
+      genericGlyph: '#FFFFFF',
+      markerOutline: '#FFFFFF'
     },
     {
       background: '#EAEAEA',
@@ -236,7 +236,7 @@ export const defaultColorTokens: ColorTokens = {
       hospitality: '#9550A8',
       residential: '#F59A36',
       genericFill: '#35946B',
-      categoryGlyph: '#FFFFFF',
+      categoryGlyph: '#000000',
       genericGlyph: '#000000',
       markerOutline: '#000000'
     },
