@@ -103,6 +103,7 @@ test('foreground, accent focus, and derived on-accent text meet WCAG contrast ta
   for (const scheme of Object.values(defaultColorTokens)) {
     const variables = colorTokenCssVariables(scheme)
     assert.ok(contrastRatio(variables['--ui-background'], variables['--ui-foreground']) >= 4.5)
+    assert.ok(contrastRatio(variables['--ui-background'], variables['--muted']) >= 4.5)
     assert.ok(contrastRatio(variables['--ui-background'], variables['--focus-ring']) >= 3)
     assert.ok(contrastRatio(variables['--ui-accent'], variables['--on-accent']) >= 4.5)
   }

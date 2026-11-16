@@ -139,8 +139,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
 }
 .search-input-wrap > svg { width: 20px; height: 20px; flex: 0 0 20px; color: var(--ink); }
 .search-bar:focus-within {
-  border-color: var(--identity);
-  box-shadow: inset 0 0 0 1px var(--identity);
+  border-color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--ink);
 }
 .search-input-wrap:focus-within { outline: 0; box-shadow: none; }
 .search-input-wrap input { min-width: 0; flex: 1; border: 0; outline: 0; box-shadow: none; background: transparent; color: var(--ink); font-size: 16px; line-height: 25px; letter-spacing: 0; }
@@ -341,7 +341,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
 .back-button svg { width: 16px; height: 16px; flex: 0 0 16px; }
 .record-index { color: var(--muted); font-size: var(--vs-meta-size); line-height: var(--vs-meta-line); letter-spacing: 0; }
 .detail-intro { padding-bottom: 22px; border-bottom: 1px solid var(--line); }
-.detail-intro .eyebrow { font-family: var(--font-attribution); font-weight: 360; }
+.detail-intro .eyebrow { color: var(--muted); font-family: var(--font-attribution); font-weight: 360; }
 .detail-content h1 { padding: 0; font-size: 30px; }
 .detail-architects { margin: 10px 0 0; color: var(--ink); font-family: var(--font-attribution); font-size: var(--vs-body-size); font-weight: 360; line-height: var(--vs-body-line); }
 .detail-year { margin: 4px 0 0; color: var(--muted); font-family: var(--font-attribution); font-size: var(--vs-meta-size); font-weight: 360; line-height: var(--vs-meta-line); }
@@ -393,17 +393,17 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
   .app.night-preview .maplibregl-ctrl-group button:hover { background-color: var(--interaction-hover); }
   .initial-loading-error button:hover { background: var(--interaction-hover); }
   .maplibregl-ctrl-group button:hover { background-color: var(--interaction-hover); }
-  .search-results button:hover { background: transparent; color: var(--identity); }
+  .search-results button:hover { background: transparent; color: var(--muted); }
   .search-results button:hover strong,
   .search-results button:hover small,
-  .search-results button:hover svg { color: var(--identity); }
+  .search-results button:hover svg { color: var(--muted); }
   .weather-chip:hover, .language-trigger:hover { background: var(--interaction-hover); }
   .icon-button:hover { background: var(--interaction-hover); }
   .locate-button:hover { background: var(--interaction-hover); }
-  .preview-details:hover { background: var(--interaction-hover); }
-  .back-button:hover { background: var(--interaction-hover); }
-  .actions a:hover { background: var(--interaction-hover); }
-  .sources a:hover { background: var(--interaction-hover); }
+  .preview-details:hover,
+  .back-button:hover,
+  .actions a:hover,
+  .sources a:hover { color: var(--muted); background: transparent; }
   .brand:hover, .primary-button:hover { background: var(--accent-hover); }
 }
 
@@ -413,15 +413,15 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
 .weather-chip:active,
 .language-trigger:active,
 .icon-button:active,
-.locate-button:active,
+.locate-button:active { background: var(--interaction-pressed); }
 .preview-details:active,
 .back-button:active,
 .actions a:active,
-.sources a:active { background: var(--interaction-pressed); }
-.search-results button:active { color: var(--identity); background: var(--interaction-selected-background); }
+.sources a:active { color: var(--muted); background: transparent; }
+.search-results button:active { color: var(--muted); background: transparent; }
 .search-results button:active strong,
 .search-results button:active small,
-.search-results button:active svg { color: var(--identity); }
+.search-results button:active svg { color: var(--muted); }
 .brand:active, .primary-button:active { background: var(--accent-pressed); }
 
 @media (forced-colors: active) {

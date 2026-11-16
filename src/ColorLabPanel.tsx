@@ -75,9 +75,9 @@ const tokenHelp: Record<string, string> = {
   'typography.geographicWater': 'Waterbody and waterway names.',
   'typography.geographicHalo': 'Thin contrast outline behind map labels.',
   'typography.architectureLabel': 'Building names beside SGM architecture pins.',
-  'interaction.identity': 'Brand, search, primary actions, selected indicators, and keyboard focus.',
+  'interaction.identity': 'Brand, primary actions, and selected indicators.',
   'interaction.primaryAction': 'Primary action background and emphasis.',
-  'interaction.hover': 'Hover fill on non-search controls; search results use red text.',
+  'interaction.hover': 'Hover fill on independent controls; text actions use the derived secondary foreground.',
   'interaction.pressed': 'Pressed state where used.',
   'interaction.selectedBackground': 'Selected UI surfaces where used.',
   'interaction.selectedIndicator': 'Selected indicators where used.',
@@ -281,9 +281,9 @@ export default function ColorLabPanel({ tokens, activeScheme, onChange, onPrevie
               color: tokens[editingScheme].typography.primary,
             }}>
               <div className="color-lab-ui-example-search" style={{
-                borderColor: tokens[editingScheme].interaction.identity,
+                borderColor: tokens[editingScheme].typography.primary,
               }}>
-                <span style={{ color: tokens[editingScheme].interaction.identity }}>⌕</span>
+                <span>⌕</span>
                 <span>Focused search</span>
               </div>
               <div className="color-lab-ui-example-title">Building name</div>
@@ -295,13 +295,13 @@ export default function ColorLabPanel({ tokens, activeScheme, onChange, onPrevie
               }} />
               <div className="color-lab-ui-example-action">View details <span>→</span></div>
               <div className="color-lab-ui-example-result" style={{
-                color: tokens[editingScheme].interaction.identity,
+                color: tokens[editingScheme].typography.secondary,
               }}>Search result hover <span>→</span></div>
               <div className="color-lab-ui-example-hover" style={{
                 background: tokens[editingScheme].interaction.hover,
               }}>Control hover</div>
             </div>
-            <p>UI example · search hover changes text, control hover changes background.</p>
+            <p>UI example · text actions use secondary foreground; independent controls use a hover background.</p>
           </div>
         )}
         <div className="color-lab-palette-preview" role="img" aria-label={viewGroups[group].label + ' palette preview'}>
