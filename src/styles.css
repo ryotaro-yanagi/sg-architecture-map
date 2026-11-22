@@ -187,15 +187,15 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
   place-items: center;
   flex: 0 0 48px;
   padding: 4px;
-  color: var(--on-accent);
-  background: var(--identity);
+  background: transparent;
   border: 0;
   border-radius: 50%;
   box-shadow: none;
   cursor: pointer;
+  transition: opacity 120ms ease-out;
 }
-.brand-mark { display: grid; place-items: center; width: 38px; height: 38px; color: currentColor; background: transparent; border-radius: 0; }
-.brand-mark svg { width: 25px; height: 25px; }
+.brand-mark { display: grid; place-items: center; width: 44px; height: 44px; }
+.brand-mark img { display: block; width: 44px; height: 44px; }
 
 .weather-chip, .language-trigger {
   min-height: 48px;
@@ -404,7 +404,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
   .back-button:hover,
   .actions a:hover,
   .sources a:hover { color: var(--muted); background: transparent; }
-  .brand:hover, .primary-button:hover { background: var(--accent-hover); }
+  .brand:hover { opacity: .8; }
+  .primary-button:hover { background: var(--accent-hover); }
 }
 
 .appearance-toggle:active,
@@ -422,7 +423,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
 .search-results button:active strong,
 .search-results button:active small,
 .search-results button:active svg { color: var(--muted); }
-.brand:active, .primary-button:active { background: var(--accent-pressed); }
+.brand:active { opacity: .64; }
+.primary-button:active { background: var(--accent-pressed); }
 
 @media (forced-colors: active) {
   button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-visible { outline-color: Highlight; box-shadow: none; }
@@ -434,6 +436,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
   html { scroll-behavior: auto; }
   .bottom-surface { animation: panel-appear 80ms linear both; }
   .control-row { transition: none; animation: none; }
+  .brand { transition: none; }
   .notice { animation: none; }
   .initial-loading-screen { transition: none; }
   .initial-loading-screen .loading-title { animation: none; opacity: 1; }
