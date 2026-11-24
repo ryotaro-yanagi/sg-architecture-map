@@ -9,8 +9,12 @@
     "preview": "vite preview",
     "typecheck": "tsc -b --pretty false",
     "check:publish": "node scripts/check-publish.mjs",
+    "prototype:share-record": "node scripts/generate-share-record-prototypes.mjs",
+    "test:collection": "node --test scripts/collection-state.test.ts scripts/architecture-record.test.ts",
+    "test:coastline": "node --test scripts/share-record-coastline.test.mjs",
     "test:colors": "node --test scripts/colorTokens.test.ts",
     "test:publish-url": "node --test scripts/publication-url.test.mjs",
+    "test:share-record": "node --test scripts/share-record.test.mjs",
     "test:weather": "node --test scripts/weather.test.ts"
   },
   "dependencies": {

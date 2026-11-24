@@ -31,7 +31,7 @@
 
 .app { color: var(--ink); background: var(--paper); font-family: var(--font-ui); }
 .app.night-preview { color-scheme: dark; }
-.appearance-toggle {
+.appearance-toggle, .collection-trigger {
   width: 48px;
   height: 48px;
   display: grid;
@@ -43,7 +43,7 @@
   border-radius: 50%;
   cursor: pointer;
 }
-.appearance-toggle svg { width: 20px; height: 20px; }
+.appearance-toggle svg, .collection-trigger svg { width: 20px; height: 20px; }
 .app.night-preview .maplibregl-ctrl-group { background: var(--paper-strong); }
 .app.night-preview .maplibregl-ctrl-group button { background-color: var(--paper-strong); }
 
@@ -311,6 +311,66 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
 .bottom-surface.preview { height: auto; }
 .bottom-surface.detail { height: calc(62dvh - var(--panel-bottom)); }
 
+.collection-surface { --record-date-column: 76px; --record-column-gap: 14px; position: absolute; z-index: 40; inset: max(12px, env(safe-area-inset-top)) 12px max(12px, env(safe-area-inset-bottom)); color: var(--ink); background: var(--paper); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; animation: panel-appear 180ms cubic-bezier(0, 0, .38, .9) both; }
+.collection-base { height: 100%; min-height: 0; display: flex; flex-direction: column; }
+.collection-header, .share-preview-header { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 13px 18px 9px; }
+.share-preview-header { box-shadow: inset 0 -1px var(--line); }
+.collection-header h1, .share-preview-header h2 { margin: 0; color: var(--ink); font-family: var(--font-display); font-size: 26px; font-weight: 500; line-height: var(--heading-leading); letter-spacing: var(--heading-tracking); }
+.collection-tabs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 0 12px; border-bottom: 1px solid var(--line); }
+.collection-tabs button { min-width: 0; min-height: 48px; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 0 8px; color: var(--muted); background: transparent; border: 0; border-bottom: 1px solid transparent; font: 400 15px/20px var(--font-ui); cursor: pointer; }
+.collection-tabs button[aria-selected='true'] { color: var(--ink); border-bottom-color: var(--ink); font-weight: 500; }
+.collection-tab-count { min-width: 22px; padding: 1px 6px; background: var(--system-soft); border-radius: 11px; font-size: 12px; line-height: 18px; font-variant-numeric: tabular-nums; }
+.collection-panels { min-height: 0; flex: 1; }
+.collection-panel { height: 100%; min-height: 0; display: flex; flex-direction: column; }
+.collection-panel[hidden] { display: none; }
+.record-summary-card { width: calc(100% - 36px); min-height: 78px; display: flex; align-items: baseline; gap: 11px; margin: 12px 18px 14px; padding: 12px 15px; color: var(--ink); background: var(--system-soft); border: 1px solid var(--line); border-radius: 5px; text-align: left; cursor: pointer; }
+.record-summary-card strong { color: var(--accent); font: 500 40px/40px var(--font-display); font-variant-numeric: tabular-nums; letter-spacing: -.04em; }
+.record-summary-card span { color: var(--ink); font: 400 13px/18px var(--font-ui); }
+.collection-list { min-height: 0; margin: 0; padding: 0 18px max(18px, env(safe-area-inset-bottom)); overflow-y: auto; list-style: none; }
+.collection-list li + li { border-top: 1px solid var(--line); }
+.collection-list button { width: 100%; min-height: 64px; display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 10px 0; color: var(--ink); background: transparent; border: 0; text-align: left; cursor: pointer; }
+.collection-list button > span { min-width: 0; display: grid; gap: 3px; }
+.collection-list strong { font: 500 16px/22px var(--font-display); }
+.collection-list small { color: var(--muted); font: 360 13px/18px var(--font-attribution); }
+.architecture-records { min-height: 0; padding: 2px 18px max(22px, env(safe-area-inset-bottom)); overflow-y: auto; }
+.record-year + .record-year { margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--line); }
+.record-year > h3 { margin: 0 0 2px; color: var(--muted); font: 500 13px/18px var(--font-ui); letter-spacing: .02em; text-transform: uppercase; }
+.record-year > ul { margin: 0; padding: 0; list-style: none; }
+.architecture-record-entry { padding: 16px 0; }
+.architecture-record-entry + .architecture-record-entry { border-top: 1px solid var(--line); }
+.record-summary { display: grid; grid-template-columns: var(--record-date-column) minmax(0, 1fr); gap: var(--record-column-gap); }
+.record-date { display: grid; grid-template-columns: auto auto; align-content: start; align-items: baseline; justify-content: start; column-gap: 5px; color: var(--ink); font-variant-numeric: tabular-nums; }
+.record-date strong { grid-row: 1 / 3; font: 500 34px/36px var(--font-display); letter-spacing: -.04em; }
+.record-date > span { font-size: 18px; line-height: 20px; }
+.record-date small { font: 500 13px/16px var(--font-ui); letter-spacing: .02em; }
+.record-date.is-undated { color: var(--muted); }
+.record-undated-dash { font: 400 18px/24px var(--font-ui); }
+.record-body { min-width: 0; }
+.record-building { width: 100%; min-height: var(--control-min); display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 0; color: var(--ink); background: transparent; border: 0; text-align: left; cursor: pointer; }
+.record-building strong { font: 500 17px/22px var(--font-display); letter-spacing: var(--heading-tracking); }
+.record-building svg { flex: 0 0 18px; margin-top: 2px; }
+.record-meta { margin: 5px 0 0; color: var(--muted); font: 360 13px/18px var(--font-attribution); }
+.record-note { margin: 12px 0 0; color: var(--ink); font: 360 var(--vs-body-size)/var(--vs-body-line) var(--font-attribution); white-space: pre-wrap; }
+.record-edit { min-height: var(--control-min); margin: 4px 0 -4px -8px; padding: 0 8px; color: var(--ink); background: transparent; border: 0; font: 500 13px/18px var(--font-ui); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.record-editor { display: grid; gap: 14px; margin: 18px 0 0 calc(var(--record-date-column) + var(--record-column-gap)); padding-top: 16px; border-top: 1px solid var(--line); }
+.record-editor label { display: grid; gap: 6px; color: var(--muted); font: 500 13px/18px var(--font-ui); }
+.record-editor input, .record-editor textarea { width: 100%; padding: 10px 11px; color: var(--ink); background: var(--paper); border: 1px solid var(--line); border-radius: 3px; font: 400 15px/20px var(--font-ui); }
+.record-editor textarea { min-height: 96px; resize: vertical; }
+.record-editor-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.record-clear { grid-column: 1 / -1; min-height: var(--control-min); padding: 0; color: var(--ink); background: transparent; border: 0; font: 500 13px/18px var(--font-ui); text-align: left; cursor: pointer; }
+.collection-empty { margin: auto; display: grid; justify-items: center; gap: 12px; padding: 32px 24px; color: var(--muted); text-align: center; }
+.collection-empty p { margin: 0; }
+.share-record-preview { position: absolute; z-index: 2; inset: 0; display: flex; min-height: 0; flex-direction: column; background: var(--paper); }
+.share-preview-body { min-height: 0; flex: 1; display: grid; place-items: center; padding: 16px; overflow: auto; background: var(--system-soft); }
+.share-preview-body img { display: block; width: auto; max-width: 100%; height: auto; max-height: 100%; aspect-ratio: 4 / 5; object-fit: contain; box-shadow: 0 2px 14px rgb(0 0 0 / .08); }
+.share-status { margin: auto; color: var(--muted); text-align: center; }
+.share-preview-footer { padding: 14px 18px max(18px, env(safe-area-inset-bottom)); border-top: 1px solid var(--line); }
+.share-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.share-actions > :only-child { grid-column: 1 / -1; }
+.secondary-button { min-height: 44px; display: inline-flex; justify-content: center; align-items: center; gap: 10px; padding: 0 16px; color: var(--ink); background: transparent; border: 1px solid var(--line); border-radius: 3px; font: 500 15px/20px var(--font-ui); cursor: pointer; }
+.share-attribution { margin: 12px 0 0; color: var(--muted); font: 360 12px/18px var(--font-attribution); }
+.share-attribution a { color: inherit; }
+
 @keyframes panel-appear {
   from { opacity: 0; }
   to { opacity: 1; }
@@ -345,6 +405,11 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
 .detail-content h1 { padding: 0; font-size: 30px; }
 .detail-architects { margin: 10px 0 0; color: var(--ink); font-family: var(--font-attribution); font-size: var(--vs-body-size); font-weight: 360; line-height: var(--vs-body-line); }
 .detail-year { margin: 4px 0 0; color: var(--muted); font-family: var(--font-attribution); font-size: var(--vs-meta-size); font-weight: 360; line-height: var(--vs-meta-line); }
+.collection-actions { padding: 16px 0; border-bottom: 1px solid var(--line); }
+.collection-toggle-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.collection-toggle { min-width: 0; min-height: 48px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 0 12px; color: var(--ink); background: transparent; border: 1px solid var(--line); border-radius: 3px; font: 500 15px/20px var(--font-ui); cursor: pointer; }
+.collection-toggle.is-active { background: var(--system-soft); border-color: var(--ink); }
+.collection-error { margin: 10px 0 0; color: var(--muted); font-size: 13px; line-height: 18px; }
 .detail-location { padding: 18px 0 20px; border-bottom: 0; }
 .detail-location p { margin: 0; color: var(--ink); font-size: var(--vs-body-size); line-height: var(--vs-body-line); }
 .detail-location small { display: block; margin-top: 8px; color: var(--muted); font-family: var(--font-attribution); font-size: 12px; line-height: 18px; }
@@ -380,6 +445,12 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
   /* Keep the expanded panel below the persistent 20px top inset, 48px search,
      12px gap, and 48px control row, plus a 20px breathing space. */
   .bottom-surface.detail { height: calc(100% - var(--panel-bottom) - 148px); }
+  .collection-surface { top: 22px; right: auto; bottom: 24px; left: 22px; width: 390px; }
+  .collection-header, .share-preview-header { padding: 17px 28px 12px; }
+  .collection-tabs { padding-inline: 22px; }
+  .record-summary-card { width: calc(100% - 56px); margin-inline: 28px; }
+  .collection-list { padding-inline: 28px; }
+  .architecture-records { padding-inline: 28px; }
   .preview-card { padding: 22px 22px 0; }
   .preview-card h1 { font-size: 24px; }
   .detail-content { padding: 24px 28px 38px; }
@@ -389,7 +460,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
 
 
 @media (hover: hover) and (pointer: fine) {
-  .appearance-toggle:hover { background: var(--interaction-hover); }
+  .appearance-toggle:hover, .collection-trigger:hover, .secondary-button:hover { background: var(--interaction-hover); }
   .app.night-preview .maplibregl-ctrl-group button:hover { background-color: var(--interaction-hover); }
   .initial-loading-error button:hover { background: var(--interaction-hover); }
   .maplibregl-ctrl-group button:hover { background-color: var(--interaction-hover); }
@@ -405,6 +476,13 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
   .actions a:hover,
   .sources a:hover { color: var(--muted); background: transparent; }
   .brand:hover, .primary-button:hover { background: var(--accent-hover); }
+  .collection-tabs button:hover,
+  .collection-list button:hover,
+  .record-building:hover,
+  .record-edit:hover,
+  .record-clear:hover,
+  .collection-toggle:hover { color: var(--muted); }
+  .record-summary-card:hover { background: var(--interaction-hover); }
 }
 
 .appearance-toggle:active,
@@ -423,6 +501,16 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
 .search-results button:active small,
 .search-results button:active svg { color: var(--muted); }
 .brand:active, .primary-button:active { background: var(--accent-pressed); }
+.record-summary-card:active { background: var(--interaction-pressed); }
+.collection-tabs button:active,
+.collection-list button:active,
+.record-building:active,
+.record-edit:active,
+.record-clear:active { color: var(--muted); }
+
+.state-collection .top-ui,
+.state-collection .map-tools,
+.state-collection .maplibregl-ctrl-bottom-right { visibility: hidden; opacity: 0; pointer-events: none; }
 
 @media (forced-colors: active) {
   button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-visible { outline-color: Highlight; box-shadow: none; }
@@ -433,6 +521,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .bottom-surface { animation: panel-appear 80ms linear both; }
+  .collection-surface { animation: panel-appear 80ms linear both; }
   .control-row { transition: none; animation: none; }
   .notice { animation: none; }
   .initial-loading-screen { transition: none; }
