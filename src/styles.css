@@ -688,3 +688,87 @@ html[data-appearance='night'] .brand-mark img { filter: invert(1); }
 /* Experience Navigation v0.3 — semantic refinement. */
 .experience-settings h2:focus { outline: 0; }
 .collection-header { border-bottom: 1px solid var(--line); }
+
+
+/* SGM interaction language v0.2 — ring feedback for embedded actions.
+   Pressed feedback is transient; persistent Saved/Visited state remains icon fill + label. */
+.collection-toggle {
+  position: relative;
+  overflow: visible;
+}
+.collection-toggle.is-active {
+  background: transparent;
+  border-color: var(--line);
+}
+.collection-toggle-glyph {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
+}
+.collection-toggle-glyph::before {
+  content: '';
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  border: 1.5px solid currentColor;
+  border-radius: 50%;
+  opacity: 0;
+  transform: scale(.88);
+  pointer-events: none;
+}
+.collection-toggle-glyph svg {
+  position: relative;
+  z-index: 1;
+}
+.collection-toggle:active .collection-toggle-glyph::before {
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity 80ms ease-out, transform 110ms cubic-bezier(.22, 1, .36, 1);
+}
+.collection-toggle.is-active .collection-toggle-glyph::before {
+  animation: sgm-ring-confirm 360ms cubic-bezier(.22, 1, .36, 1) both;
+}
+@keyframes sgm-ring-confirm {
+  0% { opacity: 0; transform: scale(.76); }
+  34% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1.08); }
+}
+
+/* Appearance is an embedded icon action inside Settings, so use the same
+   glyph-level press language instead of a temporary filled disc. */
+.experience-settings .appearance-toggle {
+  position: relative;
+  background: transparent;
+}
+.experience-settings .appearance-toggle::before {
+  content: '';
+  position: absolute;
+  width: 38px;
+  height: 38px;
+  border: 1.5px solid currentColor;
+  border-radius: 50%;
+  opacity: 0;
+  transform: scale(.9);
+  pointer-events: none;
+}
+.experience-settings .appearance-toggle:active {
+  background: transparent;
+}
+.experience-settings .appearance-toggle:active::before {
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity 80ms ease-out, transform 110ms cubic-bezier(.22, 1, .36, 1);
+}
+@media (hover: hover) and (pointer: fine) {
+  .collection-toggle:hover { background: transparent; color: var(--muted); }
+  .experience-settings .appearance-toggle:hover { background: transparent; }
+  .experience-settings .appearance-toggle:hover::before { opacity: .55; transform: scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .collection-toggle.is-active .collection-toggle-glyph::before {
+    animation-duration: 80ms;
+  }
+}

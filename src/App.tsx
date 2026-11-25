@@ -1978,10 +1978,10 @@ function DetailContent({ building, locale, t, onClose, backRef }: LocalizedProps
       <section className="collection-actions" aria-label={t.collectionActions}>
         <div className="collection-toggle-row">
           <button type="button" className={`collection-toggle ${collectionState.saved ? 'is-active' : ''}`} aria-pressed={collectionState.saved} aria-label={collectionState.saved ? t.removeSavedBuilding : t.saveBuilding} onClick={() => updateCollectionState({ saved: !collectionState.saved })}>
-            <BookmarkSimple aria-hidden="true" size={20} weight={collectionState.saved ? 'fill' : 'regular'} /><span>{collectionState.saved ? t.saved : t.save}</span>
+            <span className="collection-toggle-glyph" aria-hidden="true"><BookmarkSimple size={20} weight={collectionState.saved ? 'fill' : 'regular'} /></span><span>{collectionState.saved ? t.saved : t.save}</span>
           </button>
           <button type="button" className={`collection-toggle ${collectionState.visited ? 'is-active' : ''}`} aria-pressed={collectionState.visited} aria-label={collectionState.visited ? t.removeVisitedBuilding : t.markVisited} onClick={() => updateCollectionState({ visited: !collectionState.visited })}>
-            <CheckCircle aria-hidden="true" size={20} weight={collectionState.visited ? 'fill' : 'regular'} /><span>{collectionState.visited ? t.visited : t.markVisited}</span>
+            <span className="collection-toggle-glyph" aria-hidden="true"><CheckCircle size={20} weight={collectionState.visited ? 'fill' : 'regular'} /></span><span>{collectionState.visited ? t.visited : t.markVisited}</span>
           </button>
         </div>
         {collectionError && <p className="collection-error" role="alert">{collectionError}</p>}
