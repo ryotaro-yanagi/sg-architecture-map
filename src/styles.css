@@ -820,3 +820,48 @@ html[data-appearance='night'] .brand-mark img { filter: invert(1); }
     animation-duration: 80ms;
   }
 }
+
+
+/* Collection Experience v0.3 — independent Saved state and stable mobile record editing. */
+
+/* Collection surfaces may scroll vertically, never horizontally. */
+.collection-panel,
+.architecture-records,
+.collection-list {
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: hidden;
+  overscroll-behavior-x: none;
+}
+.architecture-records,
+.collection-list {
+  touch-action: pan-y;
+  overscroll-behavior-y: contain;
+}
+
+/* Editing is secondary to the two-column record summary, so it expands below
+   the summary as one centered single-column form instead of inheriting the
+   record body's right-hand column. */
+.record-editor {
+  width: 100%;
+  max-width: 560px;
+  min-width: 0;
+  margin: 18px auto 0;
+  padding-top: 16px;
+  box-sizing: border-box;
+}
+.record-editor label,
+.record-editor-actions {
+  min-width: 0;
+  width: 100%;
+}
+.record-editor input,
+.record-editor textarea {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+.record-editor textarea {
+  resize: vertical;
+}
