@@ -253,8 +253,10 @@ const getRequestedExpandedState = (): boolean | null => {
   return null
 }
 
-const getRequestedCollectionState = (): boolean =>
-  new URLSearchParams(window.location.search).get('view') === 'collection'
+const getRequestedCollectionState = (): boolean => {
+  const params = new URLSearchParams(window.location.search)
+  return params.get('view') === 'collection' || params.get('share') === 'record'
+}
 
 const getRequestedShareState = (): boolean =>
   getRequestedCollectionState() && new URLSearchParams(window.location.search).get('share') === 'record'
