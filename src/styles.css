@@ -292,7 +292,35 @@ html[data-appearance='night'] .brand-mark img { filter: invert(1); }
   pointer-events: none;
   transition: opacity 140ms cubic-bezier(.2, 0, 1, .9), visibility 0s linear 140ms;
 }
-.user-location-marker { width: 17px; height: 17px; background: #3e7e91; border: 3px solid #fff; border-radius: 50%; box-shadow: 0 0 0 5px rgba(62,126,145,.22), 0 2px 6px rgba(0,0,0,.25); }
+.user-location-marker {
+  position: relative;
+  width: 17px;
+  height: 17px;
+  background: #3e7e91;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 0 0 5px rgba(62,126,145,.22), 0 2px 6px rgba(0,0,0,.25);
+  animation: sgm-location-arrive var(--motion-confirm) var(--motion-ease-out) both;
+}
+.user-location-marker::after {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border: 1.5px solid #3e7e91;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: sgm-location-ring var(--motion-confirm) var(--motion-ease-out) both;
+}
+@keyframes sgm-location-arrive {
+  0% { transform: scale(.78); }
+  45% { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+@keyframes sgm-location-ring {
+  0% { opacity: 0; transform: scale(.62); }
+  35% { opacity: .9; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1.28); }
+}
 
 .bottom-surface {
   --panel-bottom: max(12px, env(safe-area-inset-bottom));
@@ -523,6 +551,11 @@ html[data-appearance='night'] .brand-mark img { filter: invert(1); }
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
+  .user-location-marker { animation: none; }
+  .user-location-marker::after {
+    animation: none;
+    opacity: 0;
+  }
   .bottom-surface { animation: panel-appear 80ms linear both; }
   .collection-surface { animation: panel-appear 80ms linear both; }
   .control-row { transition: none; animation: none; }
@@ -543,6 +576,9 @@ html[data-appearance='night'] .brand-mark img { filter: invert(1); }
   --ui-ring-stroke: 1.5px;
   --ui-ring-fast: 90ms;
   --ui-ring-motion: 120ms;
+  --motion-confirm: 340ms;
+  --motion-spatial: 180ms;
+  --motion-ease-out: cubic-bezier(.22, 1, .36, 1);
 }
 
 .top-ui .control-row { margin-top: 0; pointer-events: none; }
@@ -742,7 +778,7 @@ html[data-appearance='night'] .brand-mark img { filter: invert(1); }
     transform 110ms cubic-bezier(.22, 1, .36, 1);
 }
 .collection-toggle.is-active .ui-ring-glyph::before {
-  animation: sgm-ring-confirm 340ms cubic-bezier(.22, 1, .36, 1) both;
+  animation: sgm-ring-confirm var(--motion-confirm) var(--motion-ease-out) both;
 }
 @keyframes sgm-ring-confirm {
   0% { opacity: 0; transform: scale(.76); }
