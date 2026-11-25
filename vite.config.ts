@@ -1,10 +1,13 @@
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 
-export default defineConfig(({ command }) => ({
+export default defineConfig(({ command, mode }) => {
+  const env = loadEnv(mode, decodeURIComponent(new URL('.', import.meta.url).pathname), 'VITE_')
+  const colorLabEnabled = env.VITE_ENABLE_COLOR_LAB === 'true'
+  return ({
   plugins: [react()],
   base: './',
-  resolve: command === 'build' ? {
+  resolve: command === 'build' && !colorLabEnabled ? {
     alias: {
       './ColorLabPanel': decodeURIComponent(new URL('./src/ColorLabPanel.production.tsx', import.meta.url).pathname),
     },
@@ -18,4 +21,5 @@ export default defineConfig(({ command }) => ({
       },
     },
   },
-}))
+  })
+})
