@@ -31,6 +31,47 @@ export type Translation = {
   detailLabel: (name: string) => string
   back: string
   backToOverviewLabel: (name: string) => string
+  collectionActions: string
+  save: string
+  saved: string
+  saveBuilding: string
+  removeSavedBuilding: string
+  markVisited: string
+  visited: string
+  removeVisitedBuilding: string
+  collectionSaveError: string
+  openCollection: string
+  closeCollection: string
+  collectionTitle: string
+  collectionSections: string
+  wantToVisit: string
+  collectionCount: (count: number) => string
+  emptyVisited: string
+  emptyWantToVisit: string
+  returnToMap: string
+  shareRecord: string
+  shareRecordDescription: string
+  closeShareRecord: string
+  generatingRecord: string
+  savePng: string
+  sharePng: string
+  retryGeneration: string
+  recordGenerationError: string
+  myArchitectureRecord: string
+  myRecord: string
+  visitHistory: string
+  placesVisited: string
+  openRecordSummary: (count: number) => string
+  recordDateNotSet: string
+  visitDate: string
+  personalNote: string
+  personalNotePlaceholder: string
+  addRecordDetails: string
+  editRecord: string
+  editRecordFor: (name: string) => string
+  saveRecord: string
+  clearRecordDetails: string
+  cancel: string
   photoNotPublished: string
   photoOverlay: string
   photoPlaceholder: string
@@ -80,6 +121,22 @@ export const translations: Record<Locale, Translation> = {
     detailLabel: (name) => `${name} details`,
     back: 'Back',
     backToOverviewLabel: (name) => `Back to ${name} overview`,
+    collectionActions: 'Collection status',
+    save: 'Save', saved: 'Saved', saveBuilding: 'Save this building', removeSavedBuilding: 'Remove this building from saved',
+    markVisited: 'Mark visited', visited: 'Visited', removeVisitedBuilding: 'Mark this building as not visited',
+    collectionSaveError: 'Could not save. Try again.', openCollection: 'Open collection', closeCollection: 'Close collection',
+    collectionTitle: 'Collection', collectionSections: 'Collection sections', wantToVisit: 'Want to Visit',
+    collectionCount: (count) => `${count} ${count === 1 ? 'building' : 'buildings'}`,
+    emptyVisited: 'No visited buildings yet.', emptyWantToVisit: 'No saved buildings yet.', returnToMap: 'Return to map',
+    shareRecord: 'Share a Record', shareRecordDescription: 'Create an image from your visited buildings.', closeShareRecord: 'Back to collection',
+    generatingRecord: 'Generating your record…', savePng: 'Save PNG', sharePng: 'Share', retryGeneration: 'Try again',
+    recordGenerationError: 'The image could not be generated.',
+    myArchitectureRecord: 'My Architecture Record', myRecord: 'My Record', visitHistory: 'Visit History', placesVisited: 'Places visited',
+    openRecordSummary: (count) => `Open share preview for ${count} visited ${count === 1 ? 'place' : 'places'}`,
+    recordDateNotSet: 'Date not set', visitDate: 'Visit date',
+    personalNote: 'Personal note', personalNotePlaceholder: 'What do you want to remember?',
+    addRecordDetails: 'Add date or note', editRecord: 'Edit record', editRecordFor: (name) => `Edit record for ${name}`,
+    saveRecord: 'Save record', clearRecordDetails: 'Clear date and note', cancel: 'Cancel',
     photoNotPublished: 'Photo not published',
     photoOverlay: 'PHOTO · NOT ADDED',
     photoPlaceholder: 'A photo may be added after verification',
@@ -144,6 +201,21 @@ export const translations: Record<Locale, Translation> = {
     detailLabel: (name) => `${name}の詳細`,
     back: '戻る',
     backToOverviewLabel: (name) => `${name}の概要に戻る`,
+    collectionActions: 'コレクション状態',
+    save: '保存する', saved: '保存済み', saveBuilding: 'この建築を保存する', removeSavedBuilding: 'この建築の保存を解除する',
+    markVisited: '訪問済みにする', visited: '訪問済み', removeVisitedBuilding: 'この建築を未訪問に戻す',
+    collectionSaveError: '保存できませんでした。もう一度お試しください。', openCollection: 'コレクションを開く', closeCollection: 'コレクションを閉じる',
+    collectionTitle: 'コレクション', collectionSections: 'コレクションの分類', wantToVisit: '行きたい',
+    collectionCount: (count) => `${count}件の建築`, emptyVisited: '訪問済みの建築はまだありません。', emptyWantToVisit: '保存した建築はまだありません。', returnToMap: '地図に戻る',
+    shareRecord: '訪問記録を共有', shareRecordDescription: '訪問済みの建築から画像を作成します。', closeShareRecord: 'コレクションに戻る',
+    generatingRecord: '訪問記録を生成中…', savePng: 'PNGを保存', sharePng: '共有', retryGeneration: 'もう一度試す',
+    recordGenerationError: '画像を生成できませんでした。',
+    myArchitectureRecord: 'My Architecture Record', myRecord: 'My Record', visitHistory: '訪問記録', placesVisited: '訪問した建築',
+    openRecordSummary: (count) => `${count}件の訪問記録の共有プレビューを開く`,
+    recordDateNotSet: '日付未登録', visitDate: '訪問日',
+    personalNote: '個人メモ', personalNotePlaceholder: '覚えておきたいこと',
+    addRecordDetails: '日付・メモを追加', editRecord: '記録を編集', editRecordFor: (name) => `${name}の記録を編集`,
+    saveRecord: '記録を保存', clearRecordDetails: '日付とメモを消去', cancel: 'キャンセル',
     photoNotPublished: '写真は未掲載',
     photoOverlay: '写真 · 未掲載',
     photoPlaceholder: '写真は検証後に掲載予定',

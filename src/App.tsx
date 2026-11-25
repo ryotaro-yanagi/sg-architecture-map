@@ -1,6 +1,6 @@
-import { Component, useEffect, useMemo, useRef, useState } from 'react'
+import { Component, useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
 import type { CSSProperties } from 'react'
-import { ArrowLeft, ArrowRight, ArrowSquareOut, Cloud, CloudRain, CloudSun, Lightning, MagnifyingGlass, Moon, NavigationArrow, Sun, X } from '@phosphor-icons/react'
+import { ArrowLeft, ArrowRight, ArrowSquareOut, BookmarkSimple, BookmarksSimple, CheckCircle, Cloud, CloudRain, CloudSun, DownloadSimple, Lightning, MagnifyingGlass, Moon, NavigationArrow, ShareNetwork, Sun, X } from '@phosphor-icons/react'
 import * as maplibregl from 'maplibre-gl'
 import { flushSync } from 'react-dom'
 import type { ExpressionSpecification, GeoJSONSource, Map as MapLibreMap } from 'maplibre-gl'
@@ -13,11 +13,19 @@ import type { WeatherState } from './weather'
 import ColorLabPanel from './ColorLabPanel'
 import { cloneColorTokens, colorTokenCssVariables, readColorLabDraft, saveColorLabDraft } from './colorTokens'
 import type { ArchitectureColorTokens, ColorSchemeTokens, ColorTokens } from './colorTokens'
+import { categoryColor, getMapCategory, mapCategories } from './buildingCategories'
+import type { MapCategory } from './buildingCategories'
+import { addInitialVisitDate, createArchitectureRecordGroups, getWantToVisitBuildings } from './architectureRecord'
+import { collectionStateStore } from './collection'
+import type { CollectionUpdate } from './collection'
+import { canShareRecordFile, createShareRecordFile, generateShareRecordPng, SHARE_RECORD_FILENAME } from './shareRecordExport'
 
 type Coordinates = [number, number]
 type Appearance = 'system' | 'day' | 'night'
 type InitialMapState = 'loading' | 'fading' | 'hidden' | 'error'
+type CollectionTab = 'visited' | 'saved'
 const appearanceKey = 'sgm-appearance'
+const undatedVisitedIdsThisSession = new Set<string>()
 const readAppearance = (): Appearance => {
   try {
     const value = window.localStorage.getItem(appearanceKey)
@@ -84,39 +92,6 @@ type RestoredMapState = {
   selectedId: string | null
   expanded: boolean
 }
-
-// The detailed database types remain unchanged; map symbols use six visual groups.
-const mapCategoryByType = {
-  civic_cultural: 'culture_civic',
-  community: 'culture_civic',
-  sports: 'culture_civic',
-  infrastructure: 'culture_civic',
-  healthcare: 'culture_civic',
-  mixed_use: 'mixed_use',
-  retail: 'commercial',
-  office: 'commercial',
-  education: 'education',
-  hospitality: 'hospitality',
-  residential: 'residential',
-} as const
-
-type MapCategory = typeof mapCategoryByType[keyof typeof mapCategoryByType]
-
-const mapCategories: MapCategory[] = ['culture_civic', 'mixed_use', 'commercial', 'education', 'hospitality', 'residential']
-
-const categoryColor = (tokens: ArchitectureColorTokens, category: MapCategory): string => ({
-  culture_civic: tokens.cultureCivic,
-  mixed_use: tokens.mixedUse,
-  commercial: tokens.commercial,
-  education: tokens.education,
-  hospitality: tokens.hospitality,
-  residential: tokens.residential,
-})[category]
-
-const getMapCategory = (buildingType: string): MapCategory | null =>
-  Object.prototype.hasOwnProperty.call(mapCategoryByType, buildingType)
-    ? mapCategoryByType[buildingType as keyof typeof mapCategoryByType]
-    : null
 
 const buildings = data.buildings as unknown as Building[]
 // Main island, Sentosa and Pulau Ubin; peripheral southern islands are outside this overview.
@@ -277,6 +252,12 @@ const getRequestedExpandedState = (): boolean | null => {
   if (value === 'compact') return false
   return null
 }
+
+const getRequestedCollectionState = (): boolean =>
+  new URLSearchParams(window.location.search).get('view') === 'collection'
+
+const getRequestedShareState = (): boolean =>
+  getRequestedCollectionState() && new URLSearchParams(window.location.search).get('share') === 'record'
 type MapPalette = {
   background: string
   residential: string
@@ -732,6 +713,11 @@ function App() {
   const userMarkerRef = useRef<maplibregl.Marker | null>(null)
   const selectedMarkerRef = useRef<maplibregl.Marker | null>(null)
   const detailBackRef = useRef<HTMLButtonElement>(null)
+  const collectionTriggerRef = useRef<HTMLButtonElement>(null)
+  const collectionCloseRef = useRef<HTMLButtonElement>(null)
+  const shareTriggerRef = useRef<HTMLButtonElement>(null)
+  const shareCloseRef = useRef<HTMLButtonElement>(null)
+  const collectionFocusTargetRef = useRef<'trigger' | 'preview' | 'share' | null>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
   const previewSurfaceRef = useRef<HTMLDivElement>(null)
   const previewContentRef = useRef<HTMLDivElement>(null)
@@ -748,6 +734,12 @@ function App() {
   expandedRef.current = expanded
   const [query, setQuery] = useState('')
   const [searchOpen, setSearchOpen] = useState(false)
+  const [collectionOpen, setCollectionOpen] = useState(getRequestedCollectionState)
+  const [shareOpen, setShareOpen] = useState(getRequestedShareState)
+  const collectionOpenRef = useRef(collectionOpen)
+  const shareOpenRef = useRef(shareOpen)
+  collectionOpenRef.current = collectionOpen
+  shareOpenRef.current = shareOpen
   const [locating, setLocating] = useState(false)
   const [mapBearing, setMapBearing] = useState(restoredState?.bearing ?? 0)
   const [notice, setNotice] = useState<string | null>(null)
@@ -777,7 +769,7 @@ function App() {
   const [weather, setWeather] = useState<WeatherState>({ temperature: null, condition: null })
 
   const selected = buildings.find((building) => building.id === selectedId) ?? null
-  const surfaceState = expanded ? 'detail' : selected ? 'preview' : searchOpen ? 'search' : 'explore'
+  const surfaceState = collectionOpen ? 'collection' : expanded ? 'detail' : selected ? 'preview' : searchOpen ? 'search' : 'explore'
   const results = useMemo(() => {
     const normalizeSearch = (value: string) =>
       value.normalize('NFKC').replace(/[‘’]/g, "'").toLocaleLowerCase(locale)
@@ -802,6 +794,67 @@ function App() {
     })
   }, [locale, query])
   const hasSearchQuery = query.trim().length > 0
+
+  const openCollection = () => {
+    const url = new URL(window.location.href)
+    url.searchParams.set('view', 'collection')
+    url.searchParams.delete('share')
+    window.history.pushState({ ...window.history.state, sgmCollection: true }, '', url)
+    setSearchOpen(false)
+    setQuery('')
+    searchInputRef.current?.blur()
+    collectionFocusTargetRef.current = null
+    setCollectionOpen(true)
+  }
+
+  const closeCollection = () => {
+    collectionFocusTargetRef.current = 'trigger'
+    if (window.history.state?.sgmCollection) {
+      window.history.back()
+      return
+    }
+    const url = new URL(window.location.href)
+    url.searchParams.delete('view')
+    url.searchParams.delete('share')
+    window.history.replaceState({ ...window.history.state, sgmCollection: false, sgmShare: false }, '', url)
+    setShareOpen(false)
+    setCollectionOpen(false)
+  }
+
+  const openShareRecord = () => {
+    const url = new URL(window.location.href)
+    url.searchParams.set('view', 'collection')
+    url.searchParams.set('share', 'record')
+    window.history.pushState({ ...window.history.state, sgmCollection: true, sgmShare: true }, '', url)
+    setShareOpen(true)
+  }
+
+  const closeShareRecord = () => {
+    collectionFocusTargetRef.current = 'share'
+    if (window.history.state?.sgmShare) {
+      window.history.back()
+      return
+    }
+    const url = new URL(window.location.href)
+    url.searchParams.delete('share')
+    window.history.replaceState({ ...window.history.state, sgmShare: false }, '', url)
+    setShareOpen(false)
+  }
+
+  const chooseCollectionBuilding = (building: Building, keyboardActivated: boolean) => {
+    const url = new URL(window.location.href)
+    url.searchParams.delete('view')
+    url.searchParams.delete('share')
+    url.searchParams.set('selected', building.id)
+    url.searchParams.set('sheet', 'compact')
+    window.history.replaceState({ ...window.history.state, sgmCollection: false, sgmShare: false }, '', url)
+    collectionFocusTargetRef.current = keyboardActivated ? 'preview' : null
+    setShareOpen(false)
+    setCollectionOpen(false)
+    setSelectedId(building.id)
+    setExpanded(false)
+    window.requestAnimationFrame(() => revealBuilding(mapRef.current, building.coordinates))
+  }
 
   const releasePreview = () => {
     const surface = previewSurfaceRef.current
@@ -1283,13 +1336,53 @@ function App() {
     if (selectedId) url.searchParams.set('selected', selectedId)
     else url.searchParams.delete('selected')
     url.searchParams.set('sheet', expanded ? 'expanded' : 'compact')
-    window.history.replaceState({}, '', url)
+    window.history.replaceState({ ...window.history.state }, '', url)
   }, [expanded, selectedId])
+
+  useEffect(() => {
+    const restoreUrlState = () => {
+      const nextCollectionOpen = getRequestedCollectionState()
+      const nextShareOpen = getRequestedShareState()
+      if (shareOpenRef.current && !nextShareOpen) collectionFocusTargetRef.current = 'share'
+      if (collectionOpenRef.current && !nextCollectionOpen) collectionFocusTargetRef.current = 'trigger'
+      setCollectionOpen(nextCollectionOpen)
+      setShareOpen(nextShareOpen)
+      setSelectedId(getRequestedSelectedId())
+      setExpanded(getRequestedExpandedState() ?? false)
+      setSearchOpen(false)
+      setQuery('')
+    }
+    window.addEventListener('popstate', restoreUrlState)
+    return () => window.removeEventListener('popstate', restoreUrlState)
+  }, [])
+
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() => {
+      if (shareOpen) shareCloseRef.current?.focus({ preventScroll: true })
+      else if (collectionOpen && collectionFocusTargetRef.current === 'share') shareTriggerRef.current?.focus({ preventScroll: true })
+      else if (collectionOpen) collectionCloseRef.current?.focus({ preventScroll: true })
+      else if (collectionFocusTargetRef.current === 'trigger') collectionTriggerRef.current?.focus({ preventScroll: true })
+      else if (collectionFocusTargetRef.current === 'preview') previewContentRef.current?.querySelector<HTMLButtonElement>('.preview-details')?.focus({ preventScroll: true })
+      collectionFocusTargetRef.current = null
+    })
+    return () => window.cancelAnimationFrame(frame)
+  }, [collectionOpen, selectedId, shareOpen])
+
+  useEffect(() => {
+    if (!collectionOpen) return
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => { document.body.style.overflow = previousOverflow }
+  }, [collectionOpen])
 
   useEffect(() => {
     const closeLayer = (event: KeyboardEvent) => {
       if (event.key !== 'Escape') return
-      if (searchOpen) {
+      if (shareOpen) {
+        closeShareRecord()
+      } else if (collectionOpen) {
+        closeCollection()
+      } else if (searchOpen) {
         setSearchOpen(false)
         setQuery('')
         searchInputRef.current?.blur()
@@ -1299,7 +1392,7 @@ function App() {
     }
     window.addEventListener('keydown', closeLayer)
     return () => window.removeEventListener('keydown', closeLayer)
-  }, [expanded, searchOpen])
+  }, [collectionOpen, expanded, searchOpen, shareOpen])
 
   useEffect(() => {
     if (!notice) return
@@ -1376,9 +1469,9 @@ function App() {
       aria-busy={initialMapState !== 'hidden'}
     >
       <div className="sgm-stage">
-      <div ref={mapContainer} className="map" role="region" aria-label={t.mapLabel} />
+      <div ref={mapContainer} className="map" role="region" aria-label={t.mapLabel} inert={collectionOpen ? true : undefined} />
 
-      <div className="top-ui">
+      <div className="top-ui" aria-hidden={collectionOpen} inert={collectionOpen ? true : undefined}>
         <search className={`search-shell ${searchOpen ? 'open' : ''}`}>
           <div className="search-bar">
             <div className="search-input-wrap">
@@ -1425,6 +1518,9 @@ function App() {
                 {weather.temperature !== null && <span>{weather.temperature}°</span>}
               </a>
             </WeatherBoundary>
+            <button ref={collectionTriggerRef} className="collection-trigger" type="button" onClick={openCollection} aria-label={t.openCollection}>
+              <BookmarksSimple aria-hidden="true" size={20} weight="regular" />
+            </button>
           </div>
           <div className="control-right">
             <a
@@ -1454,7 +1550,7 @@ function App() {
         </div>
       </div>
 
-      {selected && (
+      {selected && !collectionOpen && (
         <div ref={previewSurfaceRef} className={`bottom-surface ${surfaceState}`}>
           <aside className="place-surface" aria-label={expanded ? t.detailLabel(getBuildingCopy(locale, selected.id, selected.name).name) : t.previewLabel(getBuildingCopy(locale, selected.id, selected.name).name)}>
             <div ref={previewContentRef} className="sheet-compact" aria-hidden={expanded}>
@@ -1473,7 +1569,22 @@ function App() {
         </div>
       )}
 
-      <div className="map-tools">
+      {collectionOpen && (
+        <CollectionView
+          locale={locale}
+          t={t}
+          closeRef={collectionCloseRef}
+          shareTriggerRef={shareTriggerRef}
+          shareCloseRef={shareCloseRef}
+          shareOpen={shareOpen}
+          onClose={closeCollection}
+          onChoose={chooseCollectionBuilding}
+          onOpenShare={openShareRecord}
+          onCloseShare={closeShareRecord}
+        />
+      )}
+
+      <div className="map-tools" aria-hidden={collectionOpen} inert={collectionOpen ? true : undefined}>
         <button
           className={`locate-button compass-button ${Math.abs(((mapBearing + 180) % 360 + 360) % 360 - 180) > 3 ? 'is-visible' : ''}`}
           type="button"
@@ -1517,6 +1628,217 @@ function App() {
   )
 }
 
+function CollectionView({ locale, t, closeRef, shareTriggerRef, shareCloseRef, shareOpen, onClose, onChoose, onOpenShare, onCloseShare }: {
+  locale: Locale
+  t: Translation
+  closeRef: RefObject<HTMLButtonElement | null>
+  shareTriggerRef: RefObject<HTMLButtonElement | null>
+  shareCloseRef: RefObject<HTMLButtonElement | null>
+  shareOpen: boolean
+  onClose: () => void
+  onChoose: (building: Building, keyboardActivated: boolean) => void
+  onOpenShare: () => void
+  onCloseShare: () => void
+}) {
+  const snapshot = useSyncExternalStore(collectionStateStore.subscribe, collectionStateStore.getSnapshot, collectionStateStore.getSnapshot)
+  const [activeTab, setActiveTab] = useState<CollectionTab>('saved')
+  const visitedTabRef = useRef<HTMLButtonElement>(null)
+  const savedTabRef = useRef<HTMLButtonElement>(null)
+  const visitedBuildings = useMemo(() => buildings.filter((building) => snapshot.buildings[building.id]?.visited), [snapshot])
+  const savedBuildings = useMemo(() => getWantToVisitBuildings(buildings, snapshot), [snapshot])
+  const recordGroups = useMemo(() => createArchitectureRecordGroups(buildings, snapshot), [snapshot])
+
+  const selectTab = (tab: CollectionTab, focus = false) => {
+    setActiveTab(tab)
+    if (focus) window.requestAnimationFrame(() => (tab === 'saved' ? savedTabRef : visitedTabRef).current?.focus())
+  }
+  const handleTabKeyDown = (event: React.KeyboardEvent, tab: CollectionTab) => {
+    if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return
+    event.preventDefault()
+    selectTab(event.key === 'Home' ? 'saved' : event.key === 'End' ? 'visited' : tab === 'visited' ? 'saved' : 'visited', true)
+  }
+  const renderPanel = (tab: CollectionTab, items: Building[], emptyMessage: string) => (
+    <div id={`collection-panel-${tab}`} className="collection-panel" role="tabpanel" aria-labelledby={`collection-tab-${tab}`} hidden={activeTab !== tab}>
+      {tab === 'visited' && <button ref={shareTriggerRef} className="record-summary-card" type="button" onClick={onOpenShare} aria-label={t.openRecordSummary(items.length)}>
+        <strong>{items.length}</strong><span>{t.placesVisited}</span>
+      </button>}
+      {items.length === 0 ? (
+        <div className="collection-empty">
+          <p>{emptyMessage}</p>
+          <button type="button" className="back-button" onClick={onClose}><ArrowLeft aria-hidden="true" size={16} />{t.returnToMap}</button>
+        </div>
+      ) : tab === 'visited' ? (
+        <div className="architecture-records">
+          {recordGroups.map((group) => (
+            <section className="record-year" key={group.year ?? 'undated'} aria-labelledby={`record-year-${group.year ?? 'undated'}`}>
+              <h3 id={`record-year-${group.year ?? 'undated'}`}>{group.year ?? t.recordDateNotSet}</h3>
+              <ul>
+                {group.buildings.map((building) => (
+                  <ArchitectureRecordEntry key={building.id} building={building} locale={locale} t={t} snapshot={snapshot} onChoose={onChoose} />
+                ))}
+              </ul>
+            </section>
+          ))}
+        </div>
+      ) : (
+        <ul className="collection-list">
+          {items.map((building) => {
+            const copy = getBuildingCopy(locale, building.id, building.name)
+            return <li key={building.id}><button type="button" onClick={(event) => onChoose(building, event.detail === 0)}>
+              <span><strong>{copy.name}</strong><small>{copy.previewArchitectCredit ?? copy.architectCredit}</small></span>
+              <ArrowRight aria-hidden="true" size={20} weight="regular" />
+            </button></li>
+          })}
+        </ul>
+      )}
+    </div>
+  )
+
+  return (
+    <aside className="collection-surface" role="dialog" aria-modal="true" aria-labelledby="collection-title">
+      <div aria-hidden={shareOpen} inert={shareOpen ? true : undefined} className="collection-base">
+        <header className="collection-header"><h1 id="collection-title">{t.collectionTitle}</h1>
+          <button ref={closeRef} className="icon-button" type="button" onClick={onClose} aria-label={t.closeCollection}><X aria-hidden="true" size={20} /></button>
+        </header>
+        <div className="collection-tabs" role="tablist" aria-label={t.collectionSections}>
+          <button ref={savedTabRef} id="collection-tab-saved" type="button" role="tab" aria-selected={activeTab === 'saved'} aria-controls="collection-panel-saved" tabIndex={activeTab === 'saved' ? 0 : -1} onClick={() => selectTab('saved')} onKeyDown={(event) => handleTabKeyDown(event, 'saved')}><span>{t.wantToVisit}</span><span className="collection-tab-count">{savedBuildings.length}</span></button>
+          <button ref={visitedTabRef} id="collection-tab-visited" type="button" role="tab" aria-selected={activeTab === 'visited'} aria-controls="collection-panel-visited" tabIndex={activeTab === 'visited' ? 0 : -1} onClick={() => selectTab('visited')} onKeyDown={(event) => handleTabKeyDown(event, 'visited')}><span>{t.myRecord}</span><span className="collection-tab-count">{visitedBuildings.length}</span></button>
+        </div>
+        <div className="collection-panels">{renderPanel('saved', savedBuildings, t.emptyWantToVisit)}{renderPanel('visited', visitedBuildings, t.emptyVisited)}</div>
+      </div>
+      {shareOpen && <ShareRecordPreview snapshot={snapshot} t={t} closeRef={shareCloseRef} onClose={onCloseShare} />}
+    </aside>
+  )
+}
+
+function ArchitectureRecordEntry({ building, locale, t, snapshot, onChoose }: {
+  building: Building
+  locale: Locale
+  t: Translation
+  snapshot: ReturnType<typeof collectionStateStore.getSnapshot>
+  onChoose: (building: Building, keyboardActivated: boolean) => void
+}) {
+  const state = snapshot.buildings[building.id] ?? collectionStateStore.getBuildingState(building.id)
+  const copy = getBuildingCopy(locale, building.id, building.name)
+  const [editing, setEditing] = useState(false)
+  const [visitDate, setVisitDate] = useState('')
+  const [note, setNote] = useState('')
+  const [error, setError] = useState<string | null>(null)
+  const dateParts = state.visitDate?.split('-')
+  const month = dateParts
+    ? new Intl.DateTimeFormat(locale === 'ja' ? 'ja-JP' : 'en-US', { month: 'short', timeZone: 'UTC' })
+      .format(new Date(`${state.visitDate}T00:00:00Z`)).toLocaleUpperCase(locale)
+    : null
+
+  const beginEditing = () => {
+    setVisitDate(state.visitDate ?? '')
+    setNote(state.note)
+    setError(null)
+    setEditing(true)
+  }
+  const saveRecord = () => {
+    const result = collectionStateStore.updateBuildingState(building.id, {
+      visitDate: visitDate || null,
+      note: note.trim(),
+    })
+    if (!result.ok) {
+      setError(t.collectionSaveError)
+      return
+    }
+    setEditing(false)
+    setError(null)
+  }
+
+  return <li className="architecture-record-entry">
+    <div className="record-summary">
+      <div className={`record-date ${state.visitDate ? '' : 'is-undated'}`} aria-label={state.visitDate ?? t.recordDateNotSet}>
+        {dateParts && month
+          ? <><strong>{dateParts[2]}</strong><span aria-hidden="true">/</span><small>{month}</small></>
+          : <span className="record-undated-dash" aria-hidden="true">—</span>}
+      </div>
+      <div className="record-body">
+        <button className="record-building" type="button" onClick={(event) => onChoose(building, event.detail === 0)}>
+          <strong>{copy.name}</strong><ArrowRight aria-hidden="true" size={18} />
+        </button>
+        <p className="record-meta">{copy.previewArchitectCredit ?? copy.architectCredit} · {t.types[building.buildingType]}</p>
+        {state.note && <p className="record-note">{state.note}</p>}
+        <button className="record-edit" type="button" onClick={beginEditing}>{state.visitDate || state.note ? t.editRecord : t.addRecordDetails}</button>
+      </div>
+    </div>
+    {editing && <div className="record-editor" role="group" aria-label={t.editRecordFor(copy.name)}>
+      <label><span>{t.visitDate}</span><input type="date" value={visitDate} onChange={(event) => setVisitDate(event.target.value)} /></label>
+      <label><span>{t.personalNote}</span><textarea value={note} maxLength={2000} rows={4} placeholder={t.personalNotePlaceholder} onChange={(event) => setNote(event.target.value)} /></label>
+      {error && <p className="collection-error" role="alert">{error}</p>}
+      <div className="record-editor-actions">
+        <button type="button" className="primary-button" onClick={saveRecord}>{t.saveRecord}</button>
+        <button type="button" className="secondary-button" onClick={() => setEditing(false)}>{t.cancel}</button>
+        {(state.visitDate || state.note) && <button type="button" className="record-clear" onClick={() => { setVisitDate(''); setNote('') }}>{t.clearRecordDetails}</button>}
+      </div>
+    </div>}
+  </li>
+}
+
+function ShareRecordPreview({ snapshot, t, closeRef, onClose }: {
+  snapshot: ReturnType<typeof collectionStateStore.getSnapshot>
+  t: Translation
+  closeRef: RefObject<HTMLButtonElement | null>
+  onClose: () => void
+}) {
+  const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading')
+  const [png, setPng] = useState<Blob | null>(null)
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const [shareSupported, setShareSupported] = useState(false)
+  const [operationError, setOperationError] = useState<string | null>(null)
+  const requestId = useRef(0)
+
+  const generate = useCallback(async () => {
+    const id = ++requestId.current
+    setStatus('loading')
+    setOperationError(null)
+    try {
+      const nextPng = await generateShareRecordPng(snapshot)
+      if (id !== requestId.current) return
+      const nextUrl = URL.createObjectURL(nextPng)
+      setPreviewUrl((current) => { if (current) URL.revokeObjectURL(current); return nextUrl })
+      setPng(nextPng)
+      setShareSupported(canShareRecordFile(createShareRecordFile(nextPng)))
+      setStatus('ready')
+    } catch {
+      if (id === requestId.current) setStatus('error')
+    }
+  }, [snapshot])
+
+  useEffect(() => { void generate(); return () => { requestId.current += 1 } }, [generate])
+  useEffect(() => () => { if (previewUrl) URL.revokeObjectURL(previewUrl) }, [previewUrl])
+
+  const share = async () => {
+    if (!png) return
+    setOperationError(null)
+    try { await navigator.share({ files: [createShareRecordFile(png)], title: 'Singapore Architecture Map — Visited Record' }) }
+    catch (error) {
+      if (!(error instanceof DOMException && error.name === 'AbortError')) setOperationError(t.recordGenerationError)
+    }
+  }
+
+  return <section className="share-record-preview" role="dialog" aria-modal="true" aria-labelledby="share-record-title">
+    <header className="share-preview-header"><h2 id="share-record-title">{t.myRecord}</h2>
+      <button ref={closeRef} className="icon-button" type="button" onClick={onClose} aria-label={t.closeShareRecord}><X aria-hidden="true" size={20} /></button>
+    </header>
+    <div className="share-preview-body">
+      {status === 'loading' && <p className="share-status" role="status">{t.generatingRecord}</p>}
+      {status === 'error' && <div className="share-status" role="alert"><p>{t.recordGenerationError}</p><button className="primary-button" type="button" onClick={() => void generate()}>{t.retryGeneration}</button></div>}
+      {status === 'ready' && previewUrl && <img src={previewUrl} alt="Singapore Architecture Map visited record" width="1080" height="1350" />}
+    </div>
+    {status === 'ready' && png && <footer className="share-preview-footer">
+      <div className="share-actions"><a className="primary-button" href={previewUrl ?? undefined} download={SHARE_RECORD_FILENAME}><DownloadSimple aria-hidden="true" size={20} />{t.savePng}</a>
+        {shareSupported && <button className="secondary-button" type="button" onClick={() => void share()}><ShareNetwork aria-hidden="true" size={20} />{t.sharePng}</button>}
+      </div>
+      {operationError && <p className="collection-error" role="alert">{operationError}</p>}
+      <p className="share-attribution">Source: <a href="https://data.gov.sg/datasets/d_29f066d67df3eae91df8a42f443863c8/view" target="_blank" rel="noreferrer">SLA National Map Polygon</a> · <a href="https://data.gov.sg/open-data-licence" target="_blank" rel="noreferrer">Singapore Open Data Licence</a></p>
+    </footer>}
+  </section>
+}
+
 function WeatherGlyph({ condition }: { condition: string | null }) {
   const normalized = typeof condition === 'string' ? condition.toLowerCase() : ''
   if (/thunder|lightning/.test(normalized)) return <Lightning aria-hidden="true" size={20} weight="regular" />
@@ -1556,6 +1878,28 @@ function DetailContent({ building, locale, t, onClose, backRef }: LocalizedProps
   const mapsQuery = encodeURIComponent(`${building.name}, ${building.address}`)
   const searchQuery = encodeURIComponent(`${copy.name} Singapore architecture`)
   const { details: yearDetails } = getBuildingYearDetails(building, locale, t)
+  const getCollectionState = useCallback(() => collectionStateStore.getBuildingState(building.id), [building.id])
+  const collectionState = useSyncExternalStore(collectionStateStore.subscribe, getCollectionState, getCollectionState)
+  const [collectionError, setCollectionError] = useState<string | null>(null)
+  useEffect(() => {
+    setCollectionError(null)
+    if (collectionState.visited && collectionState.visitDate === null) {
+      undatedVisitedIdsThisSession.add(building.id)
+    }
+  }, [building.id, collectionState.visitDate, collectionState.visited])
+  const updateCollectionState = (update: CollectionUpdate) => {
+    if (update.visited === false && collectionState.visited && collectionState.visitDate === null) {
+      undatedVisitedIdsThisSession.add(building.id)
+    }
+    const updateWithInitialDate = addInitialVisitDate(
+      collectionState,
+      update,
+      new Date(),
+      undatedVisitedIdsThisSession.has(building.id),
+    )
+    const result = collectionStateStore.updateBuildingState(building.id, updateWithInitialDate)
+    setCollectionError(result.ok ? null : t.collectionSaveError)
+  }
   return (
     <div className="detail-content">
       <div className="detail-heading">
@@ -1572,6 +1916,18 @@ function DetailContent({ building, locale, t, onClose, backRef }: LocalizedProps
         <p className="detail-architects">{copy.architectCredit}</p>
         {yearDetails.length > 0 && <p className="detail-year">{yearDetails.join(' · ')}</p>}
       </header>
+
+      <section className="collection-actions" aria-label={t.collectionActions}>
+        <div className="collection-toggle-row">
+          <button type="button" className={`collection-toggle ${collectionState.saved ? 'is-active' : ''}`} aria-pressed={collectionState.saved} aria-label={collectionState.saved ? t.removeSavedBuilding : t.saveBuilding} onClick={() => updateCollectionState({ saved: !collectionState.saved })}>
+            <BookmarkSimple aria-hidden="true" size={20} weight={collectionState.saved ? 'fill' : 'regular'} /><span>{collectionState.saved ? t.saved : t.save}</span>
+          </button>
+          <button type="button" className={`collection-toggle ${collectionState.visited ? 'is-active' : ''}`} aria-pressed={collectionState.visited} aria-label={collectionState.visited ? t.removeVisitedBuilding : t.markVisited} onClick={() => updateCollectionState({ visited: !collectionState.visited })}>
+            <CheckCircle aria-hidden="true" size={20} weight={collectionState.visited ? 'fill' : 'regular'} /><span>{collectionState.visited ? t.visited : t.markVisited}</span>
+          </button>
+        </div>
+        {collectionError && <p className="collection-error" role="alert">{collectionError}</p>}
+      </section>
 
       <section className="detail-location" aria-label={t.address}>
         <p>{building.address}</p>
