@@ -1,6 +1,6 @@
 import { Component, useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
 import type { CSSProperties } from 'react'
-import { ArrowLeft, ArrowRight, ArrowSquareOut, BookmarkSimple, BookmarksSimple, CheckCircle, Cloud, CloudRain, CloudSun, DownloadSimple, Lightning, MagnifyingGlass, Moon, NavigationArrow, ShareNetwork, Sun, X } from '@phosphor-icons/react'
+import { ArrowLeft, ArrowRight, ArrowSquareOut, BookmarkSimple, CheckCircle, Cloud, CloudRain, CloudSun, DownloadSimple, Gear, Lightning, MagnifyingGlass, Moon, NavigationArrow, Notebook, ShareNetwork, Sneaker, Sun, X } from '@phosphor-icons/react'
 import * as maplibregl from 'maplibre-gl'
 import { flushSync } from 'react-dom'
 import type { ExpressionSpecification, GeoJSONSource, Map as MapLibreMap } from 'maplibre-gl'
@@ -258,6 +258,11 @@ const getRequestedCollectionState = (): boolean =>
 
 const getRequestedShareState = (): boolean =>
   getRequestedCollectionState() && new URLSearchParams(window.location.search).get('share') === 'record'
+const getRequestedCollectionTab = (): CollectionTab => {
+  const params = new URLSearchParams(window.location.search)
+  return params.get('share') === 'record' || params.get('collectionTab') === 'visited' ? 'visited' : 'saved'
+}
+
 type MapPalette = {
   background: string
   residential: string
@@ -713,7 +718,12 @@ function App() {
   const userMarkerRef = useRef<maplibregl.Marker | null>(null)
   const selectedMarkerRef = useRef<maplibregl.Marker | null>(null)
   const detailBackRef = useRef<HTMLButtonElement>(null)
-  const collectionTriggerRef = useRef<HTMLButtonElement>(null)
+  const visitTriggerRef = useRef<HTMLButtonElement>(null)
+  const notebookTriggerRef = useRef<HTMLButtonElement>(null)
+  const searchTriggerRef = useRef<HTMLButtonElement>(null)
+  const settingsTriggerRef = useRef<HTMLButtonElement>(null)
+  const settingsDialogRef = useRef<HTMLDialogElement>(null)
+  const collectionOriginRef = useRef<CollectionTab>(getRequestedCollectionTab())
   const collectionCloseRef = useRef<HTMLButtonElement>(null)
   const shareTriggerRef = useRef<HTMLButtonElement>(null)
   const shareCloseRef = useRef<HTMLButtonElement>(null)
@@ -735,6 +745,7 @@ function App() {
   const [query, setQuery] = useState('')
   const [searchOpen, setSearchOpen] = useState(false)
   const [collectionOpen, setCollectionOpen] = useState(getRequestedCollectionState)
+  const [collectionTab, setCollectionTab] = useState<CollectionTab>(getRequestedCollectionTab)
   const [shareOpen, setShareOpen] = useState(getRequestedShareState)
   const collectionOpenRef = useRef(collectionOpen)
   const shareOpenRef = useRef(shareOpen)
@@ -795,9 +806,12 @@ function App() {
   }, [locale, query])
   const hasSearchQuery = query.trim().length > 0
 
-  const openCollection = () => {
+  const openCollection = (tab: CollectionTab) => {
+    collectionOriginRef.current = tab
+    setCollectionTab(tab)
     const url = new URL(window.location.href)
     url.searchParams.set('view', 'collection')
+    url.searchParams.set('collectionTab', tab)
     url.searchParams.delete('share')
     window.history.pushState({ ...window.history.state, sgmCollection: true }, '', url)
     setSearchOpen(false)
@@ -805,6 +819,13 @@ function App() {
     searchInputRef.current?.blur()
     collectionFocusTargetRef.current = null
     setCollectionOpen(true)
+  }
+
+  const changeCollectionTab = (tab: CollectionTab) => {
+    setCollectionTab(tab)
+    const url = new URL(window.location.href)
+    url.searchParams.set('collectionTab', tab)
+    window.history.replaceState({ ...window.history.state }, '', url)
   }
 
   const closeCollection = () => {
@@ -815,6 +836,7 @@ function App() {
     }
     const url = new URL(window.location.href)
     url.searchParams.delete('view')
+    url.searchParams.delete('collectionTab')
     url.searchParams.delete('share')
     window.history.replaceState({ ...window.history.state, sgmCollection: false, sgmShare: false }, '', url)
     setShareOpen(false)
@@ -824,7 +846,9 @@ function App() {
   const openShareRecord = () => {
     const url = new URL(window.location.href)
     url.searchParams.set('view', 'collection')
+    url.searchParams.set('collectionTab', 'visited')
     url.searchParams.set('share', 'record')
+    setCollectionTab('visited')
     window.history.pushState({ ...window.history.state, sgmCollection: true, sgmShare: true }, '', url)
     setShareOpen(true)
   }
@@ -844,6 +868,7 @@ function App() {
   const chooseCollectionBuilding = (building: Building, keyboardActivated: boolean) => {
     const url = new URL(window.location.href)
     url.searchParams.delete('view')
+    url.searchParams.delete('collectionTab')
     url.searchParams.delete('share')
     url.searchParams.set('selected', building.id)
     url.searchParams.set('sheet', 'compact')
@@ -1345,6 +1370,8 @@ function App() {
       const nextShareOpen = getRequestedShareState()
       if (shareOpenRef.current && !nextShareOpen) collectionFocusTargetRef.current = 'share'
       if (collectionOpenRef.current && !nextCollectionOpen) collectionFocusTargetRef.current = 'trigger'
+      if (nextCollectionOpen && !collectionOpenRef.current) collectionOriginRef.current = getRequestedCollectionTab()
+      setCollectionTab(getRequestedCollectionTab())
       setCollectionOpen(nextCollectionOpen)
       setShareOpen(nextShareOpen)
       setSelectedId(getRequestedSelectedId())
@@ -1361,7 +1388,7 @@ function App() {
       if (shareOpen) shareCloseRef.current?.focus({ preventScroll: true })
       else if (collectionOpen && collectionFocusTargetRef.current === 'share') shareTriggerRef.current?.focus({ preventScroll: true })
       else if (collectionOpen) collectionCloseRef.current?.focus({ preventScroll: true })
-      else if (collectionFocusTargetRef.current === 'trigger') collectionTriggerRef.current?.focus({ preventScroll: true })
+      else if (collectionFocusTargetRef.current === 'trigger') (collectionOriginRef.current === 'visited' ? notebookTriggerRef : visitTriggerRef).current?.focus({ preventScroll: true })
       else if (collectionFocusTargetRef.current === 'preview') previewContentRef.current?.querySelector<HTMLButtonElement>('.preview-details')?.focus({ preventScroll: true })
       collectionFocusTargetRef.current = null
     })
@@ -1383,9 +1410,7 @@ function App() {
       } else if (collectionOpen) {
         closeCollection()
       } else if (searchOpen) {
-        setSearchOpen(false)
-        setQuery('')
-        searchInputRef.current?.blur()
+        closeSearch()
       } else if (expanded) {
         transitionSurfaceDepth(false, true)
       }
@@ -1401,9 +1426,20 @@ function App() {
   }, [notice])
 
   const openSearch = () => {
-    setSelectedId(null)
-    setExpanded(false)
-    setSearchOpen(true)
+    // Focus within the originating gesture for mobile Safari.
+    flushSync(() => {
+      setSelectedId(null)
+      setExpanded(false)
+      setSearchOpen(true)
+    })
+    searchInputRef.current?.focus({ preventScroll: true })
+  }
+
+  const closeSearch = () => {
+    searchInputRef.current?.blur()
+    setSearchOpen(false)
+    setQuery('')
+    window.requestAnimationFrame(() => searchTriggerRef.current?.focus({ preventScroll: true }))
   }
 
   const chooseBuilding = (building: Building, focusMap = false) => {
@@ -1472,7 +1508,7 @@ function App() {
       <div ref={mapContainer} className="map" role="region" aria-label={t.mapLabel} inert={collectionOpen ? true : undefined} />
 
       <div className="top-ui" aria-hidden={collectionOpen} inert={collectionOpen ? true : undefined}>
-        <search className={`search-shell ${searchOpen ? 'open' : ''}`}>
+        {searchOpen && <search className="search-shell open">
           <div className="search-bar">
             <div className="search-input-wrap">
               <MagnifyingGlass aria-hidden="true" size={20} weight="regular" />
@@ -1481,7 +1517,6 @@ function App() {
                 type="search"
                 value={query}
                 onChange={(event) => { setQuery(event.target.value); setSearchOpen(true) }}
-                onFocus={openSearch}
                 aria-label={t.searchLabel}
                 aria-expanded={searchOpen}
                 aria-controls="search-results"
@@ -1490,6 +1525,7 @@ function App() {
               />
               {hasSearchQuery && <button className="icon-button small" onClick={() => { setQuery(''); searchInputRef.current?.focus() }} aria-label={t.clearSearch}><X aria-hidden="true" size={16} weight="regular" /></button>}
             </div>
+            <button type="button" className="icon-button" onClick={closeSearch} aria-label={t.cancelSearch}><X aria-hidden="true" size={20} weight="regular" /></button>
           </div>
           {searchOpen && (
             <div className="search-results" id="search-results" aria-label={t.searchResults}>
@@ -1505,24 +1541,51 @@ function App() {
               })}
             </div>
           )}
-        </search>
+        </search>}
 
-        <div className="control-row">
+        {!searchOpen && <div className="control-row">
           <div className="control-left">
             <button className="brand" type="button" onClick={goHome} aria-label={t.resetMap}>
               <span className="brand-mark"><BrandMark /></span>
             </button>
+          </div>
+          <div className="control-right">
             <WeatherBoundary>
               <a className="weather-chip" href={weatherPortalUrl} target="_blank" rel="noreferrer" aria-label={weather.condition ? `${weather.condition}${weather.temperature === null ? '' : `, ${weather.temperature} degrees Celsius`}` : 'Singapore weather'}>
                 <WeatherGlyph condition={weather.condition} />
                 {weather.temperature !== null && <span>{weather.temperature}°</span>}
               </a>
             </WeatherBoundary>
-            <button ref={collectionTriggerRef} className="collection-trigger" type="button" onClick={openCollection} aria-label={t.openCollection}>
-              <BookmarksSimple aria-hidden="true" size={20} weight="regular" />
+          </div>
+        </div>}
+      </div>
+
+      {surfaceState === 'explore' && (
+        <>
+          <div className="experience-actions" role="group" aria-label={locale === 'ja' ? '建築を巡る' : 'Architecture experiences'}>
+            <button ref={searchTriggerRef} className="experience-action" type="button" onClick={openSearch} aria-label={t.searchLabel} title={locale === 'ja' ? '検索' : 'Discover'}>
+              <MagnifyingGlass aria-hidden="true" size={26} weight="regular" />
+            </button>
+            <button ref={visitTriggerRef} className="experience-action" type="button" onClick={() => openCollection('saved')} aria-label={t.wantToVisit} aria-haspopup="dialog" title={t.wantToVisit}>
+              <Sneaker aria-hidden="true" size={26} weight="regular" />
+            </button>
+            <button ref={notebookTriggerRef} className="experience-action" type="button" onClick={() => openCollection('visited')} aria-label={t.myRecord} aria-haspopup="dialog" title={t.myRecord}>
+              <Notebook aria-hidden="true" size={26} weight="regular" />
             </button>
           </div>
-          <div className="control-right">
+          <button ref={settingsTriggerRef} type="button" className="locate-button experience-settings-trigger" aria-label={locale === 'ja' ? '設定' : 'Settings'} aria-haspopup="dialog" onClick={() => settingsDialogRef.current?.showModal()}>
+            <Gear aria-hidden="true" size={22} weight="regular" />
+          </button>
+        </>
+      )}
+
+      <dialog ref={settingsDialogRef} className="experience-settings" aria-labelledby="experience-settings-title" onClose={() => settingsTriggerRef.current?.focus({ preventScroll: true })}>
+        <header>
+          <h2 id="experience-settings-title">{locale === 'ja' ? '設定' : 'Settings'}</h2>
+          <button type="button" className="icon-button" aria-label={locale === 'ja' ? '閉じる' : 'Close settings'} onClick={() => settingsDialogRef.current?.close()}><X aria-hidden="true" size={20} /></button>
+        </header>
+        <div className="experience-setting-row">
+          <span>{locale === 'ja' ? '言語' : 'Language'}</span>
             <a
               className="language-trigger"
               href={localeHref(nextLocale, {
@@ -1536,6 +1599,10 @@ function App() {
             >
               <span>{nextLocale.toUpperCase()}</span>
             </a>
+
+        </div>
+        <div className="experience-setting-row">
+          <span>{locale === 'ja' ? '表示' : 'Appearance'}</span>
             <button
               type="button"
               className="appearance-toggle"
@@ -1546,9 +1613,9 @@ function App() {
                 ? <Sun aria-hidden="true" size={20} weight="regular" />
                 : <Moon aria-hidden="true" size={20} weight="regular" />}
             </button>
-          </div>
+
         </div>
-      </div>
+      </dialog>
 
       {selected && !collectionOpen && (
         <div ref={previewSurfaceRef} className={`bottom-surface ${surfaceState}`}>
@@ -1577,6 +1644,8 @@ function App() {
           shareTriggerRef={shareTriggerRef}
           shareCloseRef={shareCloseRef}
           shareOpen={shareOpen}
+          activeTab={collectionTab}
+          onTabChange={changeCollectionTab}
           onClose={closeCollection}
           onChoose={chooseCollectionBuilding}
           onOpenShare={openShareRecord}
@@ -1628,20 +1697,21 @@ function App() {
   )
 }
 
-function CollectionView({ locale, t, closeRef, shareTriggerRef, shareCloseRef, shareOpen, onClose, onChoose, onOpenShare, onCloseShare }: {
+function CollectionView({ locale, t, closeRef, shareTriggerRef, shareCloseRef, shareOpen, activeTab, onTabChange, onClose, onChoose, onOpenShare, onCloseShare }: {
   locale: Locale
   t: Translation
   closeRef: RefObject<HTMLButtonElement | null>
   shareTriggerRef: RefObject<HTMLButtonElement | null>
   shareCloseRef: RefObject<HTMLButtonElement | null>
   shareOpen: boolean
+  activeTab: CollectionTab
+  onTabChange: (tab: CollectionTab) => void
   onClose: () => void
   onChoose: (building: Building, keyboardActivated: boolean) => void
   onOpenShare: () => void
   onCloseShare: () => void
 }) {
   const snapshot = useSyncExternalStore(collectionStateStore.subscribe, collectionStateStore.getSnapshot, collectionStateStore.getSnapshot)
-  const [activeTab, setActiveTab] = useState<CollectionTab>('saved')
   const visitedTabRef = useRef<HTMLButtonElement>(null)
   const savedTabRef = useRef<HTMLButtonElement>(null)
   const visitedBuildings = useMemo(() => buildings.filter((building) => snapshot.buildings[building.id]?.visited), [snapshot])
@@ -1649,7 +1719,7 @@ function CollectionView({ locale, t, closeRef, shareTriggerRef, shareCloseRef, s
   const recordGroups = useMemo(() => createArchitectureRecordGroups(buildings, snapshot), [snapshot])
 
   const selectTab = (tab: CollectionTab, focus = false) => {
-    setActiveTab(tab)
+    onTabChange(tab)
     if (focus) window.requestAnimationFrame(() => (tab === 'saved' ? savedTabRef : visitedTabRef).current?.focus())
   }
   const handleTabKeyDown = (event: React.KeyboardEvent, tab: CollectionTab) => {
