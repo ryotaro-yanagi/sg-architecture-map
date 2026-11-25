@@ -204,19 +204,19 @@ export const defaultColorTokens: ColorTokens = {
       markerOutline: '#FFFFFF'
     },
     {
-      background: '#EAEAEA',
-      residential: '#EAEAEA',
-      park: '#E1E5C8',
-      wood: '#B7CD7C',
-      grass: '#E1E5C8',
-      water: '#DFE3E2',
-      waterway: '#85C8E1',
-      roadMinor: '#E3C59D',
-      roadMajor: '#E3C59D',
-      roadMotorway: '#E3C59D',
-      roadCasing: '#E3C59D',
-      building: '#989795',
-      buildingOutline: '#989795'
+      background: '#F2F0ED',
+      residential: '#F2F0ED',
+      park: '#97E5A6',
+      wood: '#9CDF9D',
+      grass: '#97E5A6',
+      water: '#E1E8EE',
+      waterway: '#E1E8EE',
+      roadMinor: '#ECEBE1',
+      roadMajor: '#FEFEFE',
+      roadMotorway: '#B6B5B8',
+      roadCasing: '#FEFEFE',
+      building: '#E4E2DF',
+      buildingOutline: '#E4E2DF'
     },
   ),
   night: createColorScheme(
