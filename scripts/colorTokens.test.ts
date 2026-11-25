@@ -108,3 +108,22 @@ test('foreground, accent focus, and derived on-accent text meet WCAG contrast ta
     assert.ok(contrastRatio(variables['--ui-accent'], variables['--on-accent']) >= 4.5)
   }
 })
+
+// Study 09 is the shared Day base-map palette; retain the v1 token keys.
+test('Day geographic defaults match Glazed Green Study 09', () => {
+  assert.deepEqual(defaultColorTokens.day.geographic, {
+    background: '#F2F0ED',
+    residential: '#F2F0ED',
+    park: '#97E5A6',
+    wood: '#9CDF9D',
+    grass: '#97E5A6',
+    water: '#E1E8EE',
+    waterway: '#E1E8EE',
+    roadMinor: '#ECEBE1',
+    roadMajor: '#FEFEFE',
+    roadMotorway: '#B6B5B8',
+    roadCasing: '#FEFEFE',
+    building: '#E4E2DF',
+    buildingOutline: '#E4E2DF',
+  })
+})
