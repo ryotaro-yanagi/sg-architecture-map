@@ -577,6 +577,7 @@ html[data-appearance='night'] .brand-mark img { filter: invert(1); }
   border-radius: 28px;
 }
 .experience-action {
+  position: relative;
   display: grid;
   place-items: center;
   flex: 0 0 56px;
@@ -589,7 +590,24 @@ html[data-appearance='night'] .brand-mark img { filter: invert(1); }
   background: transparent;
   cursor: pointer;
 }
-.experience-action svg { width: 26px; height: 26px; }
+.experience-action::before {
+  content: '';
+  position: absolute;
+  width: 42px;
+  height: 42px;
+  border: 1.5px solid currentColor;
+  border-radius: 50%;
+  opacity: 0;
+  transform: scale(.9);
+  pointer-events: none;
+  transition: opacity 90ms ease-out, transform 120ms cubic-bezier(.22, 1, .36, 1);
+}
+.experience-action svg {
+  position: relative;
+  z-index: 1;
+  width: 26px;
+  height: 26px;
+}
 
 .experience-settings-trigger,
 .state-explore .map-tools .locate-button {
@@ -642,10 +660,19 @@ html[data-appearance='night'] .brand-mark img { filter: invert(1); }
 .experience-settings .language-trigger { flex-shrink: 0; }
 .experience-settings .icon-button { background: transparent; }
 
-.experience-action:active,
+.experience-action:active { background: transparent; }
+.experience-action:active::before {
+  opacity: 1;
+  transform: scale(1);
+}
 .experience-settings-trigger:active { background: var(--interaction-pressed); }
 @media (hover: hover) and (pointer: fine) {
-  .experience-action:hover,
+  .experience-action:hover { background: transparent; }
+  .experience-action:hover::before {
+    opacity: .55;
+    transform: scale(1);
+  }
+  .experience-action:active::before { opacity: 1; }
   .experience-settings-trigger:hover { background: var(--interaction-hover); }
 }
 @media (min-width: 720px) {
