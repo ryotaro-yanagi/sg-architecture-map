@@ -15,7 +15,7 @@ import { cloneColorTokens, colorTokenCssVariables, readColorLabDraft, saveColorL
 import type { ArchitectureColorTokens, ColorSchemeTokens, ColorTokens } from './colorTokens'
 import { categoryColor, getMapCategory, mapCategories } from './buildingCategories'
 import type { MapCategory } from './buildingCategories'
-import { addInitialVisitDate, createArchitectureRecordGroups, getWantToVisitBuildings } from './architectureRecord'
+import { createArchitectureRecordGroups, getWantToVisitBuildings } from './architectureRecord'
 import { collectionStateStore } from './collection'
 import type { CollectionUpdate } from './collection'
 import { canShareRecordFile, createShareRecordFile, generateShareRecordPng, SHARE_RECORD_FILENAME } from './shareRecordExport'
@@ -25,7 +25,6 @@ type Appearance = 'system' | 'day' | 'night'
 type InitialMapState = 'loading' | 'fading' | 'hidden' | 'error'
 type CollectionTab = 'visited' | 'saved'
 const appearanceKey = 'sgm-appearance'
-const undatedVisitedIdsThisSession = new Set<string>()
 const readAppearance = (): Appearance => {
   try {
     const value = window.localStorage.getItem(appearanceKey)
@@ -1782,16 +1781,23 @@ function ArchitectureRecordEntry({ building, locale, t, snapshot, onChoose }: {
   const [visitDate, setVisitDate] = useState('')
   const [note, setNote] = useState('')
   const [error, setError] = useState<string | null>(null)
+  const [justSaved, setJustSaved] = useState(false)
+  const saveConfirmationTimerRef = useRef<number | null>(null)
   const dateParts = state.visitDate?.split('-')
   const month = dateParts
     ? new Intl.DateTimeFormat(locale === 'ja' ? 'ja-JP' : 'en-US', { month: 'short', timeZone: 'UTC' })
       .format(new Date(`${state.visitDate}T00:00:00Z`)).toLocaleUpperCase(locale)
     : null
 
+  useEffect(() => () => {
+    if (saveConfirmationTimerRef.current !== null) window.clearTimeout(saveConfirmationTimerRef.current)
+  }, [])
+
   const beginEditing = () => {
     setVisitDate(state.visitDate ?? '')
     setNote(state.note)
     setError(null)
+    setJustSaved(false)
     setEditing(true)
   }
   const saveRecord = () => {
@@ -1805,9 +1811,15 @@ function ArchitectureRecordEntry({ building, locale, t, snapshot, onChoose }: {
     }
     setEditing(false)
     setError(null)
+    setJustSaved(false)
+    window.requestAnimationFrame(() => {
+      setJustSaved(true)
+      if (saveConfirmationTimerRef.current !== null) window.clearTimeout(saveConfirmationTimerRef.current)
+      saveConfirmationTimerRef.current = window.setTimeout(() => setJustSaved(false), 420)
+    })
   }
 
-  return <li className="architecture-record-entry">
+  return <li className={`architecture-record-entry ${justSaved ? 'is-confirmed' : ''}`}>
     <div className="record-summary">
       <div className={`record-date ${state.visitDate ? '' : 'is-undated'}`} aria-label={state.visitDate ?? t.recordDateNotSet}>
         {dateParts && month
@@ -1941,21 +1953,9 @@ function DetailContent({ building, locale, t, onClose, backRef }: LocalizedProps
   const [collectionError, setCollectionError] = useState<string | null>(null)
   useEffect(() => {
     setCollectionError(null)
-    if (collectionState.visited && collectionState.visitDate === null) {
-      undatedVisitedIdsThisSession.add(building.id)
-    }
-  }, [building.id, collectionState.visitDate, collectionState.visited])
+  }, [building.id])
   const updateCollectionState = (update: CollectionUpdate) => {
-    if (update.visited === false && collectionState.visited && collectionState.visitDate === null) {
-      undatedVisitedIdsThisSession.add(building.id)
-    }
-    const updateWithInitialDate = addInitialVisitDate(
-      collectionState,
-      update,
-      new Date(),
-      undatedVisitedIdsThisSession.has(building.id),
-    )
-    const result = collectionStateStore.updateBuildingState(building.id, updateWithInitialDate)
+    const result = collectionStateStore.updateBuildingState(building.id, update)
     setCollectionError(result.ok ? null : t.collectionSaveError)
   }
   return (

@@ -1,26 +1,6 @@
 import type { CollectionSnapshot } from './collectionState'
-import type { BuildingCollectionState, CollectionUpdate } from './collectionState'
 
 type RecordBuilding = Readonly<{ id: string }>
-
-export const formatLocalVisitDate = (date: Date): string => {
-  const year = String(date.getFullYear()).padStart(4, '0')
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const day = String(date.getDate()).padStart(2, '0')
-  return `${year}-${month}-${day}`
-}
-
-export const addInitialVisitDate = (
-  state: BuildingCollectionState,
-  update: CollectionUpdate,
-  now: Date,
-  preserveUndated = false,
-): CollectionUpdate => update.visited === true
-  && !state.visited
-  && state.visitDate === null
-  && !preserveUndated
-  ? { ...update, visitDate: formatLocalVisitDate(now) }
-  : update
 
 export type ArchitectureRecordGroup<T extends RecordBuilding> = Readonly<{
   year: string | null

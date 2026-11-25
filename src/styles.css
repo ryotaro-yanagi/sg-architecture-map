@@ -820,3 +820,31 @@ html[data-appearance='night'] .brand-mark img { filter: invert(1); }
     animation-duration: 80ms;
   }
 }
+
+
+/* Collection Experience v0.1 — local confirmation after saving visit details. */
+.record-date { position: relative; }
+.architecture-record-entry.is-confirmed .record-date::after {
+  content: '';
+  position: absolute;
+  left: 24px;
+  top: 18px;
+  width: 46px;
+  height: 46px;
+  margin: -23px 0 0 -23px;
+  border: var(--ui-ring-stroke) solid currentColor;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: sgm-record-confirm var(--motion-confirm) var(--motion-ease-out) both;
+}
+@keyframes sgm-record-confirm {
+  0% { opacity: 0; transform: scale(.66); }
+  34% { opacity: .9; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1.14); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .architecture-record-entry.is-confirmed .record-date::after {
+    animation-duration: 80ms;
+    transform: none;
+  }
+}
