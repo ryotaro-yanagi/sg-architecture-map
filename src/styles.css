@@ -656,3 +656,8 @@ html[data-appearance='night'] .brand-mark img { filter: invert(1); }
   .experience-actions,
   .experience-settings-trigger { border: 1px solid ButtonText; }
 }
+
+
+/* Experience Navigation v0.3 — semantic refinement. */
+.experience-settings h2:focus { outline: 0; }
+.collection-header { border-bottom: 1px solid var(--line); }

@@ -725,6 +725,7 @@ function App() {
   const searchTriggerRef = useRef<HTMLButtonElement>(null)
   const settingsTriggerRef = useRef<HTMLButtonElement>(null)
   const settingsDialogRef = useRef<HTMLDialogElement>(null)
+  const settingsTitleRef = useRef<HTMLHeadingElement>(null)
   const collectionOriginRef = useRef<CollectionTab>(getRequestedCollectionTab())
   const collectionCloseRef = useRef<HTMLButtonElement>(null)
   const shareTriggerRef = useRef<HTMLButtonElement>(null)
@@ -821,13 +822,6 @@ function App() {
     searchInputRef.current?.blur()
     collectionFocusTargetRef.current = null
     setCollectionOpen(true)
-  }
-
-  const changeCollectionTab = (tab: CollectionTab) => {
-    setCollectionTab(tab)
-    const url = new URL(window.location.href)
-    url.searchParams.set('collectionTab', tab)
-    window.history.replaceState({ ...window.history.state }, '', url)
   }
 
   const closeCollection = () => {
@@ -1445,6 +1439,11 @@ function App() {
     window.requestAnimationFrame(() => searchTriggerRef.current?.focus({ preventScroll: true }))
   }
 
+  const openSettings = () => {
+    settingsDialogRef.current?.showModal()
+    window.requestAnimationFrame(() => settingsTitleRef.current?.focus({ preventScroll: true }))
+  }
+
   const chooseBuilding = (building: Building, focusMap = false, keyboardActivated = false) => {
     if (keyboardActivated) collectionFocusTargetRef.current = 'preview'
     setSelectedId(building.id)
@@ -1577,7 +1576,7 @@ function App() {
               <Notebook aria-hidden="true" size={26} weight="regular" />
             </button>
           </div>
-          <button ref={settingsTriggerRef} type="button" className="locate-button experience-settings-trigger" aria-label={locale === 'ja' ? '設定' : 'Settings'} aria-haspopup="dialog" onClick={() => settingsDialogRef.current?.showModal()}>
+          <button ref={settingsTriggerRef} type="button" className="locate-button experience-settings-trigger" aria-label={locale === 'ja' ? '設定' : 'Settings'} aria-haspopup="dialog" onClick={openSettings}>
             <Gear aria-hidden="true" size={22} weight="regular" />
           </button>
         </>
@@ -1585,7 +1584,7 @@ function App() {
 
       <dialog ref={settingsDialogRef} className="experience-settings" aria-labelledby="experience-settings-title" onClose={() => settingsTriggerRef.current?.focus({ preventScroll: true })}>
         <header>
-          <h2 id="experience-settings-title">{locale === 'ja' ? '設定' : 'Settings'}</h2>
+          <h2 ref={settingsTitleRef} id="experience-settings-title" tabIndex={-1}>{locale === 'ja' ? '設定' : 'Settings'}</h2>
           <button type="button" className="icon-button" aria-label={locale === 'ja' ? '閉じる' : 'Close settings'} onClick={() => settingsDialogRef.current?.close()}><X aria-hidden="true" size={20} /></button>
         </header>
         <div className="experience-setting-row">
@@ -1601,7 +1600,7 @@ function App() {
               onClick={switchLanguage}
               aria-label={locale === 'en' ? 'Switch to Japanese' : '英語に切り替える'}
             >
-              <span>{nextLocale.toUpperCase()}</span>
+              <span>{locale.toUpperCase()}</span>
             </a>
 
         </div>
@@ -1614,8 +1613,8 @@ function App() {
               onClick={toggleAppearance}
             >
               {nightPreview
-                ? <Sun aria-hidden="true" size={20} weight="regular" />
-                : <Moon aria-hidden="true" size={20} weight="regular" />}
+                ? <Moon aria-hidden="true" size={20} weight="regular" />
+                : <Sun aria-hidden="true" size={20} weight="regular" />}
             </button>
 
         </div>
@@ -1649,7 +1648,6 @@ function App() {
           shareCloseRef={shareCloseRef}
           shareOpen={shareOpen}
           activeTab={collectionTab}
-          onTabChange={changeCollectionTab}
           onClose={closeCollection}
           onChoose={chooseCollectionBuilding}
           onOpenShare={openShareRecord}
@@ -1701,7 +1699,7 @@ function App() {
   )
 }
 
-function CollectionView({ locale, t, closeRef, shareTriggerRef, shareCloseRef, shareOpen, activeTab, onTabChange, onClose, onChoose, onOpenShare, onCloseShare }: {
+function CollectionView({ locale, t, closeRef, shareTriggerRef, shareCloseRef, shareOpen, activeTab, onClose, onChoose, onOpenShare, onCloseShare }: {
   locale: Locale
   t: Translation
   closeRef: RefObject<HTMLButtonElement | null>
@@ -1709,30 +1707,18 @@ function CollectionView({ locale, t, closeRef, shareTriggerRef, shareCloseRef, s
   shareCloseRef: RefObject<HTMLButtonElement | null>
   shareOpen: boolean
   activeTab: CollectionTab
-  onTabChange: (tab: CollectionTab) => void
   onClose: () => void
   onChoose: (building: Building, keyboardActivated: boolean) => void
   onOpenShare: () => void
   onCloseShare: () => void
 }) {
   const snapshot = useSyncExternalStore(collectionStateStore.subscribe, collectionStateStore.getSnapshot, collectionStateStore.getSnapshot)
-  const visitedTabRef = useRef<HTMLButtonElement>(null)
-  const savedTabRef = useRef<HTMLButtonElement>(null)
   const visitedBuildings = useMemo(() => buildings.filter((building) => snapshot.buildings[building.id]?.visited), [snapshot])
   const savedBuildings = useMemo(() => getWantToVisitBuildings(buildings, snapshot), [snapshot])
   const recordGroups = useMemo(() => createArchitectureRecordGroups(buildings, snapshot), [snapshot])
 
-  const selectTab = (tab: CollectionTab, focus = false) => {
-    onTabChange(tab)
-    if (focus) window.requestAnimationFrame(() => (tab === 'saved' ? savedTabRef : visitedTabRef).current?.focus())
-  }
-  const handleTabKeyDown = (event: React.KeyboardEvent, tab: CollectionTab) => {
-    if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return
-    event.preventDefault()
-    selectTab(event.key === 'Home' ? 'saved' : event.key === 'End' ? 'visited' : tab === 'visited' ? 'saved' : 'visited', true)
-  }
   const renderPanel = (tab: CollectionTab, items: Building[], emptyMessage: string) => (
-    <div id={`collection-panel-${tab}`} className="collection-panel" role="tabpanel" aria-labelledby={`collection-tab-${tab}`} hidden={activeTab !== tab}>
+    <div className="collection-panel" role="region" aria-label={tab === 'saved' ? t.wantToVisit : t.myRecord}>
       {tab === 'visited' && <button ref={shareTriggerRef} className="record-summary-card" type="button" onClick={onOpenShare} aria-label={t.openRecordSummary(items.length)}>
         <strong>{items.length}</strong><span>{t.placesVisited}</span>
       </button>}
@@ -1771,14 +1757,12 @@ function CollectionView({ locale, t, closeRef, shareTriggerRef, shareCloseRef, s
   return (
     <aside className="collection-surface" role="dialog" aria-modal="true" aria-labelledby="collection-title">
       <div aria-hidden={shareOpen} inert={shareOpen ? true : undefined} className="collection-base">
-        <header className="collection-header"><h1 id="collection-title">{t.collectionTitle}</h1>
+        <header className="collection-header"><h1 id="collection-title">{activeTab === 'saved' ? t.wantToVisit : t.myRecord}</h1>
           <button ref={closeRef} className="icon-button" type="button" onClick={onClose} aria-label={t.closeCollection}><X aria-hidden="true" size={20} /></button>
         </header>
-        <div className="collection-tabs" role="tablist" aria-label={t.collectionSections}>
-          <button ref={savedTabRef} id="collection-tab-saved" type="button" role="tab" aria-selected={activeTab === 'saved'} aria-controls="collection-panel-saved" tabIndex={activeTab === 'saved' ? 0 : -1} onClick={() => selectTab('saved')} onKeyDown={(event) => handleTabKeyDown(event, 'saved')}><span>{t.wantToVisit}</span><span className="collection-tab-count">{savedBuildings.length}</span></button>
-          <button ref={visitedTabRef} id="collection-tab-visited" type="button" role="tab" aria-selected={activeTab === 'visited'} aria-controls="collection-panel-visited" tabIndex={activeTab === 'visited' ? 0 : -1} onClick={() => selectTab('visited')} onKeyDown={(event) => handleTabKeyDown(event, 'visited')}><span>{t.myRecord}</span><span className="collection-tab-count">{visitedBuildings.length}</span></button>
-        </div>
-        <div className="collection-panels">{renderPanel('saved', savedBuildings, t.emptyWantToVisit)}{renderPanel('visited', visitedBuildings, t.emptyVisited)}</div>
+        <div className="collection-panels">{activeTab === 'saved'
+          ? renderPanel('saved', savedBuildings, t.emptyWantToVisit)
+          : renderPanel('visited', visitedBuildings, t.emptyVisited)}</div>
       </div>
       {shareOpen && <ShareRecordPreview snapshot={snapshot} t={t} closeRef={shareCloseRef} onClose={onCloseShare} />}
     </aside>
