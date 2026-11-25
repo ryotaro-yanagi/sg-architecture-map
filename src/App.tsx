@@ -861,6 +861,7 @@ function App() {
     }
     const url = new URL(window.location.href)
     url.searchParams.delete('share')
+    url.searchParams.set('collectionTab', 'visited')
     window.history.replaceState({ ...window.history.state, sgmShare: false }, '', url)
     setShareOpen(false)
   }
@@ -1442,7 +1443,8 @@ function App() {
     window.requestAnimationFrame(() => searchTriggerRef.current?.focus({ preventScroll: true }))
   }
 
-  const chooseBuilding = (building: Building, focusMap = false) => {
+  const chooseBuilding = (building: Building, focusMap = false, keyboardActivated = false) => {
+    if (keyboardActivated) collectionFocusTargetRef.current = 'preview'
     setSelectedId(building.id)
     setExpanded(false)
     setSearchOpen(false)
@@ -1533,7 +1535,7 @@ function App() {
               {results.map((building) => {
                 const copy = getBuildingCopy(locale, building.id, building.name)
                 return (
-                  <button key={building.id} onClick={() => chooseBuilding(building, true)}>
+                  <button key={building.id} onClick={(event) => chooseBuilding(building, true, event.detail === 0)}>
                     <span><strong>{copy.name}</strong><small>{copy.previewArchitectCredit ?? copy.architectCredit}</small></span>
                     <ArrowRight aria-hidden="true" size={20} weight="regular" />
                   </button>
