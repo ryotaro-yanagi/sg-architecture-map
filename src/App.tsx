@@ -763,7 +763,7 @@ function App() {
   const nightPreview = appearance === 'night' || (appearance === 'system' && systemDark)
   const activeScheme = nightPreview ? 'night' : 'day'
   const colorLabEnabled = useMemo(
-    () => import.meta.env.DEV && new URLSearchParams(window.location.search).get('lab') === 'color',
+    () => (import.meta.env.DEV || import.meta.env.VITE_ENABLE_COLOR_LAB === 'true') && new URLSearchParams(window.location.search).get('lab') === 'color',
     [],
   )
   const [colorTokens, setColorTokens] = useState<ColorTokens>(() =>
