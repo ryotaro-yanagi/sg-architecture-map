@@ -1,6 +1,6 @@
 import { Component, useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
 import type { CSSProperties } from 'react'
-import { ArrowLeft, ArrowRight, ArrowSquareOut, BookmarkSimple, CheckCircle, Cloud, CloudRain, CloudSun, DownloadSimple, Gear, Lightning, MagnifyingGlass, Moon, NavigationArrow, Notebook, ShareNetwork, Sneaker, Sun, X } from '@phosphor-icons/react'
+import { ArrowLeft, ArrowRight, ArrowSquareOut, CheckCircle, Cloud, CloudRain, CloudSun, DownloadSimple, Gear, Lightning, MagnifyingGlass, Moon, NavigationArrow, Notebook, ShareNetwork, Sneaker, Sun, X } from '@phosphor-icons/react'
 import * as maplibregl from 'maplibre-gl'
 import { flushSync } from 'react-dom'
 import type { ExpressionSpecification, GeoJSONSource, Map as MapLibreMap } from 'maplibre-gl'
@@ -1566,13 +1566,13 @@ function App() {
       {surfaceState === 'explore' && (
         <>
           <div className="experience-actions experience-action-bar" role="group" aria-label={locale === 'ja' ? '建築を巡る' : 'Architecture experiences'}>
-            <button ref={searchTriggerRef} className="experience-action" type="button" onClick={openSearch} aria-label={t.searchLabel} title={locale === 'ja' ? '検索' : 'Discover'}>
+            <button ref={searchTriggerRef} className="experience-action ui-ring-control" type="button" onClick={openSearch} aria-label={t.searchLabel} title={locale === 'ja' ? '検索' : 'Discover'}>
               <MagnifyingGlass aria-hidden="true" size={26} weight="regular" />
             </button>
-            <button ref={visitTriggerRef} className="experience-action" type="button" onClick={() => openCollection('saved')} aria-label={t.wantToVisit} aria-haspopup="dialog" title={t.wantToVisit}>
+            <button ref={visitTriggerRef} className="experience-action ui-ring-control" type="button" onClick={() => openCollection('saved')} aria-label={t.wantToVisit} aria-haspopup="dialog" title={t.wantToVisit}>
               <Sneaker aria-hidden="true" size={26} weight="regular" />
             </button>
-            <button ref={notebookTriggerRef} className="experience-action" type="button" onClick={() => openCollection('visited')} aria-label={t.myRecord} aria-haspopup="dialog" title={t.myRecord}>
+            <button ref={notebookTriggerRef} className="experience-action ui-ring-control" type="button" onClick={() => openCollection('visited')} aria-label={t.myRecord} aria-haspopup="dialog" title={t.myRecord}>
               <Notebook aria-hidden="true" size={26} weight="regular" />
             </button>
           </div>
@@ -1977,11 +1977,11 @@ function DetailContent({ building, locale, t, onClose, backRef }: LocalizedProps
 
       <section className="collection-actions" aria-label={t.collectionActions}>
         <div className="collection-toggle-row">
-          <button type="button" className={`collection-toggle ${collectionState.saved ? 'is-active' : ''}`} aria-pressed={collectionState.saved} aria-label={collectionState.saved ? t.removeSavedBuilding : t.saveBuilding} onClick={() => updateCollectionState({ saved: !collectionState.saved })}>
-            <span className="collection-toggle-glyph" aria-hidden="true"><BookmarkSimple size={20} weight={collectionState.saved ? 'fill' : 'regular'} /></span><span>{collectionState.saved ? t.saved : t.save}</span>
+          <button type="button" className={`collection-toggle ${collectionState.saved ? 'is-active' : ''}`} aria-pressed={collectionState.saved} onClick={() => updateCollectionState({ saved: !collectionState.saved })}>
+            <span className="collection-toggle-glyph ui-ring-glyph" aria-hidden="true"><Sneaker size={20} weight={collectionState.saved ? 'fill' : 'regular'} /></span><span>{t.wantToVisit}</span>
           </button>
-          <button type="button" className={`collection-toggle ${collectionState.visited ? 'is-active' : ''}`} aria-pressed={collectionState.visited} aria-label={collectionState.visited ? t.removeVisitedBuilding : t.markVisited} onClick={() => updateCollectionState({ visited: !collectionState.visited })}>
-            <span className="collection-toggle-glyph" aria-hidden="true"><CheckCircle size={20} weight={collectionState.visited ? 'fill' : 'regular'} /></span><span>{collectionState.visited ? t.visited : t.markVisited}</span>
+          <button type="button" className={`collection-toggle ${collectionState.visited ? 'is-active' : ''}`} aria-pressed={collectionState.visited} onClick={() => updateCollectionState({ visited: !collectionState.visited })}>
+            <span className="collection-toggle-glyph ui-ring-glyph" aria-hidden="true"><CheckCircle size={20} weight={collectionState.visited ? 'fill' : 'regular'} /></span><span>{t.visited}</span>
           </button>
         </div>
         {collectionError && <p className="collection-error" role="alert">{collectionError}</p>}

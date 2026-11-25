@@ -533,7 +533,18 @@ html[data-appearance='night'] .brand-mark img { filter: invert(1); }
 }
 
 
-/* Experience Navigation v0.2 — grouped bottom navigation, equal control family. */
+/* Experience Navigation / Interaction System v0.4
+   Style and state are separated:
+   - grouped icon actions: transient ring
+   - standalone icon actions: transient surface
+   - persistent toggles: transient ring + persistent glyph fill
+*/
+:root {
+  --ui-ring-stroke: 1.5px;
+  --ui-ring-fast: 90ms;
+  --ui-ring-motion: 120ms;
+}
+
 .top-ui .control-row { margin-top: 0; pointer-events: none; }
 .top-ui .control-left > *, .top-ui .control-right > * { pointer-events: auto; }
 
@@ -577,7 +588,6 @@ html[data-appearance='night'] .brand-mark img { filter: invert(1); }
   border-radius: 28px;
 }
 .experience-action {
-  position: relative;
   display: grid;
   place-items: center;
   flex: 0 0 56px;
@@ -590,23 +600,36 @@ html[data-appearance='night'] .brand-mark img { filter: invert(1); }
   background: transparent;
   cursor: pointer;
 }
-.experience-action::before {
-  content: '';
-  position: absolute;
-  width: 42px;
-  height: 42px;
-  border: 1.5px solid currentColor;
-  border-radius: 50%;
-  opacity: 0;
-  transform: scale(.9);
-  pointer-events: none;
-  transition: opacity 90ms ease-out, transform 120ms cubic-bezier(.22, 1, .36, 1);
-}
 .experience-action svg {
   position: relative;
   z-index: 1;
   width: 26px;
   height: 26px;
+}
+
+/* Reusable ring primitive for icon-only grouped actions. */
+.ui-ring-control {
+  position: relative;
+  --ui-ring-size: 42px;
+}
+.ui-ring-control::before {
+  content: '';
+  position: absolute;
+  width: var(--ui-ring-size);
+  height: var(--ui-ring-size);
+  border: var(--ui-ring-stroke) solid currentColor;
+  border-radius: 50%;
+  opacity: 0;
+  transform: scale(.9);
+  pointer-events: none;
+  transition:
+    opacity var(--ui-ring-fast) ease-out,
+    transform var(--ui-ring-motion) cubic-bezier(.22, 1, .36, 1);
+}
+.ui-ring-control:active { background: transparent; }
+.ui-ring-control:active::before {
+  opacity: 1;
+  transform: scale(1);
 }
 
 .experience-settings-trigger,
@@ -621,7 +644,6 @@ html[data-appearance='night'] .brand-mark img { filter: invert(1); }
   bottom: calc(max(4px, env(safe-area-inset-bottom)) + 34px);
 }
 .experience-settings-trigger svg { width: 24px; height: 24px; }
-
 .state-explore .map-tools {
   right: max(12px, env(safe-area-inset-right));
   bottom: calc(max(4px, env(safe-area-inset-bottom)) + 34px);
@@ -629,8 +651,7 @@ html[data-appearance='night'] .brand-mark img { filter: invert(1); }
 .state-explore .map-tools .locate-button svg { width: 22px; height: 22px; }
 .state-explore .notice { bottom: calc(max(4px, env(safe-area-inset-bottom)) + 100px); }
 
-/* Settings describes the whole app, so present it as a centered modal rather than
-   an anchored popover attached to the lower-left utility button. */
+/* Settings is application-wide, so it remains a centered modal. */
 .experience-settings {
   position: fixed;
   inset: 50% auto auto 50%;
@@ -655,81 +676,73 @@ html[data-appearance='night'] .brand-mark img { filter: invert(1); }
 }
 .experience-settings header { min-height: 52px; }
 .experience-settings h2 { margin: 0; font-size: 20px; font-weight: 500; }
+.experience-settings h2:focus { outline: 0; }
 .experience-setting-row { min-height: 64px; }
 .experience-settings .appearance-toggle,
 .experience-settings .language-trigger { flex-shrink: 0; }
-.experience-settings .icon-button { background: transparent; }
 
-.experience-action:active { background: transparent; }
-.experience-action:active::before {
-  opacity: 1;
-  transform: scale(1);
+/* Standalone icon actions use their existing circular hit surface.
+   The default surface may visually merge with the panel; press/hover reveals it. */
+.experience-settings .icon-button,
+.experience-settings .appearance-toggle {
+  background: transparent;
 }
-.experience-settings-trigger:active { background: var(--interaction-pressed); }
-@media (hover: hover) and (pointer: fine) {
-  .experience-action:hover { background: transparent; }
-  .experience-action:hover::before {
-    opacity: .55;
-    transform: scale(1);
-  }
-  .experience-action:active::before { opacity: 1; }
-  .experience-settings-trigger:hover { background: var(--interaction-hover); }
-}
-@media (min-width: 720px) {
-  .experience-settings-trigger { left: 22px; }
-  .state-explore .map-tools { right: 22px; }
-}
-@media (forced-colors: active) {
-  .experience-actions,
-  .experience-settings-trigger { border: 1px solid ButtonText; }
+.experience-settings .icon-button:active,
+.experience-settings .appearance-toggle:active {
+  background: var(--interaction-pressed);
 }
 
-
-/* Experience Navigation v0.3 — semantic refinement. */
-.experience-settings h2:focus { outline: 0; }
 .collection-header { border-bottom: 1px solid var(--line); }
 
-
-/* SGM interaction language v0.2 — ring feedback for embedded actions.
-   Pressed feedback is transient; persistent Saved/Visited state remains icon fill + label. */
+/* Persistent toggles live inside the Detail section rather than inside two boxes.
+   Hit areas remain large; visible state is glyph fill + stable label. */
+.collection-toggle-row {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0;
+}
 .collection-toggle {
-  position: relative;
-  overflow: visible;
+  min-height: 56px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
 }
 .collection-toggle.is-active {
   background: transparent;
-  border-color: var(--line);
+  border-color: transparent;
 }
 .collection-toggle-glyph {
   position: relative;
   display: grid;
   place-items: center;
-  width: 32px;
-  height: 32px;
-  flex: 0 0 32px;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
 }
-.collection-toggle-glyph::before {
+.ui-ring-glyph::before {
   content: '';
   position: absolute;
-  width: 30px;
-  height: 30px;
-  border: 1.5px solid currentColor;
+  width: 32px;
+  height: 32px;
+  border: var(--ui-ring-stroke) solid currentColor;
   border-radius: 50%;
   opacity: 0;
   transform: scale(.88);
   pointer-events: none;
 }
-.collection-toggle-glyph svg {
+.ui-ring-glyph svg {
   position: relative;
   z-index: 1;
 }
-.collection-toggle:active .collection-toggle-glyph::before {
+.collection-toggle:active .ui-ring-glyph::before {
   opacity: 1;
   transform: scale(1);
-  transition: opacity 80ms ease-out, transform 110ms cubic-bezier(.22, 1, .36, 1);
+  transition:
+    opacity 80ms ease-out,
+    transform 110ms cubic-bezier(.22, 1, .36, 1);
 }
-.collection-toggle.is-active .collection-toggle-glyph::before {
-  animation: sgm-ring-confirm 360ms cubic-bezier(.22, 1, .36, 1) both;
+.collection-toggle.is-active .ui-ring-glyph::before {
+  animation: sgm-ring-confirm 340ms cubic-bezier(.22, 1, .36, 1) both;
 }
 @keyframes sgm-ring-confirm {
   0% { opacity: 0; transform: scale(.76); }
@@ -737,38 +750,37 @@ html[data-appearance='night'] .brand-mark img { filter: invert(1); }
   100% { opacity: 0; transform: scale(1.08); }
 }
 
-/* Appearance is an embedded icon action inside Settings, so use the same
-   glyph-level press language instead of a temporary filled disc. */
-.experience-settings .appearance-toggle {
-  position: relative;
-  background: transparent;
-}
-.experience-settings .appearance-toggle::before {
-  content: '';
-  position: absolute;
-  width: 38px;
-  height: 38px;
-  border: 1.5px solid currentColor;
-  border-radius: 50%;
-  opacity: 0;
-  transform: scale(.9);
-  pointer-events: none;
-}
-.experience-settings .appearance-toggle:active {
-  background: transparent;
-}
-.experience-settings .appearance-toggle:active::before {
-  opacity: 1;
-  transform: scale(1);
-  transition: opacity 80ms ease-out, transform 110ms cubic-bezier(.22, 1, .36, 1);
-}
 @media (hover: hover) and (pointer: fine) {
-  .collection-toggle:hover { background: transparent; color: var(--muted); }
-  .experience-settings .appearance-toggle:hover { background: transparent; }
-  .experience-settings .appearance-toggle:hover::before { opacity: .55; transform: scale(1); }
+  .ui-ring-control:hover { background: transparent; }
+  .ui-ring-control:hover::before {
+    opacity: .55;
+    transform: scale(1);
+  }
+  .ui-ring-control:active::before { opacity: 1; }
+
+  .experience-settings-trigger:hover { background: var(--interaction-hover); }
+  .experience-settings .icon-button:hover,
+  .experience-settings .appearance-toggle:hover { background: var(--interaction-hover); }
+
+  .collection-toggle:hover {
+    color: var(--muted);
+    background: transparent;
+  }
+}
+
+@media (min-width: 720px) {
+  .experience-settings-trigger { left: 22px; }
+  .state-explore .map-tools { right: 22px; }
+}
+@media (forced-colors: active) {
+  .experience-actions,
+  .experience-settings-trigger { border: 1px solid ButtonText; }
+  .ui-ring-control::before,
+  .ui-ring-glyph::before { border-color: ButtonText; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .collection-toggle.is-active .collection-toggle-glyph::before {
+  .ui-ring-control::before { transition-duration: .01ms; }
+  .collection-toggle.is-active .ui-ring-glyph::before {
     animation-duration: 80ms;
   }
 }
