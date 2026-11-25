@@ -1566,7 +1566,7 @@ function App() {
 
       {surfaceState === 'explore' && (
         <>
-          <div className="experience-actions" role="group" aria-label={locale === 'ja' ? '建築を巡る' : 'Architecture experiences'}>
+          <div className="experience-actions experience-action-bar" role="group" aria-label={locale === 'ja' ? '建築を巡る' : 'Architecture experiences'}>
             <button ref={searchTriggerRef} className="experience-action" type="button" onClick={openSearch} aria-label={t.searchLabel} title={locale === 'ja' ? '検索' : 'Discover'}>
               <MagnifyingGlass aria-hidden="true" size={26} weight="regular" />
             </button>

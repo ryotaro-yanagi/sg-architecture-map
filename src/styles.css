@@ -533,9 +533,33 @@ html[data-appearance='night'] .brand-mark img { filter: invert(1); }
 }
 
 
-/* Experience Navigation v0.1 — isolated layout and existing color tokens. */
+/* Experience Navigation v0.2 — grouped bottom navigation, equal control family. */
 .top-ui .control-row { margin-top: 0; pointer-events: none; }
 .top-ui .control-left > *, .top-ui .control-right > * { pointer-events: auto; }
+
+/* One visual size family: hierarchy comes from grouping, not scale. */
+.top-ui .brand {
+  width: 56px;
+  height: 56px;
+  flex-basis: 56px;
+  padding: 2px;
+}
+.top-ui .brand-mark,
+.top-ui .brand-mark img {
+  width: 52px;
+  height: 52px;
+}
+.top-ui .weather-chip {
+  min-width: 56px;
+  min-height: 56px;
+  padding-inline: 16px;
+  border-radius: 28px;
+  gap: 8px;
+  font-size: 16px;
+  line-height: 22px;
+}
+.top-ui .weather-chip svg { width: 22px; height: 22px; }
+
 .experience-actions {
   position: absolute;
   z-index: 12;
@@ -544,7 +568,13 @@ html[data-appearance='night'] .brand-mark img { filter: invert(1); }
   transform: translateX(-50%);
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 0;
+  width: 168px;
+  height: 56px;
+  overflow: hidden;
+  color: var(--ink);
+  background: var(--paper-strong);
+  border-radius: 28px;
 }
 .experience-action {
   display: grid;
@@ -554,51 +584,75 @@ html[data-appearance='night'] .brand-mark img { filter: invert(1); }
   height: 56px;
   padding: 0;
   border: 0;
-  border-radius: 50%;
+  border-radius: 0;
   color: var(--ink);
-  background: var(--paper-strong);
+  background: transparent;
   cursor: pointer;
+}
+.experience-action svg { width: 26px; height: 26px; }
+
+.experience-settings-trigger,
+.state-explore .map-tools .locate-button {
+  width: 56px;
+  height: 56px;
 }
 .experience-settings-trigger {
   position: absolute;
   z-index: 8;
-  left: max(16px, env(safe-area-inset-left));
-  bottom: calc(max(4px, env(safe-area-inset-bottom)) + 106px);
+  left: max(12px, env(safe-area-inset-left));
+  bottom: calc(max(4px, env(safe-area-inset-bottom)) + 34px);
 }
-.experience-settings-trigger svg { width: 22px; height: 22px; }
+.experience-settings-trigger svg { width: 24px; height: 24px; }
+
 .state-explore .map-tools {
-  bottom: calc(max(4px, env(safe-area-inset-bottom)) + 106px);
+  right: max(12px, env(safe-area-inset-right));
+  bottom: calc(max(4px, env(safe-area-inset-bottom)) + 34px);
 }
+.state-explore .map-tools .locate-button svg { width: 22px; height: 22px; }
 .state-explore .notice { bottom: calc(max(4px, env(safe-area-inset-bottom)) + 100px); }
+
+/* Settings describes the whole app, so present it as a centered modal rather than
+   an anchored popover attached to the lower-left utility button. */
 .experience-settings {
   position: fixed;
-  inset: auto auto calc(max(4px, env(safe-area-inset-bottom)) + 106px) max(16px, env(safe-area-inset-left));
-  width: min(280px, calc(100% - 32px));
-  max-height: calc(100% - 132px);
+  inset: 50% auto auto 50%;
+  width: min(300px, calc(100% - 32px));
+  max-height: calc(100% - 48px);
   margin: 0;
-  padding: 12px 16px 16px;
+  padding: 14px 18px 18px;
+  transform: translate(-50%, -50%);
   border: 1px solid var(--line);
-  border-radius: 18px;
+  border-radius: 22px;
   color: var(--ink);
   background: var(--paper);
   font-family: var(--font-ui);
 }
 .experience-settings::backdrop { background: color-mix(in srgb, var(--ink) 18%, transparent); }
-.experience-settings header, .experience-setting-row {
-  display: flex; justify-content: space-between; align-items: center; gap: 12px;
+.experience-settings header,
+.experience-setting-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
 }
+.experience-settings header { min-height: 52px; }
 .experience-settings h2 { margin: 0; font-size: 20px; font-weight: 500; }
-.experience-setting-row { min-height: 56px; }
-.experience-settings .appearance-toggle, .experience-settings .language-trigger { flex-shrink: 0; }
+.experience-setting-row { min-height: 64px; }
+.experience-settings .appearance-toggle,
+.experience-settings .language-trigger { flex-shrink: 0; }
 .experience-settings .icon-button { background: transparent; }
-.experience-action:active, .experience-settings-trigger:active { background: var(--interaction-pressed); }
+
+.experience-action:active,
+.experience-settings-trigger:active { background: var(--interaction-pressed); }
 @media (hover: hover) and (pointer: fine) {
-  .experience-action:hover, .experience-settings-trigger:hover { background: var(--interaction-hover); }
+  .experience-action:hover,
+  .experience-settings-trigger:hover { background: var(--interaction-hover); }
 }
 @media (min-width: 720px) {
   .experience-settings-trigger { left: 22px; }
-  .experience-settings { left: 22px; }
+  .state-explore .map-tools { right: 22px; }
 }
 @media (forced-colors: active) {
-  .experience-action, .experience-settings-trigger { border: 1px solid ButtonText; }
+  .experience-actions,
+  .experience-settings-trigger { border: 1px solid ButtonText; }
 }
