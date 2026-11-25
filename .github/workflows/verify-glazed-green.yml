@@ -1,0 +1,33 @@
+name: Verify Glazed Green and Color Lab
+on:
+  push:
+    branches: ['verify/glazed-green-color-lab']
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: lts/*
+          cache: npm
+      - run: npm ci
+      - run: npm run check:publish
+      - run: npm run test:colors
+      - run: npm run test:collection
+      - run: npm run test:coastline
+      - run: npm run test:publish-url
+      - run: npm run test:share-record
+      - run: npm run test:weather
+      - name: Verify standard build excludes editor
+        run: |
+          VITE_ENABLE_COLOR_LAB=false npm run build
+          if grep -R -F -q 'Export JSON before loading defaults' dist/assets; then exit 1; fi
+      - name: Verify opt-in build includes editor
+        run: |
+          VITE_ENABLE_COLOR_LAB=true npm run build
+          grep -R -F -q 'Export JSON before loading defaults' dist/assets
