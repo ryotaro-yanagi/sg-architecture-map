@@ -675,7 +675,7 @@ const featureCollection = (selectedId: string | null, locale: Locale, architectu
   })),
 })
 
-const BrandMark = () => <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="square" strokeLinejoin="miter"><path d="M7 7h10v10H7z"/><circle cx="17" cy="7" r="2.25" fill="currentColor" stroke="none"/><path d="M4 20h16"/></svg>
+const BrandMark = () => <img src="../sma-island-symbol-v2.svg" alt="" aria-hidden="true" />
 
 class WeatherBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
   state = { hasError: false }
