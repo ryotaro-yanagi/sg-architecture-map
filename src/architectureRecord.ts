@@ -30,10 +30,9 @@ export type ArchitectureRecordGroup<T extends RecordBuilding> = Readonly<{
 export const getWantToVisitBuildings = <T extends RecordBuilding>(
   buildings: readonly T[],
   snapshot: CollectionSnapshot,
-): T[] => buildings.filter((building) => {
-  const state = snapshot.buildings[building.id]
-  return state?.saved === true && state.visited !== true
-})
+): T[] => buildings.filter((building) =>
+  snapshot.buildings[building.id]?.saved === true
+)
 
 export const createArchitectureRecordGroups = <T extends RecordBuilding>(
   buildings: readonly T[],

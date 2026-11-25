@@ -23,7 +23,7 @@ test('groups visited buildings by year, newest first, with undated records last'
   ])
 })
 
-test('want to visit includes only saved buildings that are not visited', () => {
+test('want to visit reflects saved independently from visited', () => {
   const buildings = ['a', 'b', 'c'].map((id) => ({ id }))
   const values = new Map<string, string>()
   const store = createCollectionStateStore(buildings.map(({ id }) => id), {
@@ -34,8 +34,9 @@ test('want to visit includes only saved buildings that are not visited', () => {
   store.updateBuildingState('b', { saved: true, visited: true })
   store.updateBuildingState('c', { visited: true })
 
-  assert.deepEqual(getWantToVisitBuildings(buildings, store.getSnapshot()), [{ id: 'a' }])
+  assert.deepEqual(getWantToVisitBuildings(buildings, store.getSnapshot()), [{ id: 'a' }, { id: 'b' }])
   assert.equal(store.getBuildingState('b').saved, true)
+  assert.equal(store.getBuildingState('b').visited, true)
 })
 
 test('adds an editable local date only when Visited is first enabled', () => {

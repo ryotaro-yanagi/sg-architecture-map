@@ -292,7 +292,35 @@ html[data-appearance='night'] .brand-mark img { filter: invert(1); }
   pointer-events: none;
   transition: opacity 140ms cubic-bezier(.2, 0, 1, .9), visibility 0s linear 140ms;
 }
-.user-location-marker { width: 17px; height: 17px; background: #3e7e91; border: 3px solid #fff; border-radius: 50%; box-shadow: 0 0 0 5px rgba(62,126,145,.22), 0 2px 6px rgba(0,0,0,.25); }
+.user-location-marker {
+  position: relative;
+  width: 17px;
+  height: 17px;
+  background: #3e7e91;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 0 0 5px rgba(62,126,145,.22), 0 2px 6px rgba(0,0,0,.25);
+  animation: sgm-location-arrive var(--motion-confirm) var(--motion-ease-out) both;
+}
+.user-location-marker::after {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border: 1.5px solid #3e7e91;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: sgm-location-ring var(--motion-confirm) var(--motion-ease-out) both;
+}
+@keyframes sgm-location-arrive {
+  0% { transform: scale(.78); }
+  45% { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+@keyframes sgm-location-ring {
+  0% { opacity: 0; transform: scale(.62); }
+  35% { opacity: .9; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1.28); }
+}
 
 .bottom-surface {
   --panel-bottom: max(12px, env(safe-area-inset-bottom));
@@ -523,6 +551,11 @@ html[data-appearance='night'] .brand-mark img { filter: invert(1); }
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
+  .user-location-marker { animation: none; }
+  .user-location-marker::after {
+    animation: none;
+    opacity: 0;
+  }
   .bottom-surface { animation: panel-appear 80ms linear both; }
   .collection-surface { animation: panel-appear 80ms linear both; }
   .control-row { transition: none; animation: none; }
@@ -530,4 +563,305 @@ html[data-appearance='night'] .brand-mark img { filter: invert(1); }
   .notice { animation: none; }
   .initial-loading-screen { transition: none; }
   .initial-loading-screen .loading-title { animation: none; opacity: 1; }
+}
+
+
+/* Experience Navigation / Interaction System v0.4
+   Style and state are separated:
+   - grouped icon actions: transient ring
+   - standalone icon actions: transient surface
+   - persistent toggles: transient ring + persistent glyph fill
+*/
+:root {
+  --ui-ring-stroke: 1.5px;
+  --ui-ring-fast: 90ms;
+  --ui-ring-motion: 120ms;
+  --motion-confirm: 340ms;
+  --motion-spatial: 180ms;
+  --motion-ease-out: cubic-bezier(.22, 1, .36, 1);
+}
+
+.top-ui .control-row { margin-top: 0; pointer-events: none; }
+.top-ui .control-left > *, .top-ui .control-right > * { pointer-events: auto; }
+
+/* One visual size family: hierarchy comes from grouping, not scale. */
+.top-ui .brand {
+  width: 56px;
+  height: 56px;
+  flex-basis: 56px;
+  padding: 2px;
+}
+.top-ui .brand-mark,
+.top-ui .brand-mark img {
+  width: 52px;
+  height: 52px;
+}
+.top-ui .weather-chip {
+  min-width: 56px;
+  min-height: 56px;
+  padding-inline: 16px;
+  border-radius: 28px;
+  gap: 8px;
+  font-size: 16px;
+  line-height: 22px;
+}
+.top-ui .weather-chip svg { width: 22px; height: 22px; }
+
+.experience-actions {
+  position: absolute;
+  z-index: 12;
+  left: 50%;
+  bottom: calc(max(4px, env(safe-area-inset-bottom)) + 34px);
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0;
+  width: 168px;
+  height: 56px;
+  overflow: hidden;
+  color: var(--ink);
+  background: var(--paper-strong);
+  border-radius: 28px;
+}
+.experience-action {
+  display: grid;
+  place-items: center;
+  flex: 0 0 56px;
+  width: 56px;
+  height: 56px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  color: var(--ink);
+  background: transparent;
+  cursor: pointer;
+}
+.experience-action svg {
+  position: relative;
+  z-index: 1;
+  width: 26px;
+  height: 26px;
+}
+
+/* Reusable ring primitive for icon-only grouped actions. */
+.ui-ring-control {
+  position: relative;
+  --ui-ring-size: 42px;
+}
+.ui-ring-control::before {
+  content: '';
+  position: absolute;
+  width: var(--ui-ring-size);
+  height: var(--ui-ring-size);
+  border: var(--ui-ring-stroke) solid currentColor;
+  border-radius: 50%;
+  opacity: 0;
+  transform: scale(.9);
+  pointer-events: none;
+  transition:
+    opacity var(--ui-ring-fast) ease-out,
+    transform var(--ui-ring-motion) cubic-bezier(.22, 1, .36, 1);
+}
+.ui-ring-control:active { background: transparent; }
+.ui-ring-control:active::before {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.experience-settings-trigger,
+.state-explore .map-tools .locate-button {
+  width: 56px;
+  height: 56px;
+}
+.experience-settings-trigger {
+  position: absolute;
+  z-index: 8;
+  left: max(12px, env(safe-area-inset-left));
+  bottom: calc(max(4px, env(safe-area-inset-bottom)) + 34px);
+}
+.experience-settings-trigger svg { width: 24px; height: 24px; }
+.state-explore .map-tools {
+  right: max(12px, env(safe-area-inset-right));
+  bottom: calc(max(4px, env(safe-area-inset-bottom)) + 34px);
+}
+.state-explore .map-tools .locate-button svg { width: 22px; height: 22px; }
+.state-explore .notice { bottom: calc(max(4px, env(safe-area-inset-bottom)) + 100px); }
+
+/* Settings is application-wide, so it remains a centered modal. */
+.experience-settings {
+  position: fixed;
+  inset: 50% auto auto 50%;
+  width: min(300px, calc(100% - 32px));
+  max-height: calc(100% - 48px);
+  margin: 0;
+  padding: 14px 18px 18px;
+  transform: translate(-50%, -50%);
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  color: var(--ink);
+  background: var(--paper);
+  font-family: var(--font-ui);
+}
+.experience-settings::backdrop { background: color-mix(in srgb, var(--ink) 18%, transparent); }
+.experience-settings header,
+.experience-setting-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+.experience-settings header { min-height: 52px; }
+.experience-settings h2 { margin: 0; font-size: 20px; font-weight: 500; }
+.experience-settings h2:focus { outline: 0; }
+.experience-setting-row { min-height: 64px; }
+.experience-settings .appearance-toggle,
+.experience-settings .language-trigger { flex-shrink: 0; }
+
+/* Standalone icon actions use their existing circular hit surface.
+   The default surface may visually merge with the panel; press/hover reveals it. */
+.experience-settings .icon-button,
+.experience-settings .appearance-toggle {
+  background: transparent;
+}
+.experience-settings .icon-button:active,
+.experience-settings .appearance-toggle:active {
+  background: var(--interaction-pressed);
+}
+
+.collection-header { border-bottom: 1px solid var(--line); }
+
+/* Persistent toggles live inside the Detail section rather than inside two boxes.
+   Hit areas remain large; visible state is glyph fill + stable label. */
+.collection-toggle-row {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0;
+}
+.collection-toggle {
+  min-height: 56px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+.collection-toggle.is-active {
+  background: transparent;
+  border-color: transparent;
+}
+.collection-toggle-glyph {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+}
+.ui-ring-glyph::before {
+  content: '';
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  border: var(--ui-ring-stroke) solid currentColor;
+  border-radius: 50%;
+  opacity: 0;
+  transform: scale(.88);
+  pointer-events: none;
+}
+.ui-ring-glyph svg {
+  position: relative;
+  z-index: 1;
+}
+.collection-toggle:active .ui-ring-glyph::before {
+  opacity: 1;
+  transform: scale(1);
+  transition:
+    opacity 80ms ease-out,
+    transform 110ms cubic-bezier(.22, 1, .36, 1);
+}
+.collection-toggle.is-active .ui-ring-glyph::before {
+  animation: sgm-ring-confirm var(--motion-confirm) var(--motion-ease-out) both;
+}
+@keyframes sgm-ring-confirm {
+  0% { opacity: 0; transform: scale(.76); }
+  34% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1.08); }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .ui-ring-control:hover { background: transparent; }
+  .ui-ring-control:hover::before {
+    opacity: .55;
+    transform: scale(1);
+  }
+  .ui-ring-control:active::before { opacity: 1; }
+
+  .experience-settings-trigger:hover { background: var(--interaction-hover); }
+  .experience-settings .icon-button:hover,
+  .experience-settings .appearance-toggle:hover { background: var(--interaction-hover); }
+
+  .collection-toggle:hover {
+    color: var(--muted);
+    background: transparent;
+  }
+}
+
+@media (min-width: 720px) {
+  .experience-settings-trigger { left: 22px; }
+  .state-explore .map-tools { right: 22px; }
+}
+@media (forced-colors: active) {
+  .experience-actions,
+  .experience-settings-trigger { border: 1px solid ButtonText; }
+  .ui-ring-control::before,
+  .ui-ring-glyph::before { border-color: ButtonText; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ui-ring-control::before { transition-duration: .01ms; }
+  .collection-toggle.is-active .ui-ring-glyph::before {
+    animation-duration: 80ms;
+  }
+}
+
+
+/* Collection Experience v0.3 — independent Saved state and stable mobile record editing. */
+
+/* Collection surfaces may scroll vertically, never horizontally. */
+.collection-panel,
+.architecture-records,
+.collection-list {
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: hidden;
+  overscroll-behavior-x: none;
+}
+.architecture-records,
+.collection-list {
+  touch-action: pan-y;
+  overscroll-behavior-y: contain;
+}
+
+/* Editing is secondary to the two-column record summary, so it expands below
+   the summary as one centered single-column form instead of inheriting the
+   record body's right-hand column. */
+.record-editor {
+  width: 100%;
+  max-width: 560px;
+  min-width: 0;
+  margin: 18px auto 0;
+  padding-top: 16px;
+  box-sizing: border-box;
+}
+.record-editor label,
+.record-editor-actions {
+  min-width: 0;
+  width: 100%;
+}
+.record-editor input,
+.record-editor textarea {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+.record-editor textarea {
+  resize: vertical;
 }
