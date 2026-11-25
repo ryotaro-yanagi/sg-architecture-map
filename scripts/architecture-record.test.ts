@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { createArchitectureRecordGroups, getWantToVisitBuildings } from '../src/architectureRecord.ts'
+import { addInitialVisitDate, createArchitectureRecordGroups, formatLocalVisitDate, getWantToVisitBuildings } from '../src/architectureRecord.ts'
 import { createCollectionStateStore } from '../src/collectionState.ts'
 
 test('groups visited buildings by year, newest first, with undated records last', () => {
@@ -38,27 +38,17 @@ test('want to visit includes only saved buildings that are not visited', () => {
   assert.equal(store.getBuildingState('b').saved, true)
 })
 
-test('visited status remains independent from optional visit details', () => {
-  const buildings = [{ id: 'a' }]
-  const values = new Map<string, string>()
-  const store = createCollectionStateStore(['a'], {
-    getItem: (key) => values.get(key) ?? null,
-    setItem: (key, value) => { values.set(key, value) },
-  })
+test('adds an editable local date only when Visited is first enabled', () => {
+  const now = new Date(2026, 10, 24, 23, 58)
+  const undated = { saved: false, visited: false, visitDate: null, note: '' }
 
-  store.updateBuildingState('a', { visited: true })
-  assert.deepEqual(store.getBuildingState('a'), {
-    saved: false,
-    visited: true,
-    visitDate: null,
-    note: '',
-  })
-
-  store.updateBuildingState('a', { visitDate: '2026-11-24', note: 'Evening visit' })
-  assert.deepEqual(store.getBuildingState('a'), {
-    saved: false,
+  assert.equal(formatLocalVisitDate(now), '2026-11-24')
+  assert.deepEqual(addInitialVisitDate(undated, { visited: true }, now), {
     visited: true,
     visitDate: '2026-11-24',
-    note: 'Evening visit',
   })
+  assert.deepEqual(addInitialVisitDate(undated, { saved: true }, now), { saved: true })
+  assert.deepEqual(addInitialVisitDate({ ...undated, visitDate: '2024-05-02' }, { visited: true }, now), { visited: true })
+  assert.deepEqual(addInitialVisitDate({ ...undated, visited: true }, { visited: true }, now), { visited: true })
+  assert.deepEqual(addInitialVisitDate(undated, { visited: true }, now, true), { visited: true })
 })

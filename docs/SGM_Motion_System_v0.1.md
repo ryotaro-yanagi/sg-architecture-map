@@ -32,7 +32,8 @@ Purpose: acknowledge that something meaningful has successfully become true.
 Current uses:
 - Add Want to Visit
 - Mark Visited
-- Successfully locate the user on the map
+
+Current-location confirmation remains an experiment, not part of the core pop language.
 
 Visual character:
 - local to the touched/affected object
@@ -50,7 +51,7 @@ This is the characteristic "pop" / "ポポン" motion of SGM.
 
 ### Addition vs removal
 
-Addition can receive the expressive confirmation pop because the user has accumulated something: a place to visit, a visited record, or their position on the map.
+Addition can receive the expressive confirmation pop when the motion is tightly coupled to the object whose state just changed: a place added to Want to Visit or a building marked Visited.
 
 Removal should be quieter:
 - normal pressed feedback
@@ -109,7 +110,13 @@ Frequent actions should remain quick and quiet.
 
 Only test after the current system settles:
 - first-ever visited building: slightly richer confirmation on the My Record count
-- successful save of date/note: local confirmation in the edited record
 - dynamic logo motion: separate identity system
 
 Do not automatically extend the pop to Share, Close, Back, or every tap.
+
+
+## Revision — restraint
+
+The confirmation pop is not a signature effect that should be propagated for consistency alone. It is retained only when trigger, animated object, and resulting state are immediately understandable as one event.
+
+Editing a visit date or note uses ordinary save feedback. A remote or arbitrary pop elsewhere in the record is explicitly avoided.
