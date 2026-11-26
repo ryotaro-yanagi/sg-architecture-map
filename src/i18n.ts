@@ -23,6 +23,8 @@ export type Translation = {
   locationUnsupported: string
   locationSuccess: string
   locationFailure: string
+  locationDenied: string
+  locationTimeout: string
   currentLocation: string
   dataNote: (count: number) => string
   clearSelection: string
@@ -112,7 +114,9 @@ export const translations: Record<Locale, Translation> = {
     locating: 'Locating',
     locationUnsupported: 'Location is unavailable in this browser. You can continue using the map.',
     locationSuccess: 'Your location is now shown on the map.',
-    locationFailure: 'We could not access your location. You can continue using the map without it.',
+    locationFailure: 'Unable to determine your location. Please try again.',
+    locationDenied: 'Location access is blocked. Check your browser and device settings.',
+    locationTimeout: 'Location request timed out. Please try again.',
     currentLocation: 'Current location',
     dataNote: (count) => `${count} places · approximate coordinates`,
     clearSelection: 'Clear selection',
@@ -192,7 +196,9 @@ export const translations: Record<Locale, Translation> = {
     locating: '取得中',
     locationUnsupported: 'このブラウザでは現在地を利用できません。地図はそのまま使えます。',
     locationSuccess: '現在地を地図に表示しました。',
-    locationFailure: '現在地を取得できませんでした。許可しなくても地図は使えます。',
+    locationFailure: '現在地を特定できませんでした。もう一度お試しください。',
+    locationDenied: '位置情報へのアクセスが制限されています。端末とブラウザの設定をご確認ください。',
+    locationTimeout: '現在地の取得に時間がかかっています。もう一度お試しください。',
     currentLocation: '現在地',
     dataNote: (count) => `${count}件 · 座標は暫定`,
     clearSelection: '選択を解除',
