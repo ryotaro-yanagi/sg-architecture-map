@@ -1499,26 +1499,26 @@ function App() {
         const body = document.createElement('div')
         body.className = 'user-location-blob'
         const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)')
-        const shapeA = 'M24 3 C34 2 43 8 45 18 C48 29 41 41 31 45 C19 49 7 43 4 33 C1 23 4 11 13 6 C17 4 20 4 24 3 Z'
-        const shapeB = 'M23 3 C35 1 45 10 44 20 C44 31 39 43 28 45 C17 47 5 40 4 30 C3 19 7 8 17 5 C19 4 21 4 23 3 Z'
-        const shapeC = 'M25 4 C36 3 42 6 46 17 C49 27 43 39 34 44 C23 50 10 46 5 36 C0 27 4 14 12 8 C16 5 20 3 25 4 Z'
-        const shapeD = 'M22 4 C32 0 44 7 46 17 C49 28 40 42 30 45 C18 48 8 44 4 34 C0 24 5 10 14 6 C17 5 19 5 22 4 Z'
-        const morph = reducedMotion.matches ? '' : `<animate attributeName="d" dur="9s" repeatCount="indefinite" calcMode="spline" keyTimes="0;0.3;0.63;1" keySplines=".42 0 .58 1;.42 0 .58 1;.42 0 .58 1" values="${shapeA};${shapeB};${shapeC};${shapeD}"/>`
+        const shapeA = 'M 24.00 6.00 C 28.78 5.78 37.14 5.96 39.83 8.72 C 42.52 11.47 41.23 18.56 40.99 23.41 C 40.75 28.26 41.01 36.26 38.32 39.36 C 35.63 42.46 28.69 42.93 24.00 43.00 C 19.31 43.07 11.57 42.93 8.72 39.83 C 5.87 36.72 5.87 28.08 6.01 23.37 C 6.15 18.67 6.76 12.86 9.61 10.11 C 12.46 7.36 19.22 6.22 24.00 6.00 Z'
+        const shapeB = 'M 24.35 4.00 C 28.16 3.85 32.85 7.67 36.28 10.84 C 39.70 14.00 46.00 19.83 46.00 24.00 C 46.00 28.17 39.70 33.84 36.28 37.16 C 32.85 40.49 28.51 45.03 24.37 45.00 C 20.22 44.96 13.65 40.22 10.10 36.96 C 6.56 33.69 1.67 28.37 2.00 24.38 C 2.33 20.40 8.65 15.00 12.19 11.77 C 15.73 8.54 20.54 4.15 24.35 4.00 Z'
+        const shapeC = 'M 23.70 7.00 C 28.60 7.20 36.30 7.04 39.36 9.68 C 42.41 12.32 42.97 18.94 43.00 23.67 C 43.03 28.40 42.66 36.66 39.56 39.56 C 36.45 42.46 27.99 42.14 23.37 41.99 C 18.75 41.84 12.95 41.52 10.36 38.63 C 7.77 35.73 7.31 28.48 7.00 23.70 C 6.70 18.92 5.80 11.09 8.44 8.44 C 11.09 5.80 18.81 6.81 23.70 7.00 Z'
+        const shapeD = 'M 24.73 3.01 C 28.80 2.90 34.62 6.92 37.20 10.33 C 39.77 13.75 40.53 20.05 40.99 24.59 C 41.45 29.13 42.84 35.93 40.09 39.00 C 37.34 42.08 28.21 44.36 23.65 44.00 C 19.09 43.64 14.54 39.78 11.27 36.73 C 8.00 33.68 2.98 28.80 3.01 24.73 C 3.05 20.67 8.06 14.49 11.50 11.05 C 14.94 7.61 20.66 3.13 24.73 3.01 Z'
+        const morph = reducedMotion.matches ? '' : `<animate attributeName="d" dur="12s" repeatCount="indefinite" calcMode="spline" keyTimes="0;0.26;0.52;0.78;1" keySplines=".45 0 .55 1;.45 0 .55 1;.45 0 .55 1;.45 0 .55 1" values="${shapeA};${shapeB};${shapeC};${shapeD};${shapeA}"/>`
         body.innerHTML = `<svg viewBox="0 0 48 48" aria-hidden="true"><path class="user-location-shape" d="${shapeA}">${morph}</path><g class="user-location-face"></g></svg>`
         element.append(body)
         const face = body.querySelector<SVGGElement>('.user-location-face')!
-        const eye = (x: number, mirror = false) => `<path d="M${x - 1.5} 17.2 C${x - 2.3} 19.1 ${x - 2.0} 25.9 ${x - .3} 27.2 C${x + 1.1} 28.1 ${x + 2.1} 25.0 ${x + 1.7} 20.2 C${x + 1.5} 18.0 ${x - .1} 16.3 ${x - 1.5} 17.2 Z" transform="${mirror ? `rotate(3 ${x} 22)` : `rotate(-2 ${x} 22)`}"/>`
-        const wink = (x: number, mirror = false) => `<path d="M${x - 3.2} ${mirror ? 23.1 : 22.6} C${x - 1.2} ${mirror ? 21.7 : 21.3} ${x + 1.5} ${mirror ? 21.8 : 21.6} ${x + 3.2} ${mirror ? 22.8 : 23.0}" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round"/>`
-        const neutral = eye(18) + eye(30, true)
-        const happy = '<path d="M14.8 18.8 C17.3 20.0 19.3 21.4 20.8 22.8 C19.1 24.0 17.2 25.4 15.2 26.3 M33.2 18.7 C30.9 19.9 29.0 21.3 27.3 22.7 C29.0 24.0 30.8 25.3 32.9 26.1" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"/>'
-        const rest = '<path d="M14.7 22.9 C16.8 22.0 19.1 22.1 21.0 23.0 M27.1 23.0 C29.1 22.1 31.3 22.2 33.2 23.1" fill="none" stroke="currentColor" stroke-width="2.15" stroke-linecap="round"/>'
+        const eye = (x: number, mirror = false) => `<path d="M${x - 2.4} 20.5 C${x - 3.1} 22.0 ${x - 2.7} 25.2 ${x - .6} 26.1 C${x + 1.5} 26.9 ${x + 3.1} 25.2 ${x + 2.8} 22.4 C${x + 2.5} 20.2 ${x - .3} 19.3 ${x - 2.4} 20.5 Z" transform="${mirror ? `rotate(2 ${x} 23)` : `rotate(-1.5 ${x} 23)`}"/>`
+        const wink = (x: number, mirror = false) => `<path d="M${x - 3.3} ${mirror ? 23.5 : 23.2} C${x - 1.4} ${mirror ? 21.9 : 21.7} ${x + 1.5} ${mirror ? 22.0 : 21.8} ${x + 3.3} ${mirror ? 23.3 : 23.6}" fill="none" stroke="currentColor" stroke-width="2.45" stroke-linecap="round"/>`
+        const neutral = eye(19) + eye(29, true)
+        const happy = '<path d="M15.4 19.7 C17.2 20.6 18.9 21.7 20.4 23.0 C18.9 24.2 17.2 25.3 15.4 26.1 M32.7 19.6 C30.9 20.5 29.2 21.7 27.7 23.0 C29.2 24.2 30.8 25.2 32.6 26.0" fill="none" stroke="currentColor" stroke-width="2.35" stroke-linecap="round" stroke-linejoin="round"/>'
+        const rest = '<path d="M15.6 23.5 C17.7 22.4 20.0 22.5 21.6 23.6 M26.4 23.6 C28.2 22.5 30.5 22.6 32.3 23.7" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"/>'
         const expressions = [
-          [wink(18) + eye(30, true), 360],
-          [eye(18) + wink(30, true), 360],
-          [eye(20) + eye(32, true), 900],
-          [eye(16) + eye(28, true), 900],
-          [happy, 700],
-          [rest, 1200],
+          [wink(19) + eye(29, true), 380],
+          [eye(19) + wink(29, true), 380],
+          [eye(20.5) + eye(30.5, true), 950],
+          [eye(17.5) + eye(27.5, true), 950],
+          [happy, 720],
+          [rest, 1250],
         ] as const
         face.innerHTML = neutral
         let lastExpression = -1
@@ -1532,12 +1532,12 @@ function App() {
             face.innerHTML = expression
             window.setTimeout(() => { if (element.isConnected) face.innerHTML = neutral }, duration)
           }
-          window.setTimeout(animateFace, 3200 + Math.random() * 4800)
+          window.setTimeout(animateFace, 3400 + Math.random() * 5000)
         }
         const map = mapRef.current
         if (!map) { setLocating(false); return }
         const sizeForZoom = (zoom: number) => {
-          const stops = [[9, 14], [11, 16], [13, 19], [14, 22], [16, 27], [18, 30]] as const
+          const stops = [[9, 16], [11, 19], [13, 23], [14, 26], [16, 31], [18, 34]] as const
           if (zoom <= stops[0][0]) return stops[0][1]
           if (zoom >= stops[stops.length - 1][0]) return stops[stops.length - 1][1]
           for (let i = 1; i < stops.length; i += 1) {
@@ -1545,9 +1545,9 @@ function App() {
             const [z0, s0] = stops[i - 1]
             if (zoom <= z1) return s0 + ((zoom - z0) / (z1 - z0)) * (s1 - s0)
           }
-          return 30
+          return 34
         }
-        const syncScale = () => body.style.setProperty('--location-scale', String(sizeForZoom(map.getZoom()) / 30))
+        const syncScale = () => body.style.setProperty('--location-scale', String(sizeForZoom(map.getZoom()) / 34))
         syncScale()
         map.on('zoom', syncScale)
         userMarkerZoomCleanupRef.current = () => map.off('zoom', syncScale)
