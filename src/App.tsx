@@ -1490,7 +1490,37 @@ function App() {
         const element = document.createElement('div')
         element.className = 'user-location-marker'
         element.setAttribute('aria-label', t.currentLocation)
-        userMarkerRef.current = new maplibregl.Marker({ element }).setLngLat(location).addTo(mapRef.current!)
+        element.setAttribute('role', 'img')
+        const body = document.createElement('div')
+        body.className = 'user-location-blob'
+        body.innerHTML = '<svg viewBox="0 0 32 25" aria-hidden="true"><ellipse cx="9" cy="12" rx="2.6" ry="4.5" fill="currentColor"/><ellipse cx="23" cy="12" rx="2.6" ry="4.5" fill="currentColor"/></svg>'
+        element.append(body)
+        const face = body.querySelector('svg')!
+        const neutral = face.innerHTML
+        const eye = (x: number) => `<ellipse cx="${x}" cy="12" rx="2.6" ry="4.5" fill="currentColor"/>`
+        const line = (x: number) => `<path d="M${x - 3} 12h6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>`
+        const expressions = [
+          [line(9) + eye(23), 300],
+          [eye(9) + line(23), 300],
+          [eye(13) + eye(27), 950],
+          [eye(5) + eye(19), 950],
+          ['<path d="M5 8l7 4-7 4M27 8l-7 4 7 4" stroke="currentColor" stroke-width="2.3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>', 650],
+          [line(9) + line(23), 1300],
+        ] as const
+        const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)')
+        const animateFace = () => {
+          if (!element.isConnected) return
+          if (!reducedMotion.matches && !document.hidden) {
+            const [expression, duration] = expressions[Math.floor(Math.random() * expressions.length)]
+            face.innerHTML = expression
+            window.setTimeout(() => { face.innerHTML = neutral }, duration)
+          }
+          window.setTimeout(animateFace, 2800 + Math.random() * 4200)
+        }
+        const map = mapRef.current
+        if (!map) { setLocating(false); return }
+        userMarkerRef.current = new maplibregl.Marker({ element, anchor: 'center' }).setLngLat(location).addTo(map)
+        window.setTimeout(animateFace, 1400)
         const wide = window.matchMedia('(min-width: 720px)').matches
         mapRef.current?.flyTo({ center: location, zoom: Math.max(mapRef.current.getZoom(), 14), offset: wide ? [210, 0] : [0, -76], duration: motionDuration(700) })
         setLocating(false)
