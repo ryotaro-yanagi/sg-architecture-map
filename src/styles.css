@@ -293,15 +293,15 @@ html[data-appearance='night'] .brand-mark img { filter: invert(1); }
   transition: opacity 140ms cubic-bezier(.2, 0, 1, .9), visibility 0s linear 140ms;
 }
 .user-location-marker {
-  width: 30px;
-  height: 30px;
+  width: 34px;
+  height: 34px;
   pointer-events: none;
   z-index: 2;
 }
 .user-location-blob {
   --location-scale: .73;
-  width: 30px;
-  height: 30px;
+  width: 34px;
+  height: 34px;
   color: #EDECEE;
   transform: scale(var(--location-scale));
   transform-origin: 50% 50%;
