@@ -1,0 +1,26 @@
+name: Validate pull request
+on:
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: lts/*
+          cache: npm
+      - run: npm ci
+      - run: npm run check:publish
+      - run: npm run test:publish-url
+      - run: npm run test:weather
+      - run: npm run test:collection
+      - run: npm run test:colors
+      - run: npm run test:coastline
+      - run: npm run test:share-record
+      - run: python -m pip install 'fonttools[woff]==4.60.2'
+      - run: python scripts/build-japanese-fonts.py
+      - run: npm run build
