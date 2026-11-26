@@ -718,6 +718,7 @@ function App() {
   const mapContainer = useRef<HTMLDivElement>(null)
   const mapRef = useRef<MapLibreMap | null>(null)
   const userMarkerRef = useRef<maplibregl.Marker | null>(null)
+  const userMarkerZoomCleanupRef = useRef<(() => void) | null>(null)
   const selectedMarkerRef = useRef<maplibregl.Marker | null>(null)
   const detailBackRef = useRef<HTMLButtonElement>(null)
   const visitTriggerRef = useRef<HTMLButtonElement>(null)
@@ -1271,6 +1272,8 @@ function App() {
       disposed = true
       if (readyTimeout !== undefined) window.clearTimeout(readyTimeout)
       map.off('rotate', syncBearing)
+      userMarkerZoomCleanupRef.current?.()
+      userMarkerZoomCleanupRef.current = null
       userMarkerRef.current?.remove()
       selectedMarkerRef.current?.remove()
       map.remove()
@@ -1486,6 +1489,8 @@ function App() {
     navigator.geolocation.getCurrentPosition(
       ({ coords }) => {
         const location: Coordinates = [coords.longitude, coords.latitude]
+        userMarkerZoomCleanupRef.current?.()
+        userMarkerZoomCleanupRef.current = null
         userMarkerRef.current?.remove()
         const element = document.createElement('div')
         element.className = 'user-location-marker'
@@ -1493,34 +1498,61 @@ function App() {
         element.setAttribute('role', 'img')
         const body = document.createElement('div')
         body.className = 'user-location-blob'
-        body.innerHTML = '<svg viewBox="0 0 32 25" aria-hidden="true"><ellipse cx="9" cy="12" rx="2.6" ry="4.5" fill="currentColor"/><ellipse cx="23" cy="12" rx="2.6" ry="4.5" fill="currentColor"/></svg>'
-        element.append(body)
-        const face = body.querySelector('svg')!
-        const neutral = face.innerHTML
-        const eye = (x: number) => `<ellipse cx="${x}" cy="12" rx="2.6" ry="4.5" fill="currentColor"/>`
-        const line = (x: number) => `<path d="M${x - 3} 12h6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>`
-        const expressions = [
-          [line(9) + eye(23), 300],
-          [eye(9) + line(23), 300],
-          [eye(13) + eye(27), 950],
-          [eye(5) + eye(19), 950],
-          ['<path d="M5 8l7 4-7 4M27 8l-7 4 7 4" stroke="currentColor" stroke-width="2.3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>', 650],
-          [line(9) + line(23), 1300],
-        ] as const
         const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)')
+        const shapeA = 'M24 3 C34 2 43 8 45 18 C48 29 41 41 31 45 C19 49 7 43 4 33 C1 23 4 11 13 6 C17 4 20 4 24 3 Z'
+        const shapeB = 'M23 3 C35 1 45 10 44 20 C44 31 39 43 28 45 C17 47 5 40 4 30 C3 19 7 8 17 5 C19 4 21 4 23 3 Z'
+        const shapeC = 'M25 4 C36 3 42 6 46 17 C49 27 43 39 34 44 C23 50 10 46 5 36 C0 27 4 14 12 8 C16 5 20 3 25 4 Z'
+        const shapeD = 'M22 4 C32 0 44 7 46 17 C49 28 40 42 30 45 C18 48 8 44 4 34 C0 24 5 10 14 6 C17 5 19 5 22 4 Z'
+        const morph = reducedMotion.matches ? '' : `<animate attributeName="d" dur="9s" repeatCount="indefinite" calcMode="spline" keyTimes="0;0.3;0.63;1" keySplines=".42 0 .58 1;.42 0 .58 1;.42 0 .58 1" values="${shapeA};${shapeB};${shapeC};${shapeD}"/>`
+        body.innerHTML = `<svg viewBox="0 0 48 48" aria-hidden="true"><path class="user-location-shape" d="${shapeA}">${morph}</path><g class="user-location-face"></g></svg>`
+        element.append(body)
+        const face = body.querySelector<SVGGElement>('.user-location-face')!
+        const eye = (x: number, mirror = false) => `<path d="M${x - 1.5} 17.2 C${x - 2.3} 19.1 ${x - 2.0} 25.9 ${x - .3} 27.2 C${x + 1.1} 28.1 ${x + 2.1} 25.0 ${x + 1.7} 20.2 C${x + 1.5} 18.0 ${x - .1} 16.3 ${x - 1.5} 17.2 Z" transform="${mirror ? `rotate(3 ${x} 22)` : `rotate(-2 ${x} 22)`}"/>`
+        const wink = (x: number, mirror = false) => `<path d="M${x - 3.2} ${mirror ? 23.1 : 22.6} C${x - 1.2} ${mirror ? 21.7 : 21.3} ${x + 1.5} ${mirror ? 21.8 : 21.6} ${x + 3.2} ${mirror ? 22.8 : 23.0}" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round"/>`
+        const neutral = eye(18) + eye(30, true)
+        const happy = '<path d="M14.8 18.8 C17.3 20.0 19.3 21.4 20.8 22.8 C19.1 24.0 17.2 25.4 15.2 26.3 M33.2 18.7 C30.9 19.9 29.0 21.3 27.3 22.7 C29.0 24.0 30.8 25.3 32.9 26.1" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"/>'
+        const rest = '<path d="M14.7 22.9 C16.8 22.0 19.1 22.1 21.0 23.0 M27.1 23.0 C29.1 22.1 31.3 22.2 33.2 23.1" fill="none" stroke="currentColor" stroke-width="2.15" stroke-linecap="round"/>'
+        const expressions = [
+          [wink(18) + eye(30, true), 360],
+          [eye(18) + wink(30, true), 360],
+          [eye(20) + eye(32, true), 900],
+          [eye(16) + eye(28, true), 900],
+          [happy, 700],
+          [rest, 1200],
+        ] as const
+        face.innerHTML = neutral
+        let lastExpression = -1
         const animateFace = () => {
           if (!element.isConnected) return
           if (!reducedMotion.matches && !document.hidden) {
-            const [expression, duration] = expressions[Math.floor(Math.random() * expressions.length)]
+            let index = Math.floor(Math.random() * expressions.length)
+            if (index === lastExpression) index = (index + 1) % expressions.length
+            lastExpression = index
+            const [expression, duration] = expressions[index]
             face.innerHTML = expression
-            window.setTimeout(() => { face.innerHTML = neutral }, duration)
+            window.setTimeout(() => { if (element.isConnected) face.innerHTML = neutral }, duration)
           }
-          window.setTimeout(animateFace, 2800 + Math.random() * 4200)
+          window.setTimeout(animateFace, 3200 + Math.random() * 4800)
         }
         const map = mapRef.current
         if (!map) { setLocating(false); return }
+        const sizeForZoom = (zoom: number) => {
+          const stops = [[9, 14], [11, 16], [13, 19], [14, 22], [16, 27], [18, 30]] as const
+          if (zoom <= stops[0][0]) return stops[0][1]
+          if (zoom >= stops[stops.length - 1][0]) return stops[stops.length - 1][1]
+          for (let i = 1; i < stops.length; i += 1) {
+            const [z1, s1] = stops[i]
+            const [z0, s0] = stops[i - 1]
+            if (zoom <= z1) return s0 + ((zoom - z0) / (z1 - z0)) * (s1 - s0)
+          }
+          return 30
+        }
+        const syncScale = () => body.style.setProperty('--location-scale', String(sizeForZoom(map.getZoom()) / 30))
+        syncScale()
+        map.on('zoom', syncScale)
+        userMarkerZoomCleanupRef.current = () => map.off('zoom', syncScale)
         userMarkerRef.current = new maplibregl.Marker({ element, anchor: 'center' }).setLngLat(location).addTo(map)
-        window.setTimeout(animateFace, 1400)
+        window.setTimeout(animateFace, 1800)
         const wide = window.matchMedia('(min-width: 720px)').matches
         mapRef.current?.flyTo({ center: location, zoom: Math.max(mapRef.current.getZoom(), 14), offset: wide ? [210, 0] : [0, -76], duration: motionDuration(700) })
         setLocating(false)
