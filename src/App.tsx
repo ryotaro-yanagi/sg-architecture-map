@@ -1496,8 +1496,11 @@ function App() {
         setLocating(false)
         setNotice(t.locationSuccess)
       },
-      () => { setLocating(false); setNotice(t.locationFailure) },
-      { enableHighAccuracy: true, timeout: 10000 },
+      (error) => {
+        setLocating(false)
+        setNotice(error.code === 1 ? t.locationDenied : error.code === 3 ? t.locationTimeout : t.locationFailure)
+      },
+      { enableHighAccuracy: false, timeout: 15000, maximumAge: 30000 },
     )
   }
 
