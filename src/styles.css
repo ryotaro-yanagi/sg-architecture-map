@@ -293,29 +293,33 @@ html[data-appearance='night'] .brand-mark img { filter: invert(1); }
   transition: opacity 140ms cubic-bezier(.2, 0, 1, .9), visibility 0s linear 140ms;
 }
 .user-location-marker {
-  width: 40px;
-  height: 37px;
+  width: 30px;
+  height: 30px;
   pointer-events: none;
   z-index: 2;
 }
 .user-location-blob {
-  width: 100%;
-  height: 100%;
-  display: grid;
-  place-items: center;
-  background: #FF4534;
+  --location-scale: .73;
+  width: 30px;
+  height: 30px;
   color: #EDECEE;
-  border-radius: 40% 60% 46% 54% / 62% 41% 59% 38%;
-  animation: sgm-location-organic 8s ease-in-out infinite;
+  transform: scale(var(--location-scale));
+  transform-origin: 50% 50%;
+  transition: transform 120ms linear;
+  will-change: transform;
 }
 .user-location-blob svg {
-  width: 25px;
-  height: 23px;
+  display: block;
+  width: 100%;
+  height: 100%;
   overflow: visible;
 }
-@keyframes sgm-location-organic {
-  0%, 100% { border-radius: 40% 60% 46% 54% / 62% 41% 59% 38%; }
-  50% { border-radius: 62% 38% 64% 36% / 40% 63% 37% 60%; }
+.user-location-shape {
+  fill: #FF4534;
+}
+.user-location-face {
+  fill: currentColor;
+  color: #EDECEE;
 }
 
 .bottom-surface {
@@ -547,7 +551,7 @@ html[data-appearance='night'] .brand-mark img { filter: invert(1); }
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  .user-location-blob { animation: none; }
+  .user-location-blob { transition: none; }
   .bottom-surface { animation: panel-appear 80ms linear both; }
   .collection-surface { animation: panel-appear 80ms linear both; }
   .control-row { transition: none; animation: none; }
