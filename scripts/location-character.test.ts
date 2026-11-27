@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import { readFileSync } from 'node:fs'
 import { avatarSvg, colors, forms, shapeIds, zoomSize } from '../src/locationCharacterShapes.ts'
+import { blinkAmount, BLINK_DURATION_MS, BLINK_INTRO_DELAY_MS, BLINK_MIN_INTERVAL_MS, BLINK_RANDOM_RANGE_MS } from '../src/locationCharacterBehavior.ts'
 
 test('four unique architecture-derived silhouettes share stable form identifiers', () => {
   assert.deepEqual(shapeIds, ['long', 'rise', 'steps', 'sway'])
@@ -70,4 +71,44 @@ test('Night has no halo and Day retains a light separation shadow', () => {
   const source = readFileSync(new URL('../src/styles.css', import.meta.url), 'utf8')
   assert.match(source, /\.user-location-blob--character svg > path:first-child/)
   assert.match(source, /\.night-preview \.user-location-blob--character svg > path:first-child \{\s*filter: none;/)
+})
+
+test('one small introductory blink is followed by unhurried ambient blinks', () => {
+  assert.ok(BLINK_INTRO_DELAY_MS >= 600 && BLINK_INTRO_DELAY_MS <= 1700)
+  assert.ok(BLINK_MIN_INTERVAL_MS >= 9000)
+  assert.ok(BLINK_MIN_INTERVAL_MS + BLINK_RANDOM_RANGE_MS <= 25000)
+  assert.ok(BLINK_DURATION_MS >= 140 && BLINK_DURATION_MS <= 320)
+  assert.equal(blinkAmount(0), 0)
+  assert.equal(blinkAmount(1), 0)
+  assert.ok(blinkAmount(.38) > .9)
+  assert.ok(blinkAmount(.85) < blinkAmount(.45))
+  assert.ok(blinkAmount(-1) === 0 && blinkAmount(2) === 0)
+})
+
+test('location marker provides a 44px touch target and avoids map tap propagation', () => {
+  const css = readFileSync(new URL('../src/styles.css', import.meta.url), 'utf8')
+  const controller = readFileSync(new URL('../src/locationCharacter.ts', import.meta.url), 'utf8')
+  const app = readFileSync(new URL('../src/App.tsx', import.meta.url), 'utf8')
+  assert.match(css, /\.user-location-marker--interactive\s*\{[^}]*width: 44px;[^}]*height: 44px;/)
+  assert.match(css, /\.user-location-marker--interactive:focus-visible/)
+  assert.match(controller, /hitTarget\?\.addEventListener\('pointerdown', stopPointer\)/)
+  assert.match(controller, /hitTarget\?\.addEventListener\('click', onTap\)/)
+  assert.match(controller, /hitTarget\?\.removeEventListener\('click', onTap\)/)
+  assert.match(controller, /hitTarget\.setAttribute\('role', 'button'\)/)
+  assert.match(controller, /hitTarget\.setAttribute\('tabindex', '0'\)/)
+  assert.match(controller, /event\.stopPropagation\(\)/)
+  assert.match(controller, /onActivate\?\.\(\)/)
+  assert.match(app, /現在地のキャラクター。タップすると反応します/)
+  assert.match(app, /Your current-location character\. Tap to interact/)
+})
+
+test('ambient blink and user reaction are canceled with the existing lifecycle', () => {
+  const controller = readFileSync(new URL('../src/locationCharacter.ts', import.meta.url), 'utf8')
+  assert.match(controller, /scheduleBlink\(firstBlink \? BLINK_INTRO_DELAY_MS : undefined\)/)
+  assert.match(controller, /const playBlink = \(tapped: boolean\)/)
+  assert.match(controller, /window\.cancelAnimationFrame\(blinkFrame\)/)
+  assert.match(controller, /window\.clearTimeout\(blinkTimer\)/)
+  assert.match(controller, /if \(!canAnimate\(\) \|\| inMorph\) return/)
+  assert.match(controller, /reduced\.addEventListener\('change', onVisibility\)/)
+  assert.match(controller, /reduced\.removeEventListener\('change', onVisibility\)/)
 })
