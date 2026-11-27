@@ -105,14 +105,14 @@ const buildings = data.buildings as unknown as Building[]
 const overviewBounds: [[number, number], [number, number]] = [[103.62, 1.205], [104.085, 1.465]]
 const overviewPadding = { top: 132, right: 18, bottom: 100, left: 18 }
 const mapStateKey = 'sgm-language-map-state'
-const normalPinWidth = 28
-const normalPinHeight = 33
-const selectedPinWidth = 58
-const selectedPinHeight = 68
+const normalPinWidth = 34
+const normalPinHeight = 40
+const selectedPinWidth = 66
+const selectedPinHeight = 77
 const normalPinOutlineWidth = 2
 const selectedPinOutlineWidth = 2.5
-const normalPinIconSize = 13
-const selectedPinIconSize = 26
+const normalPinIconSize = 15
+const selectedPinIconSize = 30
 const distantSelectionZoomThreshold = 12
 const distantSelectionTargetZoom = 13.8
 
@@ -1228,7 +1228,7 @@ function App() {
         filter: ['==', ['get', 'selected'], false],
         paint: {
           // Keep overview dots quiet while retaining category colors and touch targets.
-          'circle-radius': 4.5,
+          'circle-radius': ['interpolate', ['linear'], ['zoom'], 9, 5.4, 12, 6.2, markerSwitchZoom, 7],
           'circle-color': ['coalesce', ['get', 'mapCategoryColor'], initialTokens.architecture.genericFill],
           'circle-stroke-color': initialTokens.architecture.markerOutline,
           'circle-stroke-width': 0.75,
