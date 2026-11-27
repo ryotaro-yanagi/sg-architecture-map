@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
+import { readFileSync } from 'node:fs'
 import { avatarSvg, colors, forms, shapeIds, zoomSize } from '../src/locationCharacterShapes.ts'
 
 test('four unique architecture-derived silhouettes share stable form identifiers', () => {
@@ -56,4 +57,17 @@ test('different map edge treatments do not change silhouette and face identity',
   assert.match(line, /stroke="#31453B"/)
   assert.equal(plain.includes(colors.ochre), true)
   assert.equal((plain.match(/<ellipse/g) ?? []).length, 4)
+})
+
+test('production locate button mounts the character without a URL flag', () => {
+  const source = readFileSync(new URL('../src/App.tsx', import.meta.url), 'utf8')
+  assert.match(source, /userMarkerZoomCleanupRef\.current\s*=\s*mountLocationCharacter\(\{ map, body \}\)/)
+  assert.match(source, /new maplibregl\.Marker\(\{ element, anchor: 'center' \}\)/)
+  assert.doesNotMatch(source, /locationAvatarRequested|locationAvatar=1/)
+})
+
+test('Night has no halo and Day retains a light separation shadow', () => {
+  const source = readFileSync(new URL('../src/styles.css', import.meta.url), 'utf8')
+  assert.match(source, /\.user-location-blob--character svg > path:first-child/)
+  assert.match(source, /\.night-preview \.user-location-blob--character svg > path:first-child \{\s*filter: none;/)
 })
