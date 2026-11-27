@@ -11,8 +11,15 @@ test('map credits remain discoverable on the map and never expand through MapLib
   assert.match(app, /onClick=\{\(\) => openMapCredits\(false\)\}/)
   assert.match(app, /aria-controls="map-credits-dialog"/)
   assert.doesNotMatch(app, /new maplibregl\.AttributionControl/)
-  assert.match(css, /\.map-credit-entry\s*\{[^}]*top:/)
-  assert.match(css, /\.map-credit-trigger\s*\{[^}]*min-height:\s*44px/)
+  assert.match(css, /\.map-credit-entry\s*\{[^}]*bottom:/)
+  assert.match(css, /\.map-credit-trigger\s*\{[^}]*min-height:\s*32px/)
+  const trigger = css.split('.map-credit-trigger {')[1]?.split('}')[0]
+  assert.ok(trigger)
+  assert.match(trigger, /background:\s*transparent/)
+  assert.match(trigger, /box-shadow:\s*none/)
+  assert.doesNotMatch(trigger, /border-radius:\s*10px/)
+  assert.match(css, /\.state-preview \.map-credit-entry,/)
+  assert.match(css, /\.state-detail \.map-credit-entry/)
 })
 
 test('visible on-map attribution names OpenStreetMap, OpenMapTiles, OpenFreeMap and LTA', () => {
