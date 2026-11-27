@@ -203,6 +203,10 @@ export function mountLocationCharacter({ map, body }: LocationCharacterOptions):
 
     morphTimer = window.setTimeout(() => {
       if (!canAnimate() || inMorph) return
+      // Cancel an idle eye animation before morphing, so a stale animation
+      // frame cannot paint over the new body and eye positions.
+      window.clearTimeout(idleTimer)
+      window.cancelAnimationFrame(frame)
       const options = shapeIds.filter(id => id !== currentShape)
       const destination = options[Math.floor(Math.random() * options.length)]
       const source = currentShape
