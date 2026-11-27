@@ -51,4 +51,4 @@ No geolocation permission is requested by the lab. Its sample marker starts at t
 - The lab places a single sample marker or a 2×2 comparison group. These are visual references only; they do not test automatic morph timing or replace the actual current-location marker.
 - The user may still select a building when tapping near a building pin; that is the existing map behavior.
 - This preview is only a visual candidate tool. It is not evidence of full accessibility compliance; contrast checks must use the real background under each marker.
-- The current UI marker remains the existing red circle with a white border until a separate implementation is explicitly approved.
+- The production current-location marker uses the soft architecture character after PR #17 is merged. The Lab remains only an experimental comparison overlay; it is not the GPS location marker.
