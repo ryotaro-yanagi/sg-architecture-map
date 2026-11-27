@@ -60,6 +60,12 @@ export const getCartographyStudyCamera = (location: string | null): CartographyS
     case 'marina': return { center: [103.851, 1.284], zoom: 15.25 }
     case 'orchard': return { center: [103.837, 1.305], zoom: 15.25 }
     case 'west': return { center: [103.681, 1.347], zoom: 15.25 }
+    // v0.2 isolated caplet review cameras (station-address proxy points).
+    case 'downtown': return { center: [103.8528404, 1.2794462], zoom: 16 }
+    case 'bugis': return { center: [103.8557064, 1.3004651], zoom: 16 }
+    case 'marina-station': return { center: [103.8545978, 1.2764274], zoom: 16 }
+    case 'orchard-station': return { center: [103.8322453, 1.3039799], zoom: 16 }
+    case 'outram': return { center: [103.8395135, 1.2797397], zoom: 16 }
     default: return null
   }
 }
