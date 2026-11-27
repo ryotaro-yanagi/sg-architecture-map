@@ -7,6 +7,7 @@ type Edge = 'none' | 'shadow' | 'keyline'
 type Face = 'neutral' | 'look' | 'rest'
 type Scheme = 'day' | 'night'
 type SizeChoice = 'auto' | '16' | '26' | '34'
+type ViewMode = 'single' | 'compare'
 type Point = [number, number]
 
 interface Form {
@@ -75,6 +76,12 @@ const css = [
   '.sgm-cl-thumb{display:grid;place-items:center;height:29px;width:40px}',
   '.sgm-cl-note{font-size:11px;color:#617168;line-height:1.45;margin:0}',
   '.sgm-cl-bottom{display:flex;gap:5px}.sgm-cl-bottom button{flex:1}',
+  '.sgm-cl-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));',
+  'column-gap:16px;row-gap:9px;width:100%;height:100%;align-items:center;pointer-events:none}',
+  '.sgm-cl-grid-item{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}',
+  '.sgm-cl-grid-label{font:600 10px/1.2 system-ui,sans-serif;color:#26312D;background:#FAFAF8E8;',
+  'border-radius:99px;padding:2px 7px;box-shadow:0 1px 3px #26312D22}',
+  '.sgm-cl-compare-hint{margin:0;font-size:10px;color:#718075}',
   '@media(max-width:640px){.sgm-cl{top:auto;bottom:90px;right:10px;width:min(288px,calc(100vw - 20px));',
   'max-height:calc(100dvh - 125px)}}',
 ].join('')
@@ -128,11 +135,14 @@ interface LabOptions {
 
 /** A sample marker on the real map; it never requests geolocation or updates the production user marker. */
 export function mountCharacterLab({ map, scheme: initialScheme, onSchemeChange }: LabOptions): () => void {
-  let shape: ShapeId = 'rise'
-  let size: SizeChoice = 'auto'
+  // Screenshot-approved reference configuration (v14). Keep size fixed at 34px
+  // for A/B studies; Zoom uses the existing 16–34px SGM scaling function.
+  let shape: ShapeId = 'steps'
+  let size: SizeChoice = '34'
   let edge: Edge = 'shadow'
-  let face: Face = 'neutral'
-  let color: Color = 'coral'
+  let face: Face = 'look'
+  let color: Color = 'ochre'
+  let view: ViewMode = 'single'
   let scheme: Scheme = initialScheme
   let optical = true
   let collapsed = false
@@ -151,6 +161,10 @@ export function mountCharacterLab({ map, scheme: initialScheme, onSchemeChange }
     '<span class="sgm-cl-sub">Development preview · not GPS</span></div>',
     '<button type="button" class="sgm-cl-collapse" data-action="collapse" aria-label="Collapse lab" aria-expanded="true">−</button></header>',
     '<div class="sgm-cl-body">',
+    '<section><div class="sgm-cl-label">Map comparison</div><div class="sgm-cl-row">',
+    '<button type="button" class="sgm-cl-choice" data-view="single" aria-pressed="true">Single</button>',
+    '<button type="button" class="sgm-cl-choice" data-view="compare" aria-pressed="false">All four</button>',
+    '</div><p class="sgm-cl-compare-hint">The same color, face, edge and size for every shape.</p></section>',
     '<section><div class="sgm-cl-label">Shape</div><div class="sgm-cl-forms">',
     ...shapeIds.map(id => '<button type="button" class="sgm-cl-form" data-shape="' + id +
       '" aria-pressed="false"><span class="sgm-cl-thumb" data-thumb="' + id + '"></span>' +
@@ -183,7 +197,7 @@ export function mountCharacterLab({ map, scheme: initialScheme, onSchemeChange }
     '</div></section>',
     '<section><button type="button" class="sgm-cl-choice" data-action="optical" aria-pressed="true">',
     '16px optical correction: on</button></section>',
-    '<p class="sgm-cl-note">Click anywhere on the map to move this sample marker. No location permission needed.</p>',
+    '<p class="sgm-cl-note">Tap the map to move the sample. Use All four, then collapse this panel to compare on the actual map. Not GPS.</p>',
     '<div class="sgm-cl-bottom"><button type="button" class="sgm-cl-choice" data-action="center">Place at map center</button>',
     '<button type="button" class="sgm-cl-choice" data-action="zoom">Zoom to 14</button></div>',
     '</div>',
@@ -198,18 +212,31 @@ export function mountCharacterLab({ map, scheme: initialScheme, onSchemeChange }
 
   const render = () => {
     const actualSize = size === 'auto' ? zoomSize(map.getZoom()) : Number(size)
-    element.style.width = actualSize + 'px'
-    element.style.height = actualSize + 'px'
-    element.innerHTML = avatarSvg(shape, actualSize, color, edge, face, optical)
+    if (view === 'compare') {
+      element.style.width = '184px'
+      element.style.height = '144px'
+      element.setAttribute('aria-label', 'Character Lab, four sample shapes on the map, not GPS')
+      element.innerHTML = '<div class="sgm-cl-grid">' +
+        shapeIds.map(id => '<div class="sgm-cl-grid-item">' +
+          avatarSvg(id, actualSize, color, edge, face, optical) +
+          '<span class="sgm-cl-grid-label">' + forms[id].label + '</span></div>').join('') +
+        '</div>'
+    } else {
+      element.style.width = actualSize + 'px'
+      element.style.height = actualSize + 'px'
+      element.setAttribute('aria-label', 'Character Lab, ' + forms[shape].label + ', not GPS')
+      element.innerHTML = avatarSvg(shape, actualSize, color, edge, face, optical)
+    }
     panel.querySelectorAll<HTMLElement>('[data-thumb]').forEach(el => {
       const id = el.dataset.thumb as ShapeId
       el.innerHTML = avatarSvg(id, 28, color, 'none', 'neutral', false)
     })
-    panel.querySelectorAll<HTMLButtonElement>('button[data-shape], button[data-size], button[data-edge], button[data-color], button[data-face], button[data-scheme]')
+    panel.querySelectorAll<HTMLButtonElement>('button[data-shape], button[data-view], button[data-size], button[data-edge], button[data-color], button[data-face], button[data-scheme]')
       .forEach(button => {
         const data = button.dataset
         button.setAttribute('aria-pressed', String(
-          data.shape === shape || data.size === size || data.edge === edge ||
+          (data.shape === shape && view === 'single') || data.view === view ||
+          data.size === size || data.edge === edge ||
           data.color === color || data.face === face || data.scheme === scheme,
         ))
       })
@@ -228,7 +255,8 @@ export function mountCharacterLab({ map, scheme: initialScheme, onSchemeChange }
     const button = target.closest<HTMLButtonElement>('button')
     if (!button || !panel.contains(button)) return
     const data = button.dataset
-    if (data.shape) shape = data.shape as ShapeId
+    if (data.view) view = data.view as ViewMode
+    if (data.shape) { shape = data.shape as ShapeId; view = 'single' }
     if (data.size) size = data.size as SizeChoice
     if (data.edge) edge = data.edge as Edge
     if (data.color) color = data.color as Color
