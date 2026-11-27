@@ -105,9 +105,11 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
   position: absolute;
   z-index: 14;
   bottom: max(3px, env(safe-area-inset-bottom));
-  /* Align the complete credits group to the Settings control's left edge.
-     Do not position the icon separately from the text block. */
-  left: max(12px, env(safe-area-inset-left));
+  /* Align the whole icon + two-line credit GROUP to the screen's centre,
+     not its individual parts to the nearby Settings button. */
+  left: 50%;
+  transform: translateX(-50%);
+  width: max-content;
   max-width: calc(100% - 24px);
   pointer-events: auto;
 }
