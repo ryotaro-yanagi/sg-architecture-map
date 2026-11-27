@@ -6,7 +6,9 @@ export const railStationLabelLayerId = 'poi_transit'
 export const railStationLabelMinZoom = 14
 export const railStationLabelFilter: FilterSpecification = [
   'all',
-  ['==', ['get', 'class'], 'rail'],
+  // OpenMapTiles poi class is 'railway'; 'rail' is for transportation geometry.
+  ['==', ['get', 'class'], 'railway'],
+  ['match', ['get', 'subclass'], ['station', 'halt', 'subway'], true, false],
   ['any', ['has', 'name'], ['has', 'name_en']],
 ]
 
