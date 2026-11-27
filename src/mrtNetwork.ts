@@ -60,7 +60,7 @@ const featureCollection = {
   })),
 }
 
-// SVG caplets are decoded on demand using MapLibre's styleimagemissing event,
+// SVG caplets are decoded on demand using MapLibre v6's missing-image resolver,
 // rather than eagerly decoding 146 stations × 2 zoom levels × Day/Night.
 // This preserves v0.2's appearance and reduces initial map-load work.
 const imagePrefix = 'sma-network-'
@@ -79,42 +79,52 @@ export const applyMrtNetworkAppearance = (map: MapLibreMap, scheme: MrtAppearanc
   }
 }
 
-// Returns a cleanup function for pending image decoding and the listener.
+// Returns cleanup for pending decode work and the missing-image resolver.
 // The map's sources and layers are subsequently removed by map.remove().
 export const installMrtNetwork = (map: MapLibreMap, tokens: ColorTokens, scheme: MrtAppearance): (() => void) => {
-  const pending = new Set<string>()
+  const pending = new Map<string, Promise<void>>()
   let disposed = false
 
-  const onMissing = (event: { id: string }) => {
-    if (disposed || pending.has(event.id)) return
-    const match = /^sma-network-(day|night)-(context|full)-([a-z0-9-]+)$/.exec(event.id)
+  // MapLibre GL JS v6 requires setMissingStyleImageResolver. The former
+  // styleimagemissing event only reports unresolved images in v6.
+  const resolveMissingImage = (id: string): Promise<void> | void => {
+    if (disposed) return
+    const match = /^sma-network-(day|night)-(context|full)-([a-z0-9-]+)$/.exec(id)
     if (!match) return
     const station = stationsById.get(match[3])
     if (!station || (match[2] === 'context' && station.codes.length < 2)) return
     const appearance = match[1] as MrtAppearance
     const mode = match[2] as MrtIconMode
-    if (event.id !== imageKey(appearance, mode, station.id) || map.hasImage(event.id)) return
+    if (id !== imageKey(appearance, mode, station.id) || map.hasImage(id)) return
+    const existing = pending.get(id)
+    if (existing) return existing
 
-    pending.add(event.id)
-    const image = new Image()
-    image.onload = () => {
-      pending.delete(event.id)
-      if (disposed) return
-      try {
-        if (!map.hasImage(event.id)) map.addImage(event.id, image, { pixelRatio: 3 })
-      } catch (error) {
-        console.warn('MRT station caplet image could not be installed:', error)
+    const task = new Promise<void>(resolve => {
+      const image = new Image()
+      image.onload = () => {
+        if (!disposed) {
+          try {
+            if (!map.hasImage(id)) map.addImage(id, image, { pixelRatio: 3 })
+          } catch (error) {
+            console.warn('MRT station caplet image could not be installed:', error)
+          }
+        }
+        pending.delete(id)
+        resolve()
       }
-    }
-    image.onerror = () => {
-      pending.delete(event.id)
-      console.warn('MRT station caplet image failed to decode:', station.id)
-    }
-    const svg = makeMrtCapletSvg(station, mode, appearance, tokens)
-    image.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`
+      image.onerror = () => {
+        pending.delete(id)
+        console.warn('MRT station caplet image failed to decode:', station.id)
+        resolve()
+      }
+      const svg = makeMrtCapletSvg(station, mode, appearance, tokens)
+      image.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`
+    })
+    pending.set(id, task)
+    return task
   }
 
-  map.on('styleimagemissing', onMissing)
+  map.setMissingStyleImageResolver(resolveMissingImage)
   if (map.getLayer('poi_transit')) map.setFilter('poi_transit', mrtNetworkFallbackFilter)
   map.addSource(networkSourceId, { type: 'geojson', data: featureCollection })
   // Architecture layers are inserted later in App.tsx and retain their priority.
@@ -146,7 +156,7 @@ export const installMrtNetwork = (map: MapLibreMap, tokens: ColorTokens, scheme:
   })
   return () => {
     disposed = true
-    map.off('styleimagemissing', onMissing)
+    map.setMissingStyleImageResolver(() => {})
     pending.clear()
   }
 }
