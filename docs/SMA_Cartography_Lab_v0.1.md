@@ -24,6 +24,15 @@
 
 In local development only, add `?cartographyAudit=1` to the URL and inspect the browser console table after map load. It shows layer ID, type, tile source, effective visibility, zoom range, and original visibility/minzoom. No audit UI is displayed publicly. This captures style state after SMA overrides, not the exact set of rendered vector features.
 
+## Open a focused preview
+
+This experiment includes opt-in deep links to view actual labels at z15.25:
+- `?cartographyPreview=marina` — Downtown / Marina Bay
+- `?cartographyPreview=orchard` — Orchard
+- `?cartographyPreview=west` — Western Singapore near NTU
+
+The parameter is not a user-facing control. It changes only the opening camera when the parameter is present, leaving the default SMA opening unchanged. Confirm station POIs exist and render at each location; a correctly configured filter cannot make missing tile features appear.
+
 ## Visual checks before any merge
 
 1. z11: Singapore overview — no new station labels, existing map and pins unchanged.
