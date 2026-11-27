@@ -14,7 +14,8 @@
 ## Experiment v0.1 — one decision, no runtime A/B UI
 
 - Keep all `poi_*` symbols suppressed except `poi_transit`.
-- In `poi_transit`, show *named* features with `class = rail`; suppress bus and airport labels.
+- In `poi_transit`, show *named* features with `class = railway` and `subclass = station | halt | subway` from the OpenMapTiles POI schema; suppress bus and airport labels.
+- **Correction:** the first version mistakenly used `class = rail` (a transportation geometry class). That returned no matching POI station labels and was corrected after the preview was reported as unchanged.
 - Show railway station names from z14 onwards. Use text only: remove the default icon; neutral, subdued map label styling; normal MapLibre text collision rules.
 - The feature class is not a guarantee that all MRT stations will be present or uniquely labeled. Check the actual Singapore tiles before accepting the change.
 - The rail label remains a background landmark, not a route planner or a new architecture pin.
@@ -38,6 +39,6 @@ Merge only if rail labels materially improve recognition of nearby areas or stat
 ## References
 
 - MapLibre GL JS Map API: https://maplibre.org/maplibre-gl-js/docs/API/classes/Map/
-- OpenMapTiles schema (`poi`, `class`, `name`): https://openmaptiles.org/docs/schema/
+- OpenMapTiles schema (`poi`, `class`, `name`): https://github.com/openmaptiles/openmaptiles/blob/master/layers/poi/poi.yaml
 - OpenFreeMap: https://openfreemap.org/quick_start/
 - SMA design principle: `docs/SGM_Visual_System_v0.2.md` (The City Stays in View).
