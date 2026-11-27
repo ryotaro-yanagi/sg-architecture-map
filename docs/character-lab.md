@@ -2,6 +2,14 @@
 
 This is an isolated visual experiment for the proposed SGM current-location character. It is **not the live user-location marker**.
 
+## Open on iPhone via Vercel GitHub Preview
+
+The GitHub-connected Vercel projects publish a Preview Deployment for this PR branch. Open [PR #16](https://github.com/ryotaro-yanagi/sg-architecture-map/pull/16), follow the deployment's **Visit** link, and append `/en/?lab=character` (or `/ja/?lab=character`) after the preview hostname.
+
+The Vite config enables the lab automatically **only for Vercel Preview builds**, using `VERCEL_ENV === 'preview'`. The regular production build remains unchanged. A query parameter is still required. The preview map is interactive on mobile, without geolocation permission.
+
+If the Vercel project has Deployment Protection enabled, log in to Vercel before visiting the preview.
+
 ## Launch locally
 
 ```bash
@@ -11,7 +19,7 @@ npm run dev
 
 Open `http://localhost:5173/en/?lab=character` (or `/ja/?lab=character`).
 
-The lab is enabled in Vite development. It is not mounted in normal production browsing. To opt in for a **private** production build, set `VITE_ENABLE_CHARACTER_LAB=true` at build time and use the same query parameter. Do not enable that flag for the ordinary public deployment.
+The lab is enabled in Vite development. It is not mounted in normal production browsing. Vercel GitHub Preview builds are auto-enabled; only private custom production builds need `VITE_ENABLE_CHARACTER_LAB=true`. Do not enable that flag for the ordinary public deployment.
 
 ## Compare
 
