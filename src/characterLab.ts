@@ -2,8 +2,10 @@
 import { Marker } from 'maplibre-gl'
 import type { Map as MapLibreMap } from 'maplibre-gl'
 
-import { avatarSvg, colors, forms, shapeIds, zoomSize } from './locationCharacterShapes'
+import { avatarSvg, forms, shapeIds, zoomSize } from './locationCharacterShapes'
 import type { ShapeId, Edge, Face, Scheme, SizeChoice, Color } from './locationCharacterShapes'
+
+type ViewMode = 'single' | 'compare'
 
 const css = [
   '.sgm-cl{position:fixed;top:82px;right:16px;z-index:2500;width:272px;max-height:calc(100dvh - 96px);overflow:auto;',
