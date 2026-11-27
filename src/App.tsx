@@ -1,6 +1,6 @@
 import { Component, useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
 import type { CSSProperties } from 'react'
-import { ArrowLeft, ArrowRight, ArrowSquareOut, CheckCircle, Cloud, CloudRain, CloudSun, DownloadSimple, Gear, Lightning, MagnifyingGlass, Moon, NavigationArrow, Notebook, ShareNetwork, Sneaker, Sun, X } from '@phosphor-icons/react'
+import { ArrowLeft, ArrowRight, ArrowSquareOut, CheckCircle, Cloud, CloudRain, CloudSun, DownloadSimple, Gear, Info, Lightning, MagnifyingGlass, Moon, NavigationArrow, Notebook, ShareNetwork, Sneaker, Sun, X } from '@phosphor-icons/react'
 import * as maplibregl from 'maplibre-gl'
 import { flushSync } from 'react-dom'
 import type { ExpressionSpecification, GeoJSONSource, Map as MapLibreMap } from 'maplibre-gl'
@@ -732,6 +732,10 @@ function App() {
   const settingsTriggerRef = useRef<HTMLButtonElement>(null)
   const settingsDialogRef = useRef<HTMLDialogElement>(null)
   const settingsTitleRef = useRef<HTMLHeadingElement>(null)
+  const creditsTriggerRef = useRef<HTMLButtonElement>(null)
+  const creditsDialogRef = useRef<HTMLDialogElement>(null)
+  const creditsTitleRef = useRef<HTMLHeadingElement>(null)
+  const creditsReturnFocusRef = useRef<HTMLButtonElement | null>(null)
   const collectionOriginRef = useRef<CollectionTab>(getRequestedCollectionTab())
   const collectionCloseRef = useRef<HTMLButtonElement>(null)
   const shareTriggerRef = useRef<HTMLButtonElement>(null)
@@ -1173,12 +1177,9 @@ function App() {
       if (!disposed) setInitialMapState('error')
     }, 15000)
 
-    map.addControl(new maplibregl.AttributionControl({
-      compact: true,
-      ...(isMrtNetworkEnabled(window.location.search)
-        ? { customAttribution: 'MRT stations: Contains information from <a href="https://datamall.lta.gov.sg/content/datamall/en/static-data.html" target="_blank" rel="noopener noreferrer">LTA Train Station and Station Codes datasets</a> (Sep 2026 source snapshot via <a href="https://github.com/abhijitt/mrt-kiasu" target="_blank" rel="noopener noreferrer">MRT Kiasu</a>), made available under the <a href="https://data.gov.sg/open-data-licence" target="_blank" rel="noopener noreferrer">Singapore Open Data Licence</a>.' }
-        : {}),
-    }), 'bottom-left')
+    // Visible map source credits and the detailed licence dialog are rendered
+    // as React UI outside MapLibre; avoid its long expanding attribution popup.
+    // Keep sources/terms synchronised if the basemap or MRT dataset changes.
 
     map.on('load', async () => {
       // Apply geographic styling before asynchronous marker SVG decoding.
@@ -1495,6 +1496,12 @@ function App() {
     settingsDialogRef.current?.showModal()
     window.requestAnimationFrame(() => settingsTitleRef.current?.focus({ preventScroll: true }))
   }
+  const openMapCredits = (fromSettings = false) => {
+    creditsReturnFocusRef.current = fromSettings ? settingsTriggerRef.current : creditsTriggerRef.current
+    if (fromSettings) settingsDialogRef.current?.close()
+    creditsDialogRef.current?.showModal()
+    window.requestAnimationFrame(() => creditsTitleRef.current?.focus({ preventScroll: true }))
+  }
 
   const chooseBuilding = (building: Building, focusMap = false, keyboardActivated = false) => {
     if (keyboardActivated) collectionFocusTargetRef.current = 'preview'
@@ -1715,6 +1722,24 @@ function App() {
         </div>}
       </div>
 
+      <div className="map-credit-entry" aria-hidden={collectionOpen} inert={collectionOpen ? true : undefined}>
+        <button
+          ref={creditsTriggerRef}
+          type="button"
+          className="map-credit-trigger"
+          aria-haspopup="dialog"
+          aria-controls="map-credits-dialog"
+          aria-label={locale === 'ja' ? '地図データの出典・ライセンス' : 'Map data sources and licences'}
+          onClick={() => openMapCredits(false)}
+        >
+          <span className="map-credit-names" aria-hidden="true">
+            <span>© OpenStreetMap contributors · OpenMapTiles</span>
+            <span>OpenFreeMap · LTA</span>
+          </span>
+          <Info aria-hidden="true" size={17} weight="regular" />
+        </button>
+      </div>
+
       {surfaceState === 'explore' && (
         <>
           <div className="experience-actions experience-action-bar" role="group" aria-label={locale === 'ja' ? '建築を巡る' : 'Architecture experiences'}>
@@ -1769,6 +1794,42 @@ function App() {
                 : <Sun aria-hidden="true" size={20} weight="regular" />}
             </button>
 
+        </div>
+        <div className="experience-setting-row">
+          <button
+            className="experience-setting-link"
+            type="button"
+            aria-haspopup="dialog"
+            onClick={() => openMapCredits(true)}
+          >
+            <span>{locale === 'ja' ? '地図データ・出典' : 'Map data & credits'}</span>
+            <ArrowRight aria-hidden="true" size={18} weight="regular" />
+          </button>
+        </div>
+      </dialog>
+
+      <dialog
+        ref={creditsDialogRef}
+        id="map-credits-dialog"
+        className="map-credits-dialog"
+        aria-labelledby="map-credits-title"
+        onClose={() => creditsReturnFocusRef.current?.focus({ preventScroll: true })}
+      >
+        <header>
+          <h2 ref={creditsTitleRef} id="map-credits-title" tabIndex={-1}>{locale === 'ja' ? '地図データ・出典' : 'Map data & credits'}</h2>
+          <button type="button" className="icon-button" aria-label={locale === 'ja' ? '閉じる' : 'Close credits'} onClick={() => creditsDialogRef.current?.close()}><X aria-hidden="true" size={20} /></button>
+        </header>
+        <div className="map-credits-content">
+          <section>
+            <h3>{locale === 'ja' ? 'ベースマップ' : 'Basemap'}</h3>
+            <p><a href="https://openfreemap.org/" target="_blank" rel="noopener noreferrer">OpenFreeMap</a> · <a href="https://openmaptiles.org/" target="_blank" rel="noopener noreferrer">OpenMapTiles</a></p>
+            <p>© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap contributors</a></p>
+          </section>
+          <section>
+            <h3>{locale === 'ja' ? 'MRT駅データ' : 'MRT station data'}</h3>
+            <p>Contains information from the Train Station and Train Station Codes and Chinese Names datasets of the <a href="https://datamall.lta.gov.sg/content/datamall/en/static-data.html" target="_blank" rel="noopener noreferrer">Land Transport Authority (LTA)</a>, made available under the <a href="https://datamall.lta.gov.sg/content/datamall/en/SingaporeOpenDataLicence.html" target="_blank" rel="noopener noreferrer">Singapore Open Data Licence version 1.0</a>.</p>
+            <p>{locale === 'ja' ? '2026年9月に取り込まれたデータを' : 'September 2026 source snapshot processed via '} <a href="https://github.com/abhijitt/mrt-kiasu" target="_blank" rel="noopener noreferrer">MRT Kiasu</a>{locale === 'ja' ? '経由で利用しています。' : '.'}</p>
+          </section>
         </div>
       </dialog>
 
