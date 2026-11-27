@@ -1,52 +1,40 @@
-# SGM / Scale Balance v0.1 — More discoverable, less tool-like
+# SGM / Scale Balance v0.1 — modest production experiment
 
 **Date:** 2026-11-27  
-**Status:** visual experiment, draft PR; not production-approved.
+**Status:** modest size-only change for GitHub Pages; evaluate on mobile before further refinement.
 
-## Intent
+## Why
 
-Keep the established SGM shapes, typography, palette, interaction states, information architecture, and map semantics. Adjust **size and hierarchy only**, so a visitor sees *a small set of things to explore* rather than *a dense toolbox with many functions*.
+The earlier draft comparison was an intentionally strong scale test (64px controls; 34×40px pins; 20–44px location character). This smaller revision is intended as a **subtle one-step enlargement** for day-to-day use, without waiting for a Vercel preview. Keep the established visual language: shapes, categories, colors, positioning, labels, interactions and features.
 
-Reference comparisons supplied by the designer: the current SGM map, Waze's bold controls and moods, a character-collection interface, and a map/list interface with generous type and spacing. The point is not to imitate their illustration styles or feature sets, but to align visual scale with the simplicity of the proposed experience.
+## Changes from main
 
-## Size changes
-
-| Component | Previous | v0.1 test |
+| Component | Main | Modest experiment |
 | --- | --- | --- |
-| Top brand and weather control | 56px | 64px (56px on narrow devices) |
-| Bottom three-action group | 168 × 56px | 192 × 64px (168 × 56px at ≤359px) |
-| Bottom standalone circular controls | 56px | 64px (56px at ≤359px) |
-| Main navigation glyphs | 26px | 28px |
-| Overview architecture-dot radius | 4.5px | interpolate: z9 5.4px; z12 6.2px; z13.5 7px |
-| Normal building pin | 28 × 33px | 34 × 40px |
-| Selected building pin | 58 × 68px | 66 × 77px |
-| Normal / selected category pictogram | 13px / 26px | 15px / 30px |
-| Live location character | 16–34px over z9–18 | 20–44px over z9–18 |
-| MRT station caplet icons | 1× | 1.1× on all 3 zoom stages |
+| Floating main controls | 56px | 60px |
+| Bottom three-action group | 168×56px | 180×60px |
+| Navigation pictograms | 26px | 27px |
+| Building overview dot radius | 4.5px | z9 5px, z12 5.2px, z13.5 5.6px |
+| Normal architecture pin | 28×33px | 31×36px |
+| Selected architecture pin | 58×68px | 62×72px |
+| Normal/selected pin pictograms | 13/26px | 14/28px |
+| Current-location character | 16–34px | 18–38px across z9–18 |
+| MRT station caplet labels | 1× | 1.05× |
 
-Shapes, colors, symbol semantics, map zoom gates, category content, station prioritization, and label/collision rules remain unchanged. The existing invisible architecture hit-target circle remains at 26px radius. Geolocation is still opt-in.
+Narrow-device rule: at ≤359px viewport width, keep previous 56px top/bottom controls so three independent actions do not collide. No change to hit targets, geographic coordinates, location permission semantics, basemap layer styles, text styles, MRT collision policy, or map zoom gates.
 
-The map controls need a 320px-wide fallback: 192 + 64 + 64 + margins would collide. At widths ≤359px the earlier 56px control geometry is preserved; **larger is not automatically better if it causes overlap**.
+## Mobile verification before final approval
 
-## Why sizes are different
+1. Compare the live GitHub Pages site at 390px in EN and JA, Day and Night.
+2. Check the island overview: slightly larger dots should still separate by area, especially CBD.
+3. Zoom to SUTD/Expo: architecture pin must remain clearly more important than MRT label.
+4. Tap Locate and inspect the 30px character at z14, then zoom to z16; verify anchor remains on actual position.
+5. Tap an architecture pin to open Preview / Detail; ensure no clipping or missed taps.
+6. Test narrow 320px and desktop 1280px; credits and compass must not overlap the larger controls.
+7. Verify reduced motion and keyboard navigation remain functional.
 
-- **Navigation = large, stable framing**. The few persistent actions read as approachable single-purpose tools.
-- **Building symbols = things to go explore**. A modest size increase gives content presence while preserving map visibility.
-- **Location character = protagonist**. At the typical location-reveal zoom (z14+) it should be distinctly recognizable as a character, not a tiny GPS speck.
-- **MRT = secondary contextual landmark**. 1.1× gives readability without competing visually with the selected architecture pin.
-- **Selection = exception**. The selected building pin remains substantially larger to preserve focus.
+No visual acceptance is claimed until the site is inspected on real iPhone. GitHub Actions build/validation status is tracked separately.
 
-## Manual approval checklist
+## Revert
 
-- Device widths: 320, 360, 390, 430px; desktop 1280px; both Day and Night; EN and JA.
-- Island overview: no incomprehensible clump of architecture dots over the CBD; category colors still distinguishable.
-- Neighborhood around SUTD/Expo: MRT labels remain legible; no major increase in missing names due to symbol collision.
-- At z13.4–15.5 and z16+, station caplets and architecture pins do not become indistinguishable.
-- Current location at zoom 9, 13, 14 and 16: centered GPS position; eyes and silhouette legible; no flash or scale jump after morphs.
-- Selected pin in search, preview and detail: accurate click detection, no clipping behind top controls or sheets, camera preserves selection.
-- Compass reveal and collapse: no overlap with footer, credits or large locate control.
-- Reduced motion, forced colors and keyboard focus remain intact.
-
-**Pass criteria:** users can explain the primary experience in one sentence, tap the three main actions easily, distinguish themselves from architecture and transit markers, and still explore the dense centre without losing information. Numbers are hypotheses until visually tested on iPhone.
-
-**Scope guard:** no navigation redesign, no new features, no map style/color changes, no cluster algorithm, no adjustment to geographic basemap labels.
+Revert the single eventual squash/merge commit from PR #18 on `main` to return these size changes to the previous state.
