@@ -23,7 +23,9 @@ test('map credits remain discoverable on the map and never expand through MapLib
 })
 
 test('visible on-map attribution names OpenStreetMap, OpenMapTiles, OpenFreeMap and LTA', () => {
-  const label = app.slice(app.indexOf('<span className="map-credit-names"'), app.indexOf('<Info aria-hidden="true" size={17}'))
+  const labelStart = app.indexOf('<span className="map-credit-names"')
+  const labelEnd = app.indexOf('</span>\n        </button>', labelStart)
+  const label = app.slice(labelStart, labelEnd)
   assert.ok(label)
   for (const name of ['OpenStreetMap contributors', 'OpenMapTiles', 'OpenFreeMap', 'LTA']) {
     assert.ok(label.includes(name), `attribution missing: ${name}`)
@@ -53,4 +55,28 @@ test('Settings has an alternate path to the same credits dialog and focus is res
   assert.match(app, /creditsReturnFocusRef\.current\?\.focus/)
   assert.match(app, /settingsDialogRef\.current\?\.close\(\)/)
   assert.match(app, /creditsDialogRef\.current\?\.showModal\(\)/)
+})
+
+test('the icon and centred two-line credits form one adjacent group', () => {
+  const entry = app.slice(app.indexOf('className="map-credit-entry"'), app.indexOf('{surfaceState === \'explore\''))
+  assert.ok(entry.indexOf('<Info aria-hidden="true" size={17}') < entry.indexOf('<span className="map-credit-names"'))
+  // The group itself must be centred in the viewport: left:50% alone
+  // would position its left edge at the centre, so the translation matters.
+  const placement = css.split('.map-credit-entry {')[1]?.split('}')[0]
+  assert.ok(placement)
+  assert.match(placement, /left:\s*50%/)
+  assert.match(placement, /transform:\s*translateX\(-50%\)/)
+  assert.match(placement, /width:\s*max-content/)
+  assert.doesNotMatch(placement, /left:\s*max\(12px/)
+
+  const trigger = css.split('.map-credit-trigger {')[1]?.split('}')[0]
+  const names = css.split('.map-credit-names {')[1]?.split('}')[0]
+  assert.ok(trigger && names)
+  assert.match(trigger, /display:\s*inline-flex/)
+  assert.match(trigger, /align-items:\s*center/)
+  assert.match(trigger, /justify-content:\s*center/)
+  assert.match(trigger, /gap:\s*6px/)
+  assert.doesNotMatch(trigger, /grid-template-columns:\s*56px/)
+  assert.match(names, /text-align:\s*center/)
+  assert.match(css, /\.map-credit-trigger svg\s*\{[^}]*flex-shrink:\s*0/)
 })

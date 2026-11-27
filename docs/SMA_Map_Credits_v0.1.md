@@ -67,3 +67,21 @@ A user screenshot of the first Vercel preview showed the upper-left attribution 
 The revision **does not change the source information or its dialog**. It removes all fill, rounded-card surface, shadow and horizontal/vertical padding; reduces the visible credit typography to 9px, tones it with the map-muted colour, and anchors the credit to the bottom-left map edge, below the floating UI. The text and small ⓘ still open the same dialog. In preview/detail states with a bottom sheet, the small unboxed label is moved below the top-left logo to stay discoverable. Specific thresholds and exact opacity are provisional pending a mobile screenshot.
 
 The credit is intentionally not another floating navigation button. It is a map disclosure/attribution element that should be present but visually secondary. Verify whether the 9px type is still sufficiently readable; if not, prefer restoring 10px before adding any background card.
+
+## v0.1.2 — Icon-first alignment refinement (2026-11-27)
+
+Screenshot review confirmed the quiet bottom-left credits and modal were working. The user requested the ⓘ icon to the **left** of the two-line credit and considered alignment to the Settings control either by left edge or by centre. Adopt **centre alignment**: both controls share the same safe-area-aware left offset (12px), and a 56px-wide first grid column centres the 17px information icon directly beneath the 56px circular Settings button. The credit names occupy the second column. Keep the two-line 9px typography, transparency, modal, source names, tap area and Day/Night styles unchanged. No changes to the underlying credits or licence information.
+
+Check 390px and 320px phone widths, EN/JA, Day/Night, compact/detail sheet states and iPhone safe-area bottom padding. Do not merge without the updated screenshot check.
+
+## v0.1.3 — One centred attribution group (2026-11-27)
+
+The second screenshot revealed an unintended **56px reserved icon column**: the ⓘ was aligned separately to the Settings button but sat too far from the two-line copyright credit. The second text line was left-aligned rather than centred. The user rejected this mixed alignment.
+
+Make the icon and both credit lines one compact `inline-flex` group: `align-items: center`, `justify-content: center`, `gap: 6px`. The 17px icon appears immediately to the left of the text and is vertically centred against the full two-line block; both attribution lines are centred relative to each other with `text-align: center`. Keep the complete group near the lower-left map edge, aligned by its outside left edge to the Settings control's outside left edge, without allocating a separate 56px icon cell. Retain 9px muted type, transparent background, credits modal, source names, and URL links. Verify screenshot before merge.
+
+## v0.1.4 — Centre the complete disclosure in the viewport (2026-11-27)
+
+The prior explanations conflated three distinct alignments: (1) text alignment inside the two lines, (2) spacing between ⓘ and the text, and (3) the **horizontal position of the entire attribution group on the map**. The user's intended choice is (3): bottom-centre or bottom-left. If bottom-left, the entire group's left edge should align with the Settings circle's left edge; **for this iteration the user prefers bottom-centre**.
+
+Keep the cohesive ⓘ + two-line credit group and its 6px internal gap. Set `.map-credit-entry` to `left: 50%; transform: translateX(-50%); width: max-content` so the **complete group** is centred at the map viewport, not just the icon or line text. Preserve the short bottom offset, muted typography, no card surface, and existing dialog. The preview/detail-sheet top-offset rule remains but retains the same horizontal centre. Confirm that the complete group is centred on 390px and 320px screens and does not collide with bottom navigation.

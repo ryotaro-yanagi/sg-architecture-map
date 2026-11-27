@@ -105,13 +105,18 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
   position: absolute;
   z-index: 14;
   bottom: max(3px, env(safe-area-inset-bottom));
-  left: max(8px, env(safe-area-inset-left));
-  max-width: calc(100% - 16px);
+  /* Align the whole icon + two-line credit GROUP to the screen's centre,
+     not its individual parts to the nearby Settings button. */
+  left: 50%;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: calc(100% - 24px);
   pointer-events: auto;
 }
 .map-credit-trigger {
-  display: flex;
+  display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
   min-height: 32px;
   max-width: 100%;
@@ -122,7 +127,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
   box-shadow: none;
   color: var(--muted);
   opacity: .82;
-  text-align: left;
+  text-align: center;
   cursor: pointer;
 }
 .map-credit-names {
@@ -131,11 +136,15 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
   gap: 0;
   min-width: 0;
   font: 400 9px/12px var(--font-ui);
+  text-align: center;
   letter-spacing: 0;
   overflow-wrap: normal;
   text-shadow: 0 0 2px var(--paper);
 }
-.map-credit-trigger svg { flex-shrink: 0; opacity: .8; }
+.map-credit-trigger svg {
+  flex-shrink: 0;
+  opacity: .8;
+}
 .map-credit-trigger:hover, .map-credit-trigger:focus-visible { opacity: 1; }
 .map-credit-trigger:active { opacity: 1; }
 /* At small phone widths the entire attribution remains two unobtrusive lines. */

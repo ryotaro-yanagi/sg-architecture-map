@@ -1732,11 +1732,11 @@ function App() {
           aria-label={locale === 'ja' ? '地図データの出典・ライセンス' : 'Map data sources and licences'}
           onClick={() => openMapCredits(false)}
         >
+          <Info aria-hidden="true" size={17} weight="regular" />
           <span className="map-credit-names" aria-hidden="true">
             <span>© OpenStreetMap contributors · OpenMapTiles</span>
             <span>OpenFreeMap · LTA</span>
           </span>
-          <Info aria-hidden="true" size={17} weight="regular" />
         </button>
       </div>
 
