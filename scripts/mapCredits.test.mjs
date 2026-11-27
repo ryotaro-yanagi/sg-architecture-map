@@ -60,8 +60,15 @@ test('Settings has an alternate path to the same credits dialog and focus is res
 test('the icon and centred two-line credits form one adjacent group', () => {
   const entry = app.slice(app.indexOf('className="map-credit-entry"'), app.indexOf('{surfaceState === \'explore\''))
   assert.ok(entry.indexOf('<Info aria-hidden="true" size={17}') < entry.indexOf('<span className="map-credit-names"'))
-  assert.match(css, /\.map-credit-entry\s*\{[^}]*left:\s*max\(12px, env\(safe-area-inset-left\)\)/)
-  assert.match(css, /\.experience-settings-trigger\s*\{[^}]*left:\s*max\(12px, env\(safe-area-inset-left\)\)/)
+  // The group itself must be centred in the viewport: left:50% alone
+  // would position its left edge at the centre, so the translation matters.
+  const placement = css.split('.map-credit-entry {')[1]?.split('}')[0]
+  assert.ok(placement)
+  assert.match(placement, /left:\s*50%/)
+  assert.match(placement, /transform:\s*translateX\(-50%\)/)
+  assert.match(placement, /width:\s*max-content/)
+  assert.doesNotMatch(placement, /left:\s*max\(12px/)
+
   const trigger = css.split('.map-credit-trigger {')[1]?.split('}')[0]
   const names = css.split('.map-credit-names {')[1]?.split('}')[0]
   assert.ok(trigger && names)
