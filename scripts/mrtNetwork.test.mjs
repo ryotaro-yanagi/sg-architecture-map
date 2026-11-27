@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import test from 'node:test'
+import { isMrtNetworkEnabled } from '../src/mrtActivation.ts'
 
 const data = JSON.parse(readFileSync(new URL('../src/data/mrtStations2026.json', import.meta.url), 'utf8'))
 const stations = data.stations
@@ -89,4 +90,15 @@ test('v0.3.1 shows earlier MRT context without forcing symbol overlap', () => {
   }
   assert.match(src, /labelPriority: 3 - station\.codes\.length/)
   assert.doesNotMatch(src, /match\[2\] === 'context' && station\.codes\.length < 2/)
+})
+
+test('production enables the complete MRT network without a query string', () => {
+  assert.equal(isMrtNetworkEnabled(''), true)
+  assert.equal(isMrtNetworkEnabled('?cartographyPreview=marina-station'), true)
+  assert.equal(isMrtNetworkEnabled('?mrtNetwork=1'), true)
+  assert.equal(isMrtNetworkEnabled('?mrtNetwork=0'), false)
+  assert.equal(isMrtNetworkEnabled('?mrtNetwork=0&mrtPilot=1'), false)
+  assert.equal(isMrtNetworkEnabled('?mrtPilot=1'), false)
+  assert.equal(isMrtNetworkEnabled('?mrtPilot=1&mrtNetwork=1'), true)
+  assert.equal(isMrtNetworkEnabled('?mrtNetwork=invalid'), true)
 })

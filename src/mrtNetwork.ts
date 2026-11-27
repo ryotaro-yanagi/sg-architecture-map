@@ -4,8 +4,8 @@ import type { ColorTokens } from './colorTokens'
 import { makeMrtCapletSvg } from './mrtPilot'
 import type { PilotStation, MrtAppearance, MrtIconMode } from './mrtPilot'
 
-// The v0.3 preview renders the same approved caplets as v0.2, now for the
-// complete snapshot of 146 operational MRT stations. It remains opt-in.
+// The published v0.3.1 renderer reuses the approved caplets from v0.2 for the
+// complete snapshot of 146 operational MRT stations. It is enabled by default.
 // Station codes, geographic proxy points and provenance live in one JSON file.
 export const networkSourceId = 'sma-mrt-network'
 export const networkOverviewLayerId = 'sma-mrt-network-overview'
@@ -16,8 +16,8 @@ export const networkOverviewMinZoom = 13.25
 export const networkContextMinZoom = 14.25
 export const networkFullMinZoom = 15
 
-export const isMrtNetworkEnabled = (search: string): boolean =>
-  new URLSearchParams(search).get('mrtNetwork') === '1'
+// Public default and preview overrides are tested separately from rendering.
+export { isMrtNetworkEnabled } from './mrtActivation'
 
 const stations: ReadonlyArray<PilotStation> = data.stations.map(station => ({
   id: station.id,

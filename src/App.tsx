@@ -1176,7 +1176,7 @@ function App() {
     map.addControl(new maplibregl.AttributionControl({
       compact: true,
       ...(isMrtNetworkEnabled(window.location.search)
-        ? { customAttribution: 'MRT data: <a href="https://datamall.lta.gov.sg/" target="_blank" rel="noopener noreferrer">LTA</a> (Singapore Open Data Licence)' }
+        ? { customAttribution: 'MRT stations: Contains information from <a href="https://datamall.lta.gov.sg/content/datamall/en/static-data.html" target="_blank" rel="noopener noreferrer">LTA Train Station and Station Codes datasets</a> (Sep 2026 source snapshot via <a href="https://github.com/abhijitt/mrt-kiasu" target="_blank" rel="noopener noreferrer">MRT Kiasu</a>), made available under the <a href="https://data.gov.sg/open-data-licence" target="_blank" rel="noopener noreferrer">Singapore Open Data Licence</a>.' }
         : {}),
     }), 'bottom-left')
 
@@ -1195,8 +1195,9 @@ function App() {
         updateMarkerImages(map, colorTokensRef.current.day.architecture, 'day'),
         updateMarkerImages(map, colorTokensRef.current.night.architecture, 'night'),
       ])
-      // The full network and five-station pilot are independent opt-in variants.
-      // Never mount both together; default remains v0.1 railway names.
+      // Default: approved full MRT network. Use ?mrtNetwork=0 for legacy
+      // railway labels, or ?mrtPilot=1 for the former five-station study.
+      // Never mount both independent variants together.
       if (isMrtNetworkEnabled(window.location.search)) {
         try {
           disposeMrtNetwork = installMrtNetwork(map, colorTokensRef.current, initialScheme)

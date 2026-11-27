@@ -59,3 +59,12 @@ git push -u origin main
 ## データについて
 
 試作データは `src/data/buildings.json` に収録しています。座標は暫定の代表点です。写真、公開アクセス可否、未確認の竣工年は補完していません。地図スタイルはOpenFreeMap Libertyを使用し、MapLibreの地図上に提供元クレジットを表示します。
+
+## MRT station context (November 2026)
+
+The architectural map now includes a subdued, line-coloured **MRT station label layer** for 146 operational stations (174 line-specific station codes). At zoom 13.25–14.25, interchange labels appear as compact colour ticks + station name; at zoom 14.25–15, ordinary stations may also appear if space allows; at zoom 15+, station-code caplets + names appear. MapLibre collision handling prevents overlaps when labels do not fit. The architecture markers remain the primary content.
+
+- Default: full MRT labels. Preview overrides: `?mrtNetwork=0` for older Liberty rail labels; `?mrtPilot=1` for the five-station prototype.
+- Data provenance / known limitations: [docs/SMA_MRT_Layer_v0.3.md](docs/SMA_MRT_Layer_v0.3.md) and [docs/SMA_MRT_Layer_v0.3.1.md](docs/SMA_MRT_Layer_v0.3.1.md).
+- **Attribution:** The MRT station dataset contains information from Land Transport Authority (LTA) Train Station and Station Codes datasets, processed from a September 2026 data snapshot via [MRT Kiasu](https://github.com/abhijitt/mrt-kiasu). The underlying LTA data are covered by the [Singapore Open Data Licence](https://data.gov.sg/open-data-licence), **not** the MIT software licence. The map attribution UI links to these sources.
+- Coordinates are approximate label anchors, not pedestrian access locations. Hume and Punggol Coast currently use provisional reference coordinates. LRT and planned future MRT stations are outside this snapshot; updates require verifying their operational status.

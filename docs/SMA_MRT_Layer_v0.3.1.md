@@ -60,3 +60,11 @@ Use these on the v0.3.1 Vercel preview (and keep `mrtNetwork=1`):
 
 - [Style spec / symbol-sort-key and collision placement](https://maplibre.org/maplibre-style-spec/layers/#symbol-sort-key)
 - [MapLibre symbol-layer layout and zoom limits](https://maplibre.org/maplibre-style-spec/layers/)
+
+## Publication activation (2026-11-27)
+
+- The all-station v0.3.1 MRT network is the **default** when no query parameter is present. No public toggle was added.
+- For comparison only, `?mrtNetwork=0` shows the v0.1 generic rail-station labels. `?mrtPilot=1` shows the five-station v0.2 prototype. An explicit `?mrtNetwork=1` takes precedence.
+- The map attribution for the default network now acknowledges LTA Train Station and Station Codes data, the Sep 2026 source extract obtained via MRT Kiasu, and links directly to the Singapore Open Data Licence.
+- This is an **accepted design ready for release after PR CI / production deploy review**. The default view continues to open at SMA's existing Singapore overview; station labels only appear at the chosen zoom thresholds.
+- Remember to validate the 2 provisional station coordinates (Hume and Punggol Coast) and refresh official data after the scheduled 26 Dec 2026 TEL5/DTL3e opening. Do not present a station as operational before verifying the opening.
