@@ -14,6 +14,9 @@ import ColorLabPanel from './ColorLabPanel'
 import { cloneColorTokens, colorTokenCssVariables, readColorLabDraft, saveColorLabDraft } from './colorTokens'
 import type { ArchitectureColorTokens, ColorSchemeTokens, ColorTokens } from './colorTokens'
 import { categoryColor, getMapCategory, mapCategories } from './buildingCategories'
+import { applyRailStationLabels, getCartographyStudyCamera, getCartographyReviewZoom, snapshotCartographyLayers, railStationLabelLayerId } from './cartographyRail'
+import { applyMrtPilotAppearance, installMrtPilot, isMrtPilotEnabled } from './mrtPilot'
+import { applyMrtNetworkAppearance, installMrtNetwork, isMrtNetworkEnabled } from './mrtNetwork'
 import type { MapCategory } from './buildingCategories'
 import { addInitialVisitDate, createArchitectureRecordGroups, getWantToVisitBuildings } from './architectureRecord'
 import { collectionStateStore } from './collection'
@@ -530,6 +533,8 @@ const applyMapStructure = (map: MapLibreMap) => {
     }
     if (id === 'tunnel_path_pedestrian') setPaint(map, id, 'line-opacity', 0.45)
   })
+  // Restore named rail stations only; retain the general POI suppression.
+  applyRailStationLabels(map)
 }
 
 const applyMapColors = (map: MapLibreMap, palette: MapPalette) => {
@@ -568,7 +573,7 @@ const applyMapColors = (map: MapLibreMap, palette: MapPalette) => {
       setPaint(map, id, 'text-color', isWater ? palette.labelWater : isSecondary ? palette.labelSecondary : palette.label)
       setPaint(map, id, 'text-halo-color', palette.labelHalo)
       setPaint(map, id, 'text-halo-width', 1.25)
-      if (isPoi) setPaint(map, id, 'text-opacity', palette.poiOpacity)
+      if (isPoi) setPaint(map, id, 'text-opacity', id === railStationLabelLayerId ? 0.75 : palette.poiOpacity)
     }
   })
 }
@@ -1082,6 +1087,8 @@ function App() {
     const map = mapRef.current
     if (!map || !map.getLayer('building-pins')) return
     applyMapTheme(map, activeColorTokens, nightPreview)
+    if (isMrtNetworkEnabled(window.location.search)) applyMrtNetworkAppearance(map, nightPreview ? 'night' : 'day')
+    else if (isMrtPilotEnabled(window.location.search)) applyMrtPilotAppearance(map, nightPreview ? 'night' : 'day')
   }, [activeColorTokens, nightPreview])
 
   useEffect(() => {
@@ -1121,6 +1128,7 @@ function App() {
 
     setInitialMapState('loading')
     let disposed = false
+    let disposeMrtNetwork: (() => void) | null = null
     let readyTimeout: number | undefined
 
     const finishInitialLoad = () => {
@@ -1131,12 +1139,20 @@ function App() {
 
     let map: MapLibreMap
     try {
+      // Opt-in comparison camera for this experiment; the normal opening
+      // view remains unchanged without ?cartographyPreview=marina.
+      const reviewParams = new URLSearchParams(window.location.search)
+      const studyCamera = getCartographyStudyCamera(reviewParams.get('cartographyPreview'))
+      const reviewZoom = studyCamera ? getCartographyReviewZoom(reviewParams.get('cartographyZoom')) : null
       map = new maplibregl.Map({
         container: mapContainer.current,
         style: 'https://tiles.openfreemap.org/styles/liberty',
-        ...(restoredState
-          ? { center: restoredState.center, zoom: restoredState.zoom }
-          : { bounds: overviewBounds, fitBoundsOptions: { padding: overviewPadding, maxZoom: 12 } }),
+        // An explicit comparison URL overrides a saved camera to make A/B reliable.
+        ...(studyCamera
+          ? { center: studyCamera.center, zoom: reviewZoom ?? studyCamera.zoom }
+          : restoredState
+            ? { center: restoredState.center, zoom: restoredState.zoom }
+            : { bounds: overviewBounds, fitBoundsOptions: { padding: overviewPadding, maxZoom: 12 } }),
         bearing: restoredState?.bearing ?? 0,
         pitch: 0,
         minPitch: 0,
@@ -1157,13 +1173,21 @@ function App() {
       if (!disposed) setInitialMapState('error')
     }, 15000)
 
-    map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-left')
+    map.addControl(new maplibregl.AttributionControl({
+      compact: true,
+      ...(isMrtNetworkEnabled(window.location.search)
+        ? { customAttribution: 'MRT stations: Contains information from <a href="https://datamall.lta.gov.sg/content/datamall/en/static-data.html" target="_blank" rel="noopener noreferrer">LTA Train Station and Station Codes datasets</a> (Sep 2026 source snapshot via <a href="https://github.com/abhijitt/mrt-kiasu" target="_blank" rel="noopener noreferrer">MRT Kiasu</a>), made available under the <a href="https://data.gov.sg/open-data-licence" target="_blank" rel="noopener noreferrer">Singapore Open Data Licence</a>.' }
+        : {}),
+    }), 'bottom-left')
 
     map.on('load', async () => {
       // Apply geographic styling before asynchronous marker SVG decoding.
       // Otherwise Liberty's original buildings and linework can briefly appear.
       const initialScheme = nightPreviewRef.current ? 'night' : 'day'
       const initialTokens = colorTokensRef.current[initialScheme]
+      const shouldAuditCartography = import.meta.env.DEV &&
+        new URLSearchParams(window.location.search).get('cartographyAudit') === '1'
+      const originalLayerState = shouldAuditCartography ? snapshotCartographyLayers(map) : null
       applyMapStructure(map)
       addSingaporeCityLabel(map, mapPaletteFromTokens(initialTokens))
       applyMapColors(map, mapPaletteFromTokens(initialTokens))
@@ -1171,6 +1195,22 @@ function App() {
         updateMarkerImages(map, colorTokensRef.current.day.architecture, 'day'),
         updateMarkerImages(map, colorTokensRef.current.night.architecture, 'night'),
       ])
+      // Default: approved full MRT network. Use ?mrtNetwork=0 for legacy
+      // railway labels, or ?mrtPilot=1 for the former five-station study.
+      // Never mount both independent variants together.
+      if (isMrtNetworkEnabled(window.location.search)) {
+        try {
+          disposeMrtNetwork = installMrtNetwork(map, colorTokensRef.current, initialScheme)
+        } catch (error) {
+          console.warn('MRT v0.3 network preview unavailable:', error)
+        }
+      } else if (isMrtPilotEnabled(window.location.search)) {
+        try {
+          await installMrtPilot(map, colorTokensRef.current, initialScheme)
+        } catch (error) {
+          console.warn('MRT v0.2 caplet prototype unavailable:', error)
+        }
+      }
       map.addSource('buildings', { type: 'geojson', data: featureCollection(selectedId, locale, initialTokens.architecture) })
       map.addLayer({
         id: 'building-hit-targets', type: 'circle', source: 'buildings',
@@ -1209,6 +1249,14 @@ function App() {
       })
       applyMapTheme(map, initialTokens, nightPreviewRef.current)
       applyProductionTypeScaleToMap(map)
+      if (originalLayerState) {
+        const initialById = new Map(originalLayerState.map(layer => [layer.id, layer]))
+        console.table(snapshotCartographyLayers(map).map(layer => ({
+          ...layer,
+          originalVisibility: initialById.get(layer.id)?.visibility ?? 'new',
+          originalMinzoom: initialById.get(layer.id)?.minzoom ?? 'new',
+        })))
+      }
 
       // Do not uncover the application at MapLibre's generic `load` event.
       // First render the SGM sources and layers, then wait until MapLibre has
@@ -1270,6 +1318,7 @@ function App() {
     mapRef.current = map
     return () => {
       disposed = true
+      disposeMrtNetwork?.()
       if (readyTimeout !== undefined) window.clearTimeout(readyTimeout)
       map.off('rotate', syncBearing)
       userMarkerZoomCleanupRef.current?.()

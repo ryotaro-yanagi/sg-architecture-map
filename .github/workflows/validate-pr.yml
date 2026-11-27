@@ -19,6 +19,9 @@ jobs:
       - run: npm run test:weather
       - run: npm run test:collection
       - run: npm run test:colors
+      - run: npm run test:cartography
+      - run: npm run test:mrt
+      - run: npm run test:mrt-network
       - run: npm run test:coastline
       - run: npm run test:share-record
       - run: python -m pip install 'fonttools[woff]==4.60.2'

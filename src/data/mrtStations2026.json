@@ -1,0 +1,2337 @@
+{
+  "metadata": {
+    "snapshotDate": "2026-11-27",
+    "stationCount": 146,
+    "codeCount": 174,
+    "coverage": "Six operational MRT lines including Changi Airport branch and CCL Stage 6; LRT and future openings excluded",
+    "lineCodeMap": {
+      "NS": "NS",
+      "EW": "EW",
+      "CG": "EW",
+      "NE": "NE",
+      "CC": "CC",
+      "DT": "DT",
+      "TE": "TE"
+    },
+    "primarySource": "https://github.com/abhijitt/mrt-kiasu/blob/main/src/data/stations.json",
+    "primarySourceImportedAt": "2026-09-24",
+    "primarySourceLicense": "Singapore Open Data Licence (LTA): https://data.gov.sg/open-data-licence; the mrt-kiasu code is MIT, but its stations.json is not",
+    "upstreamCoordinates": "LTA MRT Station Exit data (exit-coordinate mean) and LTA GTFS stops for CC30–CC32",
+    "fallbackSource": "https://github.com/ayaka14732/singapore-hdb-map/blob/main/data/mrt_network.json",
+    "fallbackStations": [
+      "Hume",
+      "Punggol Coast"
+    ],
+    "officialLineAndStatusCheck": "https://www.lta.gov.sg/content/ltagov/en/getting_around/public_transport/rail_network.html",
+    "plannedNotIncluded": [
+      "TE30 Bedok South",
+      "DT36 Xilin",
+      "TE31/DT37 Sungei Bedok"
+    ],
+    "note": "Station-centre approximation for map labels, not surveyed platform or entrance point; check full licence and primary source freshness before production"
+  },
+  "stations": [
+    {
+      "id": "admiralty",
+      "nameEn": "Admiralty",
+      "coordinates": [
+        103.8008575,
+        1.4404069
+      ],
+      "codes": [
+        {
+          "code": "NS10",
+          "line": "NS"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "aljunied",
+      "nameEn": "Aljunied",
+      "coordinates": [
+        103.8824848,
+        1.3163632
+      ],
+      "codes": [
+        {
+          "code": "EW9",
+          "line": "EW"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "ang-mo-kio",
+      "nameEn": "Ang Mo Kio",
+      "coordinates": [
+        103.8496757,
+        1.3696182
+      ],
+      "codes": [
+        {
+          "code": "NS16",
+          "line": "NS"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "bartley",
+      "nameEn": "Bartley",
+      "coordinates": [
+        103.8795823,
+        1.3428749
+      ],
+      "codes": [
+        {
+          "code": "CC12",
+          "line": "CC"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "bayfront",
+      "nameEn": "Bayfront",
+      "coordinates": [
+        103.8592046,
+        1.2820893
+      ],
+      "codes": [
+        {
+          "code": "CC34",
+          "line": "CC"
+        },
+        {
+          "code": "DT16",
+          "line": "DT"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "bayshore",
+      "nameEn": "Bayshore",
+      "coordinates": [
+        103.9415833,
+        1.3128147
+      ],
+      "codes": [
+        {
+          "code": "TE29",
+          "line": "TE"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "beauty-world",
+      "nameEn": "Beauty World",
+      "coordinates": [
+        103.7757322,
+        1.3410867
+      ],
+      "codes": [
+        {
+          "code": "DT5",
+          "line": "DT"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "bedok",
+      "nameEn": "Bedok",
+      "coordinates": [
+        103.9294115,
+        1.3239705
+      ],
+      "codes": [
+        {
+          "code": "EW5",
+          "line": "EW"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "bedok-north",
+      "nameEn": "Bedok North",
+      "coordinates": [
+        103.9183315,
+        1.3346405
+      ],
+      "codes": [
+        {
+          "code": "DT29",
+          "line": "DT"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "bedok-reservoir",
+      "nameEn": "Bedok Reservoir",
+      "coordinates": [
+        103.933187,
+        1.3364513
+      ],
+      "codes": [
+        {
+          "code": "DT30",
+          "line": "DT"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "bencoolen",
+      "nameEn": "Bencoolen",
+      "coordinates": [
+        103.8498919,
+        1.2983646
+      ],
+      "codes": [
+        {
+          "code": "DT21",
+          "line": "DT"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "bendemeer",
+      "nameEn": "Bendemeer",
+      "coordinates": [
+        103.8631466,
+        1.3136666
+      ],
+      "codes": [
+        {
+          "code": "DT23",
+          "line": "DT"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "bishan",
+      "nameEn": "Bishan",
+      "coordinates": [
+        103.8486921,
+        1.3508634
+      ],
+      "codes": [
+        {
+          "code": "NS17",
+          "line": "NS"
+        },
+        {
+          "code": "CC15",
+          "line": "CC"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "boon-keng",
+      "nameEn": "Boon Keng",
+      "coordinates": [
+        103.861371,
+        1.3190856
+      ],
+      "codes": [
+        {
+          "code": "NE9",
+          "line": "NE"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "boon-lay",
+      "nameEn": "Boon Lay",
+      "coordinates": [
+        103.705718,
+        1.3384759
+      ],
+      "codes": [
+        {
+          "code": "EW27",
+          "line": "EW"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "botanic-gardens",
+      "nameEn": "Botanic Gardens",
+      "coordinates": [
+        103.8154455,
+        1.3226096
+      ],
+      "codes": [
+        {
+          "code": "CC19",
+          "line": "CC"
+        },
+        {
+          "code": "DT9",
+          "line": "DT"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "braddell",
+      "nameEn": "Braddell",
+      "coordinates": [
+        103.8467589,
+        1.3408285
+      ],
+      "codes": [
+        {
+          "code": "NS18",
+          "line": "NS"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "bras-basah",
+      "nameEn": "Bras Basah",
+      "coordinates": [
+        103.8505264,
+        1.2970013
+      ],
+      "codes": [
+        {
+          "code": "CC2",
+          "line": "CC"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "bright-hill",
+      "nameEn": "Bright Hill",
+      "coordinates": [
+        103.8328689,
+        1.3631669
+      ],
+      "codes": [
+        {
+          "code": "TE7",
+          "line": "TE"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "buangkok",
+      "nameEn": "Buangkok",
+      "coordinates": [
+        103.8931735,
+        1.3830297
+      ],
+      "codes": [
+        {
+          "code": "NE15",
+          "line": "NE"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "bugis",
+      "nameEn": "Bugis",
+      "coordinates": [
+        103.8565619,
+        1.2999143
+      ],
+      "codes": [
+        {
+          "code": "EW12",
+          "line": "EW"
+        },
+        {
+          "code": "DT14",
+          "line": "DT"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "bukit-batok",
+      "nameEn": "Bukit Batok",
+      "coordinates": [
+        103.749699,
+        1.3492191
+      ],
+      "codes": [
+        {
+          "code": "NS2",
+          "line": "NS"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "bukit-gombak",
+      "nameEn": "Bukit Gombak",
+      "coordinates": [
+        103.7519618,
+        1.359032
+      ],
+      "codes": [
+        {
+          "code": "NS3",
+          "line": "NS"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "bukit-panjang",
+      "nameEn": "Bukit Panjang",
+      "coordinates": [
+        103.7617357,
+        1.378829
+      ],
+      "codes": [
+        {
+          "code": "DT1",
+          "line": "DT"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "buona-vista",
+      "nameEn": "Buona Vista",
+      "coordinates": [
+        103.7906588,
+        1.3069294
+      ],
+      "codes": [
+        {
+          "code": "EW21",
+          "line": "EW"
+        },
+        {
+          "code": "CC22",
+          "line": "CC"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "caldecott",
+      "nameEn": "Caldecott",
+      "coordinates": [
+        103.8400353,
+        1.337487
+      ],
+      "codes": [
+        {
+          "code": "CC17",
+          "line": "CC"
+        },
+        {
+          "code": "TE9",
+          "line": "TE"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "canberra",
+      "nameEn": "Canberra",
+      "coordinates": [
+        103.8297122,
+        1.4432274
+      ],
+      "codes": [
+        {
+          "code": "NS12",
+          "line": "NS"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "cantonment",
+      "nameEn": "Cantonment",
+      "coordinates": [
+        103.83663,
+        1.27294
+      ],
+      "codes": [
+        {
+          "code": "CC31",
+          "line": "CC"
+        }
+      ],
+      "coordMethod": "lta-gtfs"
+    },
+    {
+      "id": "cashew",
+      "nameEn": "Cashew",
+      "coordinates": [
+        103.7642345,
+        1.3698333
+      ],
+      "codes": [
+        {
+          "code": "DT2",
+          "line": "DT"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "changi-airport",
+      "nameEn": "Changi Airport",
+      "coordinates": [
+        103.9882906,
+        1.3567809
+      ],
+      "codes": [
+        {
+          "code": "CG2",
+          "line": "EW"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "chinatown",
+      "nameEn": "Chinatown",
+      "coordinates": [
+        103.8440727,
+        1.2846415
+      ],
+      "codes": [
+        {
+          "code": "NE4",
+          "line": "NE"
+        },
+        {
+          "code": "DT19",
+          "line": "DT"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "chinese-garden",
+      "nameEn": "Chinese Garden",
+      "coordinates": [
+        103.732785,
+        1.3419955
+      ],
+      "codes": [
+        {
+          "code": "EW25",
+          "line": "EW"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "choa-chu-kang",
+      "nameEn": "Choa Chu Kang",
+      "coordinates": [
+        103.744446,
+        1.38522
+      ],
+      "codes": [
+        {
+          "code": "NS4",
+          "line": "NS"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "city-hall",
+      "nameEn": "City Hall",
+      "coordinates": [
+        103.8524408,
+        1.2932059
+      ],
+      "codes": [
+        {
+          "code": "NS25",
+          "line": "NS"
+        },
+        {
+          "code": "EW13",
+          "line": "EW"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "clarke-quay",
+      "nameEn": "Clarke Quay",
+      "coordinates": [
+        103.846565,
+        1.2886156
+      ],
+      "codes": [
+        {
+          "code": "NE5",
+          "line": "NE"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "clementi",
+      "nameEn": "Clementi",
+      "coordinates": [
+        103.7653719,
+        1.3147708
+      ],
+      "codes": [
+        {
+          "code": "EW23",
+          "line": "EW"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "commonwealth",
+      "nameEn": "Commonwealth",
+      "coordinates": [
+        103.7983788,
+        1.3023727
+      ],
+      "codes": [
+        {
+          "code": "EW20",
+          "line": "EW"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "dakota",
+      "nameEn": "Dakota",
+      "coordinates": [
+        103.8886433,
+        1.3084555
+      ],
+      "codes": [
+        {
+          "code": "CC8",
+          "line": "CC"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "dhoby-ghaut",
+      "nameEn": "Dhoby Ghaut",
+      "coordinates": [
+        103.8455017,
+        1.2994107
+      ],
+      "codes": [
+        {
+          "code": "NS24",
+          "line": "NS"
+        },
+        {
+          "code": "NE6",
+          "line": "NE"
+        },
+        {
+          "code": "CC1",
+          "line": "CC"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "dover",
+      "nameEn": "Dover",
+      "coordinates": [
+        103.7783848,
+        1.3115543
+      ],
+      "codes": [
+        {
+          "code": "EW22",
+          "line": "EW"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "downtown",
+      "nameEn": "Downtown",
+      "coordinates": [
+        103.8527711,
+        1.2795532
+      ],
+      "codes": [
+        {
+          "code": "DT17",
+          "line": "DT"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "esplanade",
+      "nameEn": "Esplanade",
+      "coordinates": [
+        103.8556804,
+        1.2931943
+      ],
+      "codes": [
+        {
+          "code": "CC3",
+          "line": "CC"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "eunos",
+      "nameEn": "Eunos",
+      "coordinates": [
+        103.9028971,
+        1.3195366
+      ],
+      "codes": [
+        {
+          "code": "EW7",
+          "line": "EW"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "expo",
+      "nameEn": "Expo",
+      "coordinates": [
+        103.962474,
+        1.3351364
+      ],
+      "codes": [
+        {
+          "code": "CG1",
+          "line": "EW"
+        },
+        {
+          "code": "DT35",
+          "line": "DT"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "farrer-park",
+      "nameEn": "Farrer Park",
+      "coordinates": [
+        103.8543372,
+        1.312161
+      ],
+      "codes": [
+        {
+          "code": "NE8",
+          "line": "NE"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "farrer-road",
+      "nameEn": "Farrer Road",
+      "coordinates": [
+        103.8076772,
+        1.3175229
+      ],
+      "codes": [
+        {
+          "code": "CC20",
+          "line": "CC"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "fort-canning",
+      "nameEn": "Fort Canning",
+      "coordinates": [
+        103.8442975,
+        1.2926182
+      ],
+      "codes": [
+        {
+          "code": "DT20",
+          "line": "DT"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "gardens-by-the-bay",
+      "nameEn": "Gardens by the Bay",
+      "coordinates": [
+        103.8679032,
+        1.2791668
+      ],
+      "codes": [
+        {
+          "code": "TE22",
+          "line": "TE"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "geylang-bahru",
+      "nameEn": "Geylang Bahru",
+      "coordinates": [
+        103.8716749,
+        1.3213354
+      ],
+      "codes": [
+        {
+          "code": "DT24",
+          "line": "DT"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "great-world",
+      "nameEn": "Great World",
+      "coordinates": [
+        103.8330916,
+        1.2942962
+      ],
+      "codes": [
+        {
+          "code": "TE15",
+          "line": "TE"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "gul-circle",
+      "nameEn": "Gul Circle",
+      "coordinates": [
+        103.6599395,
+        1.3189347
+      ],
+      "codes": [
+        {
+          "code": "EW30",
+          "line": "EW"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "harbourfront",
+      "nameEn": "HarbourFront",
+      "coordinates": [
+        103.8212976,
+        1.2654758
+      ],
+      "codes": [
+        {
+          "code": "NE1",
+          "line": "NE"
+        },
+        {
+          "code": "CC29",
+          "line": "CC"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "havelock",
+      "nameEn": "Havelock",
+      "coordinates": [
+        103.833734,
+        1.2884385
+      ],
+      "codes": [
+        {
+          "code": "TE16",
+          "line": "TE"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "haw-par-villa",
+      "nameEn": "Haw Par Villa",
+      "coordinates": [
+        103.7820064,
+        1.2830553
+      ],
+      "codes": [
+        {
+          "code": "CC25",
+          "line": "CC"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "hillview",
+      "nameEn": "Hillview",
+      "coordinates": [
+        103.7673984,
+        1.3622793
+      ],
+      "codes": [
+        {
+          "code": "DT3",
+          "line": "DT"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "holland-village",
+      "nameEn": "Holland Village",
+      "coordinates": [
+        103.7958873,
+        1.3110003
+      ],
+      "codes": [
+        {
+          "code": "CC21",
+          "line": "CC"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "hougang",
+      "nameEn": "Hougang",
+      "coordinates": [
+        103.8924644,
+        1.3714322
+      ],
+      "codes": [
+        {
+          "code": "NE14",
+          "line": "NE"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "hume",
+      "nameEn": "Hume",
+      "coordinates": [
+        103.7690913,
+        1.3544942
+      ],
+      "codes": [
+        {
+          "code": "DT4",
+          "line": "DT"
+        }
+      ],
+      "coordMethod": "reference-map-proxy"
+    },
+    {
+      "id": "jalan-besar",
+      "nameEn": "Jalan Besar",
+      "coordinates": [
+        103.8552704,
+        1.3051786
+      ],
+      "codes": [
+        {
+          "code": "DT22",
+          "line": "DT"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "joo-koon",
+      "nameEn": "Joo Koon",
+      "coordinates": [
+        103.6785824,
+        1.3277291
+      ],
+      "codes": [
+        {
+          "code": "EW29",
+          "line": "EW"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "jurong-east",
+      "nameEn": "Jurong East",
+      "coordinates": [
+        103.7423651,
+        1.3332114
+      ],
+      "codes": [
+        {
+          "code": "NS1",
+          "line": "NS"
+        },
+        {
+          "code": "EW24",
+          "line": "EW"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "kaki-bukit",
+      "nameEn": "Kaki Bukit",
+      "coordinates": [
+        103.9092757,
+        1.3351165
+      ],
+      "codes": [
+        {
+          "code": "DT28",
+          "line": "DT"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "kallang",
+      "nameEn": "Kallang",
+      "coordinates": [
+        103.8716589,
+        1.3116611
+      ],
+      "codes": [
+        {
+          "code": "EW10",
+          "line": "EW"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "katong-park",
+      "nameEn": "Katong Park",
+      "coordinates": [
+        103.8860806,
+        1.2979591
+      ],
+      "codes": [
+        {
+          "code": "TE24",
+          "line": "TE"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "kembangan",
+      "nameEn": "Kembangan",
+      "coordinates": [
+        103.9129202,
+        1.321038
+      ],
+      "codes": [
+        {
+          "code": "EW6",
+          "line": "EW"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "kent-ridge",
+      "nameEn": "Kent Ridge",
+      "coordinates": [
+        103.7845752,
+        1.2934869
+      ],
+      "codes": [
+        {
+          "code": "CC24",
+          "line": "CC"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "keppel",
+      "nameEn": "Keppel",
+      "coordinates": [
+        103.8304,
+        1.27009
+      ],
+      "codes": [
+        {
+          "code": "CC30",
+          "line": "CC"
+        }
+      ],
+      "coordMethod": "lta-gtfs"
+    },
+    {
+      "id": "khatib",
+      "nameEn": "Khatib",
+      "coordinates": [
+        103.8329368,
+        1.4174038
+      ],
+      "codes": [
+        {
+          "code": "NS14",
+          "line": "NS"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "king-albert-park",
+      "nameEn": "King Albert Park",
+      "coordinates": [
+        103.7837959,
+        1.3357566
+      ],
+      "codes": [
+        {
+          "code": "DT6",
+          "line": "DT"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "kovan",
+      "nameEn": "Kovan",
+      "coordinates": [
+        103.8848266,
+        1.3599804
+      ],
+      "codes": [
+        {
+          "code": "NE13",
+          "line": "NE"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "kranji",
+      "nameEn": "Kranji",
+      "coordinates": [
+        103.7620527,
+        1.4249607
+      ],
+      "codes": [
+        {
+          "code": "NS7",
+          "line": "NS"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "labrador-park",
+      "nameEn": "Labrador Park",
+      "coordinates": [
+        103.8023556,
+        1.272107
+      ],
+      "codes": [
+        {
+          "code": "CC27",
+          "line": "CC"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "lakeside",
+      "nameEn": "Lakeside",
+      "coordinates": [
+        103.7210789,
+        1.344123
+      ],
+      "codes": [
+        {
+          "code": "EW26",
+          "line": "EW"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "lavender",
+      "nameEn": "Lavender",
+      "coordinates": [
+        103.8628467,
+        1.307394
+      ],
+      "codes": [
+        {
+          "code": "EW11",
+          "line": "EW"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "lentor",
+      "nameEn": "Lentor",
+      "coordinates": [
+        103.836552,
+        1.3847386
+      ],
+      "codes": [
+        {
+          "code": "TE5",
+          "line": "TE"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "little-india",
+      "nameEn": "Little India",
+      "coordinates": [
+        103.8492794,
+        1.3067475
+      ],
+      "codes": [
+        {
+          "code": "NE7",
+          "line": "NE"
+        },
+        {
+          "code": "DT12",
+          "line": "DT"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "lorong-chuan",
+      "nameEn": "Lorong Chuan",
+      "coordinates": [
+        103.863926,
+        1.3515888
+      ],
+      "codes": [
+        {
+          "code": "CC14",
+          "line": "CC"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "macpherson",
+      "nameEn": "MacPherson",
+      "coordinates": [
+        103.8895583,
+        1.3258707
+      ],
+      "codes": [
+        {
+          "code": "CC10",
+          "line": "CC"
+        },
+        {
+          "code": "DT26",
+          "line": "DT"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "marina-bay",
+      "nameEn": "Marina Bay",
+      "coordinates": [
+        103.8551307,
+        1.2754512
+      ],
+      "codes": [
+        {
+          "code": "NS27",
+          "line": "NS"
+        },
+        {
+          "code": "CC33",
+          "line": "CC"
+        },
+        {
+          "code": "TE20",
+          "line": "TE"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "marina-south-pier",
+      "nameEn": "Marina South Pier",
+      "coordinates": [
+        103.8629549,
+        1.2709839
+      ],
+      "codes": [
+        {
+          "code": "NS28",
+          "line": "NS"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "marine-parade",
+      "nameEn": "Marine Parade",
+      "coordinates": [
+        103.9068439,
+        1.3037773
+      ],
+      "codes": [
+        {
+          "code": "TE26",
+          "line": "TE"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "marine-terrace",
+      "nameEn": "Marine Terrace",
+      "coordinates": [
+        103.9150744,
+        1.3066939
+      ],
+      "codes": [
+        {
+          "code": "TE27",
+          "line": "TE"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "marsiling",
+      "nameEn": "Marsiling",
+      "coordinates": [
+        103.7741096,
+        1.4326935
+      ],
+      "codes": [
+        {
+          "code": "NS8",
+          "line": "NS"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "marymount",
+      "nameEn": "Marymount",
+      "coordinates": [
+        103.8395735,
+        1.3484233
+      ],
+      "codes": [
+        {
+          "code": "CC16",
+          "line": "CC"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "mattar",
+      "nameEn": "Mattar",
+      "coordinates": [
+        103.8832403,
+        1.3268574
+      ],
+      "codes": [
+        {
+          "code": "DT25",
+          "line": "DT"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "maxwell",
+      "nameEn": "Maxwell",
+      "coordinates": [
+        103.8439921,
+        1.2807151
+      ],
+      "codes": [
+        {
+          "code": "TE18",
+          "line": "TE"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "mayflower",
+      "nameEn": "Mayflower",
+      "coordinates": [
+        103.8367656,
+        1.3720404
+      ],
+      "codes": [
+        {
+          "code": "TE6",
+          "line": "TE"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "mountbatten",
+      "nameEn": "Mountbatten",
+      "coordinates": [
+        103.8829229,
+        1.3063993
+      ],
+      "codes": [
+        {
+          "code": "CC7",
+          "line": "CC"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "napier",
+      "nameEn": "Napier",
+      "coordinates": [
+        103.8194952,
+        1.3066405
+      ],
+      "codes": [
+        {
+          "code": "TE12",
+          "line": "TE"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "newton",
+      "nameEn": "Newton",
+      "coordinates": [
+        103.8381143,
+        1.3127635
+      ],
+      "codes": [
+        {
+          "code": "NS21",
+          "line": "NS"
+        },
+        {
+          "code": "DT11",
+          "line": "DT"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "nicoll-highway",
+      "nameEn": "Nicoll Highway",
+      "coordinates": [
+        103.8638289,
+        1.2999153
+      ],
+      "codes": [
+        {
+          "code": "CC5",
+          "line": "CC"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "novena",
+      "nameEn": "Novena",
+      "coordinates": [
+        103.8438645,
+        1.3204954
+      ],
+      "codes": [
+        {
+          "code": "NS20",
+          "line": "NS"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "one-north",
+      "nameEn": "one-north",
+      "coordinates": [
+        103.7875464,
+        1.2997941
+      ],
+      "codes": [
+        {
+          "code": "CC23",
+          "line": "CC"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "orchard",
+      "nameEn": "Orchard",
+      "coordinates": [
+        103.8318596,
+        1.3037892
+      ],
+      "codes": [
+        {
+          "code": "NS22",
+          "line": "NS"
+        },
+        {
+          "code": "TE14",
+          "line": "TE"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "orchard-boulevard",
+      "nameEn": "Orchard Boulevard",
+      "coordinates": [
+        103.8237668,
+        1.3030436
+      ],
+      "codes": [
+        {
+          "code": "TE13",
+          "line": "TE"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "outram-park",
+      "nameEn": "Outram Park",
+      "coordinates": [
+        103.8390765,
+        1.2807283
+      ],
+      "codes": [
+        {
+          "code": "EW16",
+          "line": "EW"
+        },
+        {
+          "code": "NE3",
+          "line": "NE"
+        },
+        {
+          "code": "TE17",
+          "line": "TE"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "pasir-panjang",
+      "nameEn": "Pasir Panjang",
+      "coordinates": [
+        103.7920302,
+        1.2760032
+      ],
+      "codes": [
+        {
+          "code": "CC26",
+          "line": "CC"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "pasir-ris",
+      "nameEn": "Pasir Ris",
+      "coordinates": [
+        103.9492351,
+        1.3728641
+      ],
+      "codes": [
+        {
+          "code": "EW1",
+          "line": "EW"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "paya-lebar",
+      "nameEn": "Paya Lebar",
+      "coordinates": [
+        103.8923301,
+        1.3178337
+      ],
+      "codes": [
+        {
+          "code": "EW8",
+          "line": "EW"
+        },
+        {
+          "code": "CC9",
+          "line": "CC"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "pioneer",
+      "nameEn": "Pioneer",
+      "coordinates": [
+        103.6971425,
+        1.3375881
+      ],
+      "codes": [
+        {
+          "code": "EW28",
+          "line": "EW"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "potong-pasir",
+      "nameEn": "Potong Pasir",
+      "coordinates": [
+        103.8690012,
+        1.3316721
+      ],
+      "codes": [
+        {
+          "code": "NE10",
+          "line": "NE"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "prince-edward-road",
+      "nameEn": "Prince Edward Road",
+      "coordinates": [
+        103.84749,
+        1.27327
+      ],
+      "codes": [
+        {
+          "code": "CC32",
+          "line": "CC"
+        }
+      ],
+      "coordMethod": "lta-gtfs"
+    },
+    {
+      "id": "promenade",
+      "nameEn": "Promenade",
+      "coordinates": [
+        103.860349,
+        1.2932255
+      ],
+      "codes": [
+        {
+          "code": "CC4",
+          "line": "CC"
+        },
+        {
+          "code": "DT15",
+          "line": "DT"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "punggol",
+      "nameEn": "Punggol",
+      "coordinates": [
+        103.9022046,
+        1.4048162
+      ],
+      "codes": [
+        {
+          "code": "NE17",
+          "line": "NE"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "punggol-coast",
+      "nameEn": "Punggol Coast",
+      "coordinates": [
+        103.9101563,
+        1.4149105
+      ],
+      "codes": [
+        {
+          "code": "NE18",
+          "line": "NE"
+        }
+      ],
+      "coordMethod": "reference-map-proxy"
+    },
+    {
+      "id": "queenstown",
+      "nameEn": "Queenstown",
+      "coordinates": [
+        103.8058928,
+        1.2948516
+      ],
+      "codes": [
+        {
+          "code": "EW19",
+          "line": "EW"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "raffles-place",
+      "nameEn": "Raffles Place",
+      "coordinates": [
+        103.8514147,
+        1.2837038
+      ],
+      "codes": [
+        {
+          "code": "NS26",
+          "line": "NS"
+        },
+        {
+          "code": "EW14",
+          "line": "EW"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "redhill",
+      "nameEn": "Redhill",
+      "coordinates": [
+        103.817122,
+        1.2894283
+      ],
+      "codes": [
+        {
+          "code": "EW18",
+          "line": "EW"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "rochor",
+      "nameEn": "Rochor",
+      "coordinates": [
+        103.8527396,
+        1.3038095
+      ],
+      "codes": [
+        {
+          "code": "DT13",
+          "line": "DT"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "sembawang",
+      "nameEn": "Sembawang",
+      "coordinates": [
+        103.8200151,
+        1.4489224
+      ],
+      "codes": [
+        {
+          "code": "NS11",
+          "line": "NS"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "sengkang",
+      "nameEn": "Sengkang",
+      "coordinates": [
+        103.8954894,
+        1.3917193
+      ],
+      "codes": [
+        {
+          "code": "NE16",
+          "line": "NE"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "serangoon",
+      "nameEn": "Serangoon",
+      "coordinates": [
+        103.8732974,
+        1.3502623
+      ],
+      "codes": [
+        {
+          "code": "NE12",
+          "line": "NE"
+        },
+        {
+          "code": "CC13",
+          "line": "CC"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "shenton-way",
+      "nameEn": "Shenton Way",
+      "coordinates": [
+        103.8509358,
+        1.2774706
+      ],
+      "codes": [
+        {
+          "code": "TE19",
+          "line": "TE"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "siglap",
+      "nameEn": "Siglap",
+      "coordinates": [
+        103.929979,
+        1.3098545
+      ],
+      "codes": [
+        {
+          "code": "TE28",
+          "line": "TE"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "simei",
+      "nameEn": "Simei",
+      "coordinates": [
+        103.9538187,
+        1.3426618
+      ],
+      "codes": [
+        {
+          "code": "EW3",
+          "line": "EW"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "sixth-avenue",
+      "nameEn": "Sixth Avenue",
+      "coordinates": [
+        103.7967072,
+        1.3311509
+      ],
+      "codes": [
+        {
+          "code": "DT7",
+          "line": "DT"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "somerset",
+      "nameEn": "Somerset",
+      "coordinates": [
+        103.8388395,
+        1.3003681
+      ],
+      "codes": [
+        {
+          "code": "NS23",
+          "line": "NS"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "springleaf",
+      "nameEn": "Springleaf",
+      "coordinates": [
+        103.8181585,
+        1.3980974
+      ],
+      "codes": [
+        {
+          "code": "TE4",
+          "line": "TE"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "stadium",
+      "nameEn": "Stadium",
+      "coordinates": [
+        103.8753131,
+        1.3029407
+      ],
+      "codes": [
+        {
+          "code": "CC6",
+          "line": "CC"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "stevens",
+      "nameEn": "Stevens",
+      "coordinates": [
+        103.8257878,
+        1.3201417
+      ],
+      "codes": [
+        {
+          "code": "DT10",
+          "line": "DT"
+        },
+        {
+          "code": "TE11",
+          "line": "TE"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "tai-seng",
+      "nameEn": "Tai Seng",
+      "coordinates": [
+        103.8880342,
+        1.3354358
+      ],
+      "codes": [
+        {
+          "code": "CC11",
+          "line": "CC"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "tampines",
+      "nameEn": "Tampines",
+      "coordinates": [
+        103.943782,
+        1.3543165
+      ],
+      "codes": [
+        {
+          "code": "EW2",
+          "line": "EW"
+        },
+        {
+          "code": "DT32",
+          "line": "DT"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "tampines-east",
+      "nameEn": "Tampines East",
+      "coordinates": [
+        103.9552831,
+        1.3561431
+      ],
+      "codes": [
+        {
+          "code": "DT33",
+          "line": "DT"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "tampines-west",
+      "nameEn": "Tampines West",
+      "coordinates": [
+        103.9385726,
+        1.3453149
+      ],
+      "codes": [
+        {
+          "code": "DT31",
+          "line": "DT"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "tan-kah-kee",
+      "nameEn": "Tan Kah Kee",
+      "coordinates": [
+        103.8078,
+        1.3257397
+      ],
+      "codes": [
+        {
+          "code": "DT8",
+          "line": "DT"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "tanah-merah",
+      "nameEn": "Tanah Merah",
+      "coordinates": [
+        103.9457589,
+        1.3269595
+      ],
+      "codes": [
+        {
+          "code": "EW4",
+          "line": "EW"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "tanjong-katong",
+      "nameEn": "Tanjong Katong",
+      "coordinates": [
+        103.8974846,
+        1.299428
+      ],
+      "codes": [
+        {
+          "code": "TE25",
+          "line": "TE"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "tanjong-pagar",
+      "nameEn": "Tanjong Pagar",
+      "coordinates": [
+        103.8464332,
+        1.2765062
+      ],
+      "codes": [
+        {
+          "code": "EW15",
+          "line": "EW"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "tanjong-rhu",
+      "nameEn": "Tanjong Rhu",
+      "coordinates": [
+        103.8735403,
+        1.2973298
+      ],
+      "codes": [
+        {
+          "code": "TE23",
+          "line": "TE"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "telok-ayer",
+      "nameEn": "Telok Ayer",
+      "coordinates": [
+        103.8483936,
+        1.2824349
+      ],
+      "codes": [
+        {
+          "code": "DT18",
+          "line": "DT"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "telok-blangah",
+      "nameEn": "Telok Blangah",
+      "coordinates": [
+        103.8098837,
+        1.2707212
+      ],
+      "codes": [
+        {
+          "code": "CC28",
+          "line": "CC"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "tiong-bahru",
+      "nameEn": "Tiong Bahru",
+      "coordinates": [
+        103.8272435,
+        1.2860607
+      ],
+      "codes": [
+        {
+          "code": "EW17",
+          "line": "EW"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "toa-payoh",
+      "nameEn": "Toa Payoh",
+      "coordinates": [
+        103.8472846,
+        1.3327412
+      ],
+      "codes": [
+        {
+          "code": "NS19",
+          "line": "NS"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "tuas-crescent",
+      "nameEn": "Tuas Crescent",
+      "coordinates": [
+        103.6491228,
+        1.3210037
+      ],
+      "codes": [
+        {
+          "code": "EW31",
+          "line": "EW"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "tuas-link",
+      "nameEn": "Tuas Link",
+      "coordinates": [
+        103.6370432,
+        1.3406835
+      ],
+      "codes": [
+        {
+          "code": "EW33",
+          "line": "EW"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "tuas-west-road",
+      "nameEn": "Tuas West Road",
+      "coordinates": [
+        103.6395375,
+        1.3300273
+      ],
+      "codes": [
+        {
+          "code": "EW32",
+          "line": "EW"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "ubi",
+      "nameEn": "Ubi",
+      "coordinates": [
+        103.8992311,
+        1.3298908
+      ],
+      "codes": [
+        {
+          "code": "DT27",
+          "line": "DT"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "upper-changi",
+      "nameEn": "Upper Changi",
+      "coordinates": [
+        103.9612743,
+        1.3414694
+      ],
+      "codes": [
+        {
+          "code": "DT34",
+          "line": "DT"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "upper-thomson",
+      "nameEn": "Upper Thomson",
+      "coordinates": [
+        103.8328206,
+        1.3545271
+      ],
+      "codes": [
+        {
+          "code": "TE8",
+          "line": "TE"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "woodlands",
+      "nameEn": "Woodlands",
+      "coordinates": [
+        103.7876268,
+        1.4361869
+      ],
+      "codes": [
+        {
+          "code": "NS9",
+          "line": "NS"
+        },
+        {
+          "code": "TE2",
+          "line": "TE"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "woodlands-north",
+      "nameEn": "Woodlands North",
+      "coordinates": [
+        103.7852657,
+        1.4484919
+      ],
+      "codes": [
+        {
+          "code": "TE1",
+          "line": "TE"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "woodlands-south",
+      "nameEn": "Woodlands South",
+      "coordinates": [
+        103.7939581,
+        1.4269723
+      ],
+      "codes": [
+        {
+          "code": "TE3",
+          "line": "TE"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "woodleigh",
+      "nameEn": "Woodleigh",
+      "coordinates": [
+        103.8708343,
+        1.338987
+      ],
+      "codes": [
+        {
+          "code": "NE11",
+          "line": "NE"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "yew-tee",
+      "nameEn": "Yew Tee",
+      "coordinates": [
+        103.7472671,
+        1.3974991
+      ],
+      "codes": [
+        {
+          "code": "NS5",
+          "line": "NS"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "yio-chu-kang",
+      "nameEn": "Yio Chu Kang",
+      "coordinates": [
+        103.8448089,
+        1.3817152
+      ],
+      "codes": [
+        {
+          "code": "NS15",
+          "line": "NS"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    },
+    {
+      "id": "yishun",
+      "nameEn": "Yishun",
+      "coordinates": [
+        103.8350494,
+        1.4293845
+      ],
+      "codes": [
+        {
+          "code": "NS13",
+          "line": "NS"
+        }
+      ],
+      "coordMethod": "lta-exits-mean"
+    }
+  ]
+}
