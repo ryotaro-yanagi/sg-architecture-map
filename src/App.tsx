@@ -14,7 +14,7 @@ import ColorLabPanel from './ColorLabPanel'
 import { cloneColorTokens, colorTokenCssVariables, readColorLabDraft, saveColorLabDraft } from './colorTokens'
 import type { ArchitectureColorTokens, ColorSchemeTokens, ColorTokens } from './colorTokens'
 import { categoryColor, getMapCategory, mapCategories } from './buildingCategories'
-import { applyRailStationLabels, snapshotCartographyLayers, railStationLabelLayerId } from './cartographyRail'
+import { applyRailStationLabels, getCartographyStudyCamera, snapshotCartographyLayers, railStationLabelLayerId } from './cartographyRail'
 import type { MapCategory } from './buildingCategories'
 import { addInitialVisitDate, createArchitectureRecordGroups, getWantToVisitBuildings } from './architectureRecord'
 import { collectionStateStore } from './collection'
@@ -1134,12 +1134,19 @@ function App() {
 
     let map: MapLibreMap
     try {
+      // Opt-in comparison camera for this experiment; the normal opening
+      // view remains unchanged without ?cartographyPreview=marina.
+      const studyCamera = getCartographyStudyCamera(
+        new URLSearchParams(window.location.search).get('cartographyPreview'),
+      )
       map = new maplibregl.Map({
         container: mapContainer.current,
         style: 'https://tiles.openfreemap.org/styles/liberty',
         ...(restoredState
           ? { center: restoredState.center, zoom: restoredState.zoom }
-          : { bounds: overviewBounds, fitBoundsOptions: { padding: overviewPadding, maxZoom: 12 } }),
+          : studyCamera
+            ? { center: studyCamera.center, zoom: studyCamera.zoom }
+            : { bounds: overviewBounds, fitBoundsOptions: { padding: overviewPadding, maxZoom: 12 } }),
         bearing: restoredState?.bearing ?? 0,
         pitch: 0,
         minPitch: 0,
