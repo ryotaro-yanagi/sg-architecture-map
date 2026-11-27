@@ -110,7 +110,6 @@ export function mountLocationCharacter({ map, body }: LocationCharacterOptions):
   svg.style.cssText = 'display:block;width:100%;height:100%;overflow:visible'
   const bodyPath = document.createElementNS(SVG_NS, 'path')
   bodyPath.setAttribute('fill', BODY_OCHRE)
-  bodyPath.style.filter = 'drop-shadow(0px .7px 1.15px rgba(38,57,45,.36))'
   svg.append(bodyPath)
 
   const whites = [createEllipse(EYE_WHITE), createEllipse(EYE_WHITE)]
