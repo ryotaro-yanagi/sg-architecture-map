@@ -44,7 +44,7 @@ export const snapshotCartographyLayers = (map: MapLibreMap): CartographyLayerAud
     type: layer.type,
     source: 'source' in layer ? String(layer.source ?? '') : '',
     sourceLayer: 'source-layer' in layer ? String(layer['source-layer'] ?? '') : '',
-    visibility: layer.layout?.visibility ?? 'visible',
+    visibility: String(layer.layout?.visibility ?? 'visible'),
     minzoom: layer.minzoom ?? 'default',
     maxzoom: layer.maxzoom ?? 'default',
   }))
