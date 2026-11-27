@@ -4,7 +4,6 @@ export type Edge = 'none' | 'shadow' | 'keyline'
 export type Face = 'neutral' | 'look' | 'rest'
 export type Scheme = 'day' | 'night'
 export type SizeChoice = 'auto' | '16' | '26' | '34'
-type ViewMode = 'single' | 'compare'
 export type Point = [number, number]
 
 export interface Form {
