@@ -1133,6 +1133,7 @@ function App() {
     setInitialMapState('loading')
     let disposed = false
     let disposeMrtNetwork: (() => void) | null = null
+    let disposeCharacterLab: (() => void) | null = null
     let readyTimeout: number | undefined
 
     const finishInitialLoad = () => {
@@ -1311,6 +1312,19 @@ function App() {
       })
       map.on('mouseenter', 'building-hit-targets', () => { map.getCanvas().style.cursor = 'pointer' })
       map.on('mouseleave', 'building-hit-targets', () => { map.getCanvas().style.cursor = '' })
+      // Optional, isolated developer preview on the real map. Never requests GPS,
+      // changes the production marker, or appears in ordinary browsing.
+      if ((import.meta.env.DEV || import.meta.env.VITE_ENABLE_CHARACTER_LAB === 'true') &&
+          new URLSearchParams(window.location.search).get('lab') === 'character') {
+        void import('./characterLab').then(({ mountCharacterLab }) => {
+          if (disposed) return
+          disposeCharacterLab = mountCharacterLab({
+            map,
+            scheme: nightPreviewRef.current ? 'night' : 'day',
+            onSchemeChange: setAppearance,
+          })
+        }).catch(error => console.error('Character Lab failed to load', error))
+      }
     })
 
     const syncBearing = () => setMapBearing(map.getBearing())
@@ -1319,6 +1333,7 @@ function App() {
     mapRef.current = map
     return () => {
       disposed = true
+      disposeCharacterLab?.()
       disposeMrtNetwork?.()
       if (readyTimeout !== undefined) window.clearTimeout(readyTimeout)
       map.off('rotate', syncBearing)
