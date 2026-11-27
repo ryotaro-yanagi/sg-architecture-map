@@ -15,7 +15,8 @@
     "test:colors": "node --test scripts/colorTokens.test.ts",
     "test:publish-url": "node --test scripts/publication-url.test.mjs",
     "test:share-record": "node --test scripts/share-record.test.mjs",
-    "test:weather": "node --test scripts/weather.test.ts"
+    "test:weather": "node --test scripts/weather.test.ts",
+    "test:cartography": "node --test scripts/cartography.test.ts"
   },
   "dependencies": {
     "@fontsource/hanken-grotesk": "^5.3.0",

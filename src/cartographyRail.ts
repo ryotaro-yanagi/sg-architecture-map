@@ -1,0 +1,50 @@
+import type { FilterSpecification, Map as MapLibreMap } from 'maplibre-gl'
+
+// The rail stop is geographical context, not a navigation overlay.
+// Liberty provides the feature names and MapLibre handles label collision.
+export const railStationLabelLayerId = 'poi_transit'
+export const railStationLabelMinZoom = 14
+export const railStationLabelFilter: FilterSpecification = [
+  'all',
+  ['==', ['get', 'class'], 'rail'],
+  ['any', ['has', 'name'], ['has', 'name_en']],
+]
+
+export const applyRailStationLabels = (map: MapLibreMap): boolean => {
+  if (!map.getLayer(railStationLabelLayerId)) return false
+  map.setFilter(railStationLabelLayerId, railStationLabelFilter)
+  map.setLayerZoomRange(railStationLabelLayerId, railStationLabelMinZoom, 24)
+  map.setLayoutProperty(railStationLabelLayerId, 'visibility', 'visible')
+  map.setLayoutProperty(railStationLabelLayerId, 'icon-image', '')
+  map.setLayoutProperty(railStationLabelLayerId, 'text-anchor', 'center')
+  map.setLayoutProperty(railStationLabelLayerId, 'text-offset', [0, 0])
+  map.setLayoutProperty(railStationLabelLayerId, 'text-font', ['Noto Sans Regular'])
+  map.setLayoutProperty(railStationLabelLayerId, 'text-size', [
+    'interpolate', ['linear'], ['zoom'], 14, 10.5, 16, 11.5, 18, 12,
+  ])
+  map.setLayoutProperty(railStationLabelLayerId, 'text-max-width', 10)
+  map.setLayoutProperty(railStationLabelLayerId, 'text-padding', 4)
+  return true
+}
+
+export type CartographyLayerAuditRow = {
+  id: string
+  type: string
+  source: string
+  sourceLayer: string
+  visibility: string
+  minzoom: number | string
+  maxzoom: number | string
+}
+
+// Opt-in development audit: ?cartographyAudit=1; no controls in production UI.
+export const snapshotCartographyLayers = (map: MapLibreMap): CartographyLayerAuditRow[] =>
+  (map.getStyle()?.layers ?? []).map(layer => ({
+    id: layer.id,
+    type: layer.type,
+    source: 'source' in layer ? String(layer.source ?? '') : '',
+    sourceLayer: 'source-layer' in layer ? String(layer['source-layer'] ?? '') : '',
+    visibility: layer.layout?.visibility ?? 'visible',
+    minzoom: layer.minzoom ?? 'default',
+    maxzoom: layer.maxzoom ?? 'default',
+  }))

@@ -14,6 +14,7 @@ import ColorLabPanel from './ColorLabPanel'
 import { cloneColorTokens, colorTokenCssVariables, readColorLabDraft, saveColorLabDraft } from './colorTokens'
 import type { ArchitectureColorTokens, ColorSchemeTokens, ColorTokens } from './colorTokens'
 import { categoryColor, getMapCategory, mapCategories } from './buildingCategories'
+import { applyRailStationLabels, snapshotCartographyLayers, railStationLabelLayerId } from './cartographyRail'
 import type { MapCategory } from './buildingCategories'
 import { addInitialVisitDate, createArchitectureRecordGroups, getWantToVisitBuildings } from './architectureRecord'
 import { collectionStateStore } from './collection'
@@ -530,6 +531,8 @@ const applyMapStructure = (map: MapLibreMap) => {
     }
     if (id === 'tunnel_path_pedestrian') setPaint(map, id, 'line-opacity', 0.45)
   })
+  // Restore named rail stations only; retain the general POI suppression.
+  applyRailStationLabels(map)
 }
 
 const applyMapColors = (map: MapLibreMap, palette: MapPalette) => {
@@ -568,7 +571,7 @@ const applyMapColors = (map: MapLibreMap, palette: MapPalette) => {
       setPaint(map, id, 'text-color', isWater ? palette.labelWater : isSecondary ? palette.labelSecondary : palette.label)
       setPaint(map, id, 'text-halo-color', palette.labelHalo)
       setPaint(map, id, 'text-halo-width', 1.25)
-      if (isPoi) setPaint(map, id, 'text-opacity', palette.poiOpacity)
+      if (isPoi) setPaint(map, id, 'text-opacity', id === railStationLabelLayerId ? 0.75 : palette.poiOpacity)
     }
   })
 }
@@ -1164,6 +1167,9 @@ function App() {
       // Otherwise Liberty's original buildings and linework can briefly appear.
       const initialScheme = nightPreviewRef.current ? 'night' : 'day'
       const initialTokens = colorTokensRef.current[initialScheme]
+      const shouldAuditCartography = import.meta.env.DEV &&
+        new URLSearchParams(window.location.search).get('cartographyAudit') === '1'
+      const originalLayerState = shouldAuditCartography ? snapshotCartographyLayers(map) : null
       applyMapStructure(map)
       addSingaporeCityLabel(map, mapPaletteFromTokens(initialTokens))
       applyMapColors(map, mapPaletteFromTokens(initialTokens))
@@ -1209,6 +1215,14 @@ function App() {
       })
       applyMapTheme(map, initialTokens, nightPreviewRef.current)
       applyProductionTypeScaleToMap(map)
+      if (originalLayerState) {
+        const initialById = new Map(originalLayerState.map(layer => [layer.id, layer]))
+        console.table(snapshotCartographyLayers(map).map(layer => ({
+          ...layer,
+          originalVisibility: initialById.get(layer.id)?.visibility ?? 'new',
+          originalMinzoom: initialById.get(layer.id)?.minzoom ?? 'new',
+        })))
+      }
 
       // Do not uncover the application at MapLibre's generic `load` event.
       // First render the SGM sources and layers, then wait until MapLibre has
