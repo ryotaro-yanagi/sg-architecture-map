@@ -73,3 +73,9 @@ The credit is intentionally not another floating navigation button. It is a map 
 Screenshot review confirmed the quiet bottom-left credits and modal were working. The user requested the ⓘ icon to the **left** of the two-line credit and considered alignment to the Settings control either by left edge or by centre. Adopt **centre alignment**: both controls share the same safe-area-aware left offset (12px), and a 56px-wide first grid column centres the 17px information icon directly beneath the 56px circular Settings button. The credit names occupy the second column. Keep the two-line 9px typography, transparency, modal, source names, tap area and Day/Night styles unchanged. No changes to the underlying credits or licence information.
 
 Check 390px and 320px phone widths, EN/JA, Day/Night, compact/detail sheet states and iPhone safe-area bottom padding. Do not merge without the updated screenshot check.
+
+## v0.1.3 — One centred attribution group (2026-11-27)
+
+The second screenshot revealed an unintended **56px reserved icon column**: the ⓘ was aligned separately to the Settings button but sat too far from the two-line copyright credit. The second text line was left-aligned rather than centred. The user rejected this mixed alignment.
+
+Make the icon and both credit lines one compact `inline-flex` group: `align-items: center`, `justify-content: center`, `gap: 6px`. The 17px icon appears immediately to the left of the text and is vertically centred against the full two-line block; both attribution lines are centred relative to each other with `text-align: center`. Keep the complete group near the lower-left map edge, aligned by its outside left edge to the Settings control's outside left edge, without allocating a separate 56px icon cell. Retain 9px muted type, transparent background, credits modal, source names, and URL links. Verify screenshot before merge.
