@@ -24,9 +24,11 @@ const fakeMap = (hasTransitLayer: boolean) => {
   return { map: map as unknown as MapLibreMap, calls }
 }
 
-test('filter is limited to named rail features, not airports or buses', () => {
+test('OpenMapTiles railway POI class selects named stations only, not other transit', () => {
   assert.deepEqual(railStationLabelFilter, [
-    'all', ['==', ['get', 'class'], 'rail'], ['any', ['has', 'name'], ['has', 'name_en']],
+    'all', ['==', ['get', 'class'], 'railway'],
+    ['match', ['get', 'subclass'], ['station', 'halt', 'subway'], true, false],
+    ['any', ['has', 'name'], ['has', 'name_en']],
   ])
 })
 
