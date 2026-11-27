@@ -1317,13 +1317,15 @@ function App() {
       map.on('mouseleave', 'building-hit-targets', () => { map.getCanvas().style.cursor = '' })
       // Optional, isolated developer preview on the real map. Never requests GPS,
       // changes the production marker, or appears in ordinary browsing.
-      if ((import.meta.env.DEV ||
-        __SGM_VERCEL_PREVIEW__ ||
-        import.meta.env.VITE_ENABLE_CHARACTER_LAB === 'true' ||
-        // Fallback for Vercel branch aliases, even if VERCEL_ENV is not injected.
-        (window.location.hostname.endsWith('.vercel.app') &&
-         window.location.hostname.includes('-git-feature-character-lab-'))) &&
-          new URLSearchParams(window.location.search).get('lab') === 'character') {
+      const characterBranchPreview = window.location.hostname.endsWith('.vercel.app') &&
+        window.location.hostname.includes('-git-feature-character-lab-')
+      const characterLabRequested = new URLSearchParams(window.location.search).get('lab') === 'character'
+      // Dedicated branch Preview always shows the lab, even when an external
+      // browser strips the query during redirect. All other hosts require opt-in.
+      if (characterBranchPreview ||
+          (characterLabRequested &&
+           (import.meta.env.DEV || __SGM_VERCEL_PREVIEW__ ||
+            import.meta.env.VITE_ENABLE_CHARACTER_LAB === 'true'))) {
         void import('./characterLab').then(({ mountCharacterLab }) => {
           if (disposed) return
           disposeCharacterLab = mountCharacterLab({
