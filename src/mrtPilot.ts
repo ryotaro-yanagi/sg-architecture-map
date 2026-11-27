@@ -1,6 +1,12 @@
 import type { FilterSpecification, Map as MapLibreMap } from 'maplibre-gl'
 import type { ColorTokens } from './colorTokens'
-import { railStationLabelFilter } from './cartographyRail'
+// Kept local so Node's native TypeScript test runner needs no extensionless runtime import.
+const railStationLabelFilter: FilterSpecification = [
+  'all',
+  ['==', ['get', 'class'], 'railway'],
+  ['match', ['get', 'subclass'], ['station', 'halt', 'subway'], true, false],
+  ['any', ['has', 'name'], ['has', 'name_en']],
+]
 
 // Screen colours are provisional approximations, not official LTA sRGB tokens.
 export const mrtLineColors = {
