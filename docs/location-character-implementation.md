@@ -1,18 +1,19 @@
 # Location Character — implementation pilot
 
-SGM's current-location marker can now render the architecture-derived soft character on an **opt-in Vercel Preview**. The default production current-location marker remains the established red circle with its existing eyes and white outline.
+SGM's current-location marker now renders the architecture-derived soft character whenever the user presses the normal locate control and grants geolocation permission. This is the production implementation. The Character Lab remains a separate experiment. A static red marker is used only if the new SVG controller unexpectedly fails.
 
-## iPhone Preview
+## iPhone production verification
 
-1. Open the Vercel Preview associated with the implementation PR.
-2. Add `/en/?locationAvatar=1` or `/ja/?locationAvatar=1` to the deployment hostname. If an existing Preview URL already ends in `/en/`, add only `?locationAvatar=1`.
-3. Tap the regular SGM current-location arrow and grant geolocation permission. **Only this button** requests your real location.
-4. On consent, the character appears at your actual device location. You can zoom the map to see the 16–34 px size behavior and observe occasional changes in shape.
-5. Compare against the existing marker by removing the `locationAvatar=1` query and using the location arrow again.
+1. Open the regular SGM site at `/en/` or `/ja/` on iPhone.
+2. Tap the current-location arrow and grant geolocation permission.
+3. The **Steps / Ochre / Shadow** character appears at the actual device location; no query parameter is required.
+4. Zoom the map to check sizes 16–34px and, after a natural pause, observe occasional form changes.
+5. Test Day/Night and backgrounding the app. Day uses a soft shadow; Night uses no shadow.
+
 
 The character uses the position produced by `navigator.geolocation.getCurrentPosition()` in `src/App.tsx` and the pre-existing `maplibregl.Marker({anchor:'center'})`. All animation happens **inside** the 34px SVG and never modifies the MapLibre GPS anchor.
 
-The new marker can be activated only in the development server or a Vercel Preview, and only with `locationAvatar=1`. It is not automatically enabled by a normal Production build.
+The new marker is enabled by default. No additional location data requests are made; geolocation still happens only after pressing the locate button.
 
 ## Design baseline
 
@@ -31,14 +32,14 @@ The new marker can be activated only in the development server or a Vercel Previ
 
 - Shared design data: `src/locationCharacterShapes.ts`.
 - Map-only Character Lab: `src/characterLab.ts`.
-- Production-marker animation controller (preview-flagged): `src/locationCharacter.ts`.
-- Real geolocation entry point: `src/App.tsx`, conditional to keep existing behavior unchanged.
+- Production-marker animation controller: `src/locationCharacter.ts`.
+- Real geolocation entry point: `src/App.tsx`, which preserves the existing location permission request and centered MapLibre marker.
 - Tests: `npm run test:location-character`, automatically included in GitHub PR validation.
 
-Check (1) geolocation consent and denial, (2) repeated taps of the location button, (3) 16/26/34px optical size, (4) Day and Night, (5) background/foreground switching, (6) reduced motion, (7) clicking architecture pins, and (8) normal production UI without a query.
+Check (1) geolocation consent and denial, (2) repeated taps of the location button, (3) 16/26/34px optical size, (4) Day and Night, (5) background/foreground switching, (6) reduced motion, (7) clicking architecture pins, and (8) real production UI without a query.
 
 ## Deliberate limitations
 
 The 72-point morph is an engineering prototype, not final curve optimization. The exact intermediate silhouette must be evaluated on mobile, especially Steps ↔ Sway. Color and shadow contrast need further on-map review. The Preview has no cloud storage of location data, but the normal browser geolocation permission still applies. The app does not transmit coordinates to our prototype controller.
 
-The implementation is **not yet merged or publicly released**.
+Rollout follows merge of PR #17 and successful GitHub Pages deployment. If visual QA finds a regression, revert the feature commit.
