@@ -2,6 +2,7 @@ import { Component, useCallback, useEffect, useMemo, useRef, useState, useSyncEx
 import type { CSSProperties } from 'react'
 import { ArrowLeft, ArrowRight, ArrowSquareOut, CheckCircle, Cloud, CloudRain, CloudSun, DownloadSimple, Gear, Info, Lightning, MagnifyingGlass, Moon, NavigationArrow, Notebook, ShareNetwork, Sneaker, Sun, X } from '@phosphor-icons/react'
 import * as maplibregl from 'maplibre-gl'
+import { mountLocationCharacter } from './locationCharacter'
 import { flushSync } from 'react-dom'
 import type { ExpressionSpecification, GeoJSONSource, Map as MapLibreMap } from 'maplibre-gl'
 import data from './data/buildings.json'
@@ -1573,6 +1574,36 @@ function App() {
         userMarkerZoomCleanupRef.current?.()
         userMarkerZoomCleanupRef.current = null
         userMarkerRef.current?.remove()
+        const mapForAvatar = mapRef.current
+        const locationAvatarRequested = new URLSearchParams(window.location.search).get('locationAvatar') === '1'
+        const isDevelopmentPreview = import.meta.env.DEV ||
+          __SGM_VERCEL_PREVIEW__ ||
+          (window.location.hostname.endsWith('.vercel.app') &&
+           window.location.hostname.includes('-git-feature-location-character-'))
+        // The live location marker can be previewed only by explicit opt-in on
+        // a development / Vercel Preview host. Ordinary production is unchanged.
+        if (locationAvatarRequested && isDevelopmentPreview && mapForAvatar) {
+          const avatarElement = document.createElement('div')
+          avatarElement.className = 'user-location-marker'
+          avatarElement.setAttribute('aria-label', t.currentLocation)
+          avatarElement.setAttribute('role', 'img')
+          const avatarBody = document.createElement('div')
+          avatarBody.className = 'user-location-blob user-location-blob--character'
+          avatarElement.append(avatarBody)
+          userMarkerRef.current = new maplibregl.Marker({ element: avatarElement, anchor: 'center' })
+            .setLngLat(location).addTo(mapForAvatar)
+          userMarkerZoomCleanupRef.current = mountLocationCharacter({
+            map: mapForAvatar, body: avatarBody,
+          })
+          const wide = window.matchMedia('(min-width: 720px)').matches
+          mapForAvatar.flyTo({
+            center: location, zoom: Math.max(mapForAvatar.getZoom(), 14),
+            offset: wide ? [210, 0] : [0, -76], duration: motionDuration(700),
+          })
+          setLocating(false)
+          setNotice(t.locationSuccess)
+          return
+        }
         const element = document.createElement('div')
         element.className = 'user-location-marker'
         element.setAttribute('aria-label', t.currentLocation)
