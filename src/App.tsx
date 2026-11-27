@@ -16,6 +16,7 @@ import type { ArchitectureColorTokens, ColorSchemeTokens, ColorTokens } from './
 import { categoryColor, getMapCategory, mapCategories } from './buildingCategories'
 import { applyRailStationLabels, getCartographyStudyCamera, snapshotCartographyLayers, railStationLabelLayerId } from './cartographyRail'
 import { applyMrtPilotAppearance, installMrtPilot, isMrtPilotEnabled } from './mrtPilot'
+import { applyMrtNetworkAppearance, installMrtNetwork, isMrtNetworkEnabled } from './mrtNetwork'
 import type { MapCategory } from './buildingCategories'
 import { addInitialVisitDate, createArchitectureRecordGroups, getWantToVisitBuildings } from './architectureRecord'
 import { collectionStateStore } from './collection'
@@ -1086,7 +1087,8 @@ function App() {
     const map = mapRef.current
     if (!map || !map.getLayer('building-pins')) return
     applyMapTheme(map, activeColorTokens, nightPreview)
-    if (isMrtPilotEnabled(window.location.search)) applyMrtPilotAppearance(map, nightPreview ? 'night' : 'day')
+    if (isMrtNetworkEnabled(window.location.search)) applyMrtNetworkAppearance(map, nightPreview ? 'night' : 'day')
+    else if (isMrtPilotEnabled(window.location.search)) applyMrtPilotAppearance(map, nightPreview ? 'night' : 'day')
   }, [activeColorTokens, nightPreview])
 
   useEffect(() => {
@@ -1126,6 +1128,7 @@ function App() {
 
     setInitialMapState('loading')
     let disposed = false
+    let disposeMrtNetwork: (() => void) | null = null
     let readyTimeout: number | undefined
 
     const finishInitialLoad = () => {
@@ -1169,7 +1172,12 @@ function App() {
       if (!disposed) setInitialMapState('error')
     }, 15000)
 
-    map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-left')
+    map.addControl(new maplibregl.AttributionControl({
+      compact: true,
+      ...(isMrtNetworkEnabled(window.location.search)
+        ? { customAttribution: 'MRT data: <a href="https://datamall.lta.gov.sg/" target="_blank" rel="noopener noreferrer">LTA</a> (Singapore Open Data Licence)' }
+        : {}),
+    }), 'bottom-left')
 
     map.on('load', async () => {
       // Apply geographic styling before asynchronous marker SVG decoding.
@@ -1186,8 +1194,15 @@ function App() {
         updateMarkerImages(map, colorTokensRef.current.day.architecture, 'day'),
         updateMarkerImages(map, colorTokensRef.current.night.architecture, 'night'),
       ])
-      // v0.2 pilot is opt-in. The v0.1 railway station labels stay the default.
-      if (isMrtPilotEnabled(window.location.search)) {
+      // The full network and five-station pilot are independent opt-in variants.
+      // Never mount both together; default remains v0.1 railway names.
+      if (isMrtNetworkEnabled(window.location.search)) {
+        try {
+          disposeMrtNetwork = installMrtNetwork(map, colorTokensRef.current, initialScheme)
+        } catch (error) {
+          console.warn('MRT v0.3 network preview unavailable:', error)
+        }
+      } else if (isMrtPilotEnabled(window.location.search)) {
         try {
           await installMrtPilot(map, colorTokensRef.current, initialScheme)
         } catch (error) {
@@ -1301,6 +1316,7 @@ function App() {
     mapRef.current = map
     return () => {
       disposed = true
+      disposeMrtNetwork?.()
       if (readyTimeout !== undefined) window.clearTimeout(readyTimeout)
       map.off('rotate', syncBearing)
       userMarkerZoomCleanupRef.current?.()

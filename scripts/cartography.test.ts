@@ -76,3 +76,13 @@ test('v0.2 station-specific cameras allow direct review of each caplet', () => {
     assert.ok(camera.center[1] > 1.27 && camera.center[1] < 1.32)
   }
 })
+
+test('v0.3 full-network review covers north, west, east and dense central locations', () => {
+  for (const key of ['jurong', 'punggol', 'tampines', 'woodlands']) {
+    const camera = getCartographyStudyCamera(key)
+    assert.ok(camera, key)
+    assert.equal(camera.zoom, 15.5)
+    assert.ok(camera.center[0] >= 103.6 && camera.center[0] <= 104.1)
+    assert.ok(camera.center[1] >= 1.2 && camera.center[1] <= 1.5)
+  }
+})

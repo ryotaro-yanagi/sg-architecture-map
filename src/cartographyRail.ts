@@ -66,6 +66,11 @@ export const getCartographyStudyCamera = (location: string | null): CartographyS
     case 'marina-station': return { center: [103.8545978, 1.2764274], zoom: 16 }
     case 'orchard-station': return { center: [103.8322453, 1.3039799], zoom: 16 }
     case 'outram': return { center: [103.8395135, 1.2797397], zoom: 16 }
+    // Full-network review: sparse/urban and peripheral contexts.
+    case 'jurong': return { center: [103.7423, 1.3332], zoom: 15.5 }
+    case 'punggol': return { center: [103.9015, 1.4030], zoom: 15.5 }
+    case 'tampines': return { center: [103.9451, 1.3533], zoom: 15.5 }
+    case 'woodlands': return { center: [103.7865, 1.4370], zoom: 15.5 }
     default: return null
   }
 }
