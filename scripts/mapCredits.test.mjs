@@ -23,7 +23,9 @@ test('map credits remain discoverable on the map and never expand through MapLib
 })
 
 test('visible on-map attribution names OpenStreetMap, OpenMapTiles, OpenFreeMap and LTA', () => {
-  const label = app.slice(app.indexOf('<span className="map-credit-names"'), app.indexOf('<Info aria-hidden="true" size={17}'))
+  const labelStart = app.indexOf('<span className="map-credit-names"')
+  const labelEnd = app.indexOf('</span>\n        </button>', labelStart)
+  const label = app.slice(labelStart, labelEnd)
   assert.ok(label)
   for (const name of ['OpenStreetMap contributors', 'OpenMapTiles', 'OpenFreeMap', 'LTA']) {
     assert.ok(label.includes(name), `attribution missing: ${name}`)
@@ -53,4 +55,17 @@ test('Settings has an alternate path to the same credits dialog and focus is res
   assert.match(app, /creditsReturnFocusRef\.current\?\.focus/)
   assert.match(app, /settingsDialogRef\.current\?\.close\(\)/)
   assert.match(app, /creditsDialogRef\.current\?\.showModal\(\)/)
+})
+
+test('information icon comes before credits and is centred under the Settings control', () => {
+  const entry = app.slice(app.indexOf('className="map-credit-entry"'), app.indexOf('{surfaceState === \'explore\''))
+  assert.ok(entry.indexOf('<Info aria-hidden="true" size={17}') < entry.indexOf('<span className="map-credit-names"'))
+  assert.match(css, /\.map-credit-entry\s*\{[^}]*left:\s*max\(12px, env\(safe-area-inset-left\)\)/)
+  assert.match(css, /\.experience-settings-trigger\s*\{[^}]*left:\s*max\(12px, env\(safe-area-inset-left\)\)/)
+  const block = css.split('.map-credit-trigger {')[1]?.split('}')[0]
+  assert.ok(block)
+  assert.match(block, /display:\s*grid/)
+  assert.match(block, /grid-template-columns:\s*56px/)
+  assert.match(css, /\.map-credit-trigger svg\s*\{[^}]*justify-self:\s*center/)
+  assert.match(css, /\.map-credit-names\s*\{[^}]*grid-column:\s*2/)
 })

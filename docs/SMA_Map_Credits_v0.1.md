@@ -67,3 +67,9 @@ A user screenshot of the first Vercel preview showed the upper-left attribution 
 The revision **does not change the source information or its dialog**. It removes all fill, rounded-card surface, shadow and horizontal/vertical padding; reduces the visible credit typography to 9px, tones it with the map-muted colour, and anchors the credit to the bottom-left map edge, below the floating UI. The text and small ⓘ still open the same dialog. In preview/detail states with a bottom sheet, the small unboxed label is moved below the top-left logo to stay discoverable. Specific thresholds and exact opacity are provisional pending a mobile screenshot.
 
 The credit is intentionally not another floating navigation button. It is a map disclosure/attribution element that should be present but visually secondary. Verify whether the 9px type is still sufficiently readable; if not, prefer restoring 10px before adding any background card.
+
+## v0.1.2 — Icon-first alignment refinement (2026-11-27)
+
+Screenshot review confirmed the quiet bottom-left credits and modal were working. The user requested the ⓘ icon to the **left** of the two-line credit and considered alignment to the Settings control either by left edge or by centre. Adopt **centre alignment**: both controls share the same safe-area-aware left offset (12px), and a 56px-wide first grid column centres the 17px information icon directly beneath the 56px circular Settings button. The credit names occupy the second column. Keep the two-line 9px typography, transparency, modal, source names, tap area and Day/Night styles unchanged. No changes to the underlying credits or licence information.
+
+Check 390px and 320px phone widths, EN/JA, Day/Night, compact/detail sheet states and iPhone safe-area bottom padding. Do not merge without the updated screenshot check.
