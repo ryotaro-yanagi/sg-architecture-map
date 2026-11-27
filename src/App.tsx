@@ -23,6 +23,9 @@ import { collectionStateStore } from './collection'
 import type { CollectionUpdate } from './collection'
 import { canShareRecordFile, createShareRecordFile, generateShareRecordPng, SHARE_RECORD_FILENAME } from './shareRecordExport'
 
+// Set only at build time by Vite; true for Vercel Preview, never Production.
+declare const __SGM_VERCEL_PREVIEW__: boolean
+
 type Coordinates = [number, number]
 type Appearance = 'system' | 'day' | 'night'
 type InitialMapState = 'loading' | 'fading' | 'hidden' | 'error'
@@ -1314,7 +1317,7 @@ function App() {
       map.on('mouseleave', 'building-hit-targets', () => { map.getCanvas().style.cursor = '' })
       // Optional, isolated developer preview on the real map. Never requests GPS,
       // changes the production marker, or appears in ordinary browsing.
-      if ((import.meta.env.DEV || import.meta.env.VITE_ENABLE_CHARACTER_LAB === 'true') &&
+      if ((import.meta.env.DEV || __SGM_VERCEL_PREVIEW__ || import.meta.env.VITE_ENABLE_CHARACTER_LAB === 'true') &&
           new URLSearchParams(window.location.search).get('lab') === 'character') {
         void import('./characterLab').then(({ mountCharacterLab }) => {
           if (disposed) return
