@@ -66,3 +66,13 @@ test('preview focus selects known areas without changing the default camera', ()
   assert.equal(study.zoom, 15.25)
   assert.deepEqual(study.center, [103.851, 1.284])
 })
+
+test('v0.2 station-specific cameras allow direct review of each caplet', () => {
+  for (const key of ['downtown', 'bugis', 'marina-station', 'orchard-station', 'outram']) {
+    const camera = getCartographyStudyCamera(key)
+    assert.ok(camera, key)
+    assert.equal(camera.zoom, 16)
+    assert.ok(camera.center[0] > 103.8 && camera.center[0] < 103.9)
+    assert.ok(camera.center[1] > 1.27 && camera.center[1] < 1.32)
+  }
+})
