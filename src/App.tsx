@@ -1586,7 +1586,9 @@ function App() {
         // Only the appearance of the marker is replaced.
         const element = document.createElement('div')
         element.className = 'user-location-marker'
-        element.setAttribute('aria-label', t.currentLocation)
+        element.setAttribute('aria-label', locale === 'ja'
+          ? '現在地のキャラクター。タップすると反応します'
+          : 'Your current-location character. Tap to interact')
         element.setAttribute('role', 'img')
         const body = document.createElement('div')
         body.className = 'user-location-blob user-location-blob--character'
