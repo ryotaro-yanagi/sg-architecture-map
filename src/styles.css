@@ -380,6 +380,13 @@ html[data-appearance='night'] .brand-mark img { filter: invert(1); }
   fill: currentColor;
   color: #EDECEE;
 }
+/* Soft architecture-derived avatar: subtle separation on Day, clean on Night. */
+.user-location-blob--character svg > path:first-child {
+  filter: drop-shadow(0 .7px 1.15px rgba(38, 57, 45, .36));
+}
+.night-preview .user-location-blob--character svg > path:first-child {
+  filter: none;
+}
 
 .bottom-surface {
   --panel-bottom: max(12px, env(safe-area-inset-bottom));
