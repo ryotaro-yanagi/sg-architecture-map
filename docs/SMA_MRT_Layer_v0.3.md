@@ -41,7 +41,7 @@ The MRT Kiasu repository's *software* is MIT-licensed, but its `stations.json` a
 - **Opt-in** via `?mrtNetwork=1`. With no flag, v0.1 is unchanged. `?mrtPilot=1` remains the five-station v0.2 reference; v0.3 takes precedence if both flags appear.
 - `src/data/mrtStations2026.json`: 146 static station features including code arrays and the coordinate source category. There is no runtime network request for the stations.
 - `src/mrtNetwork.ts`: MapLibre source and two zoom-dependent symbol layers, with the same SVG caplet design as v0.2 (`makeMrtCapletSvg`). Below z13.75 the custom MRT layer is hidden; z13.75–15 shows major interchange colour strips/name; z15+ shows full code caplets/name.
-- **Lazy images:** a `styleimagemissing` handler decodes and adds only the icon variants needed by the current map view; avoids generating 146 × 2 appearances × 2 zoom modes upfront.
+- **Lazy images:** a MapLibre GL JS v6 `setMissingStyleImageResolver` asynchronously decodes and adds only the icon variants needed by the current map view; avoids generating 146 × 2 appearances × 2 zoom modes upfront.
 - `poi_transit`: exclude the canonical MRT names from generic railway symbols to avoid duplicate labels. Non-MRT rail POI names may remain.
 - Custom MRT layers are created *before* architecture layers. Existing pin priority and colour themes are unchanged; visible-collision behaviour requires real-device review.
 - Day/Night reuse the same line colours and existing v0.2 label typography. This is a controlled expansion, not a new visual redesign.
@@ -69,3 +69,7 @@ Remove `mrtNetwork=1` for v0.1 comparison at the identical map camera.
 - All source variants should receive a formal rights/attribution review before main-branch release. The reference coordinates for Hume and Punggol Coast must be replaced by primary LTA station coordinates when verified.
 - Monitor label-loading latency from lazy SVGs and possible conflicts with architectural text.
 - **Do not merge automatically**. A successful build proves code compatibility, not cartographic usability.
+
+### MapLibre v6 compatibility correction
+
+The initial lazy renderer incorrectly relied on the pre-v6 `styleimagemissing` event. MapLibre GL JS v6 uses `Map#setMissingStyleImageResolver` for missing icons; the event can only report unresolved icons. The v0.3 experiment now uses the asynchronous resolver and includes a targeted regression test. Reference: https://maplibre.org/maplibre-gl-js/docs/guides/v5-to-v6-migration-guide/ .
