@@ -105,17 +105,17 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
   position: absolute;
   z-index: 14;
   bottom: max(3px, env(safe-area-inset-bottom));
-  /* Match the Settings control's left edge, allowing the info icon to
-     share the same horizontal centre as the 56px Settings button. */
+  /* Align the complete credits group to the Settings control's left edge.
+     Do not position the icon separately from the text block. */
   left: max(12px, env(safe-area-inset-left));
   max-width: calc(100% - 24px);
   pointer-events: auto;
 }
 .map-credit-trigger {
-  display: grid;
-  grid-template-columns: 56px minmax(0, max-content);
+  display: inline-flex;
   align-items: center;
-  gap: 0;
+  justify-content: center;
+  gap: 6px;
   min-height: 32px;
   max-width: 100%;
   padding: 0;
@@ -125,7 +125,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
   box-shadow: none;
   color: var(--muted);
   opacity: .82;
-  text-align: left;
+  text-align: center;
   cursor: pointer;
 }
 .map-credit-names {
@@ -134,19 +134,14 @@ button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-vis
   gap: 0;
   min-width: 0;
   font: 400 9px/12px var(--font-ui);
+  text-align: center;
   letter-spacing: 0;
   overflow-wrap: normal;
   text-shadow: 0 0 2px var(--paper);
 }
 .map-credit-trigger svg {
-  grid-column: 1;
-  grid-row: 1;
-  justify-self: center;
+  flex-shrink: 0;
   opacity: .8;
-}
-.map-credit-names {
-  grid-column: 2;
-  grid-row: 1;
 }
 .map-credit-trigger:hover, .map-credit-trigger:focus-visible { opacity: 1; }
 .map-credit-trigger:active { opacity: 1; }
