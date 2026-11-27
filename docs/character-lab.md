@@ -6,7 +6,7 @@ This is an isolated visual experiment for the proposed SGM current-location char
 
 The GitHub-connected Vercel projects publish a Preview Deployment for this PR branch. Open [PR #16](https://github.com/ryotaro-yanagi/sg-architecture-map/pull/16), follow the deployment's **Visit** link, and append `/en/?lab=character` (or `/ja/?lab=character`) after the preview hostname.
 
-The Vite config enables the lab automatically **only for Vercel Preview builds**, using `VERCEL_ENV === 'preview'`. The regular production build remains unchanged. A query parameter is still required. The preview map is interactive on mobile, without geolocation permission.
+The dedicated `feature/character-lab-preview-v1` Vercel branch preview **automatically shows the Character Lab**, even without a query string. On other Vercel preview branches, `?lab=character` enables it using `VERCEL_ENV === 'preview'`. The regular production build remains unchanged. The preview map is interactive on mobile, without geolocation permission.
 
 If the Vercel project has Deployment Protection enabled, log in to Vercel before visiting the preview.
 
