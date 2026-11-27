@@ -49,7 +49,7 @@ export const colors = { coral: '#EE8974', ochre: '#E9C77D', sage: '#91B7A2' } as
 export type Color = keyof typeof colors
 
 export function zoomSize(zoom: number): number {
-  const stops: Point[] = [[9, 18], [11, 21], [13, 26], [14, 30], [16, 35], [18, 38]]
+  const stops: Point[] = [[9, 20], [11, 23], [13, 28], [14, 32], [16, 37], [18, 40]]
   if (zoom <= stops[0][0]) return stops[0][1]
   if (zoom >= stops[stops.length - 1][0]) return stops[stops.length - 1][1]
   for (let i = 1; i < stops.length; i++) {

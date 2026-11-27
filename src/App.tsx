@@ -1231,7 +1231,7 @@ function App() {
           'circle-radius': ['interpolate', ['linear'], ['zoom'], 9, 5, 12, 5.2, markerSwitchZoom, 5.6],
           'circle-color': ['coalesce', ['get', 'mapCategoryColor'], initialTokens.architecture.genericFill],
           'circle-stroke-color': initialTokens.architecture.markerOutline,
-          'circle-stroke-width': 0.75,
+          'circle-stroke-width': 1.4,
           'circle-opacity': 1,
         },
       })
