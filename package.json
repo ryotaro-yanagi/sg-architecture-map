@@ -18,7 +18,8 @@
     "test:weather": "node --test scripts/weather.test.ts",
     "test:cartography": "node --test scripts/cartography.test.ts",
     "test:mrt": "node --test scripts/mrtPilot.test.ts",
-    "test:mrt-network": "node --test scripts/mrtNetwork.test.mjs"
+    "test:mrt-network": "node --test scripts/mrtNetwork.test.mjs",
+    "test:credits": "node --test scripts/mapCredits.test.mjs"
   },
   "dependencies": {
     "@fontsource/hanken-grotesk": "^5.3.0",
