@@ -15,6 +15,7 @@ import { cloneColorTokens, colorTokenCssVariables, readColorLabDraft, saveColorL
 import type { ArchitectureColorTokens, ColorSchemeTokens, ColorTokens } from './colorTokens'
 import { categoryColor, getMapCategory, mapCategories } from './buildingCategories'
 import { applyRailStationLabels, getCartographyStudyCamera, snapshotCartographyLayers, railStationLabelLayerId } from './cartographyRail'
+import { applyMrtPilotAppearance, installMrtPilot, isMrtPilotEnabled } from './mrtPilot'
 import type { MapCategory } from './buildingCategories'
 import { addInitialVisitDate, createArchitectureRecordGroups, getWantToVisitBuildings } from './architectureRecord'
 import { collectionStateStore } from './collection'
@@ -1085,6 +1086,7 @@ function App() {
     const map = mapRef.current
     if (!map || !map.getLayer('building-pins')) return
     applyMapTheme(map, activeColorTokens, nightPreview)
+    if (isMrtPilotEnabled(window.location.search)) applyMrtPilotAppearance(map, nightPreview ? 'night' : 'day')
   }, [activeColorTokens, nightPreview])
 
   useEffect(() => {
@@ -1184,6 +1186,14 @@ function App() {
         updateMarkerImages(map, colorTokensRef.current.day.architecture, 'day'),
         updateMarkerImages(map, colorTokensRef.current.night.architecture, 'night'),
       ])
+      // v0.2 pilot is opt-in. The v0.1 railway station labels stay the default.
+      if (isMrtPilotEnabled(window.location.search)) {
+        try {
+          await installMrtPilot(map, colorTokensRef.current, initialScheme)
+        } catch (error) {
+          console.warn('MRT v0.2 caplet prototype unavailable:', error)
+        }
+      }
       map.addSource('buildings', { type: 'geojson', data: featureCollection(selectedId, locale, initialTokens.architecture) })
       map.addLayer({
         id: 'building-hit-targets', type: 'circle', source: 'buildings',
