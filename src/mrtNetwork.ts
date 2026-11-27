@@ -147,6 +147,7 @@ export const installMrtNetwork = (map: MapLibreMap, tokens: ColorTokens, scheme:
     filter: ['>=', ['get', 'lineCount'], 2],
     layout: {
       'icon-image': appearanceExpression(scheme, 'context'),
+      'icon-size': 1.1,
       'icon-anchor': 'bottom',
       'icon-allow-overlap': false,
       'icon-ignore-placement': false,
@@ -163,6 +164,7 @@ export const installMrtNetwork = (map: MapLibreMap, tokens: ColorTokens, scheme:
     maxzoom: networkFullMinZoom,
     layout: {
       'icon-image': appearanceExpression(scheme, 'context'),
+      'icon-size': 1.1,
       'icon-anchor': 'bottom',
       'icon-allow-overlap': false,
       'icon-ignore-placement': false,
@@ -176,6 +178,7 @@ export const installMrtNetwork = (map: MapLibreMap, tokens: ColorTokens, scheme:
     minzoom: networkFullMinZoom,
     layout: {
       'icon-image': appearanceExpression(scheme, 'full'),
+      'icon-size': 1.1,
       'icon-anchor': 'bottom',
       'icon-allow-overlap': false,
       'icon-ignore-placement': false,
