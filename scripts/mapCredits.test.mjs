@@ -57,15 +57,19 @@ test('Settings has an alternate path to the same credits dialog and focus is res
   assert.match(app, /creditsDialogRef\.current\?\.showModal\(\)/)
 })
 
-test('information icon comes before credits and is centred under the Settings control', () => {
+test('the icon and centred two-line credits form one adjacent group', () => {
   const entry = app.slice(app.indexOf('className="map-credit-entry"'), app.indexOf('{surfaceState === \'explore\''))
   assert.ok(entry.indexOf('<Info aria-hidden="true" size={17}') < entry.indexOf('<span className="map-credit-names"'))
-  assert.match(css, /\.map-credit-entry\s*\{[^}]*left:\s*max\(12px, env\(safe-area-inset-left\)\)/)
-  assert.match(css, /\.experience-settings-trigger\s*\{[^}]*left:\s*max\(12px, env\(safe-area-inset-left\)\)/)
-  const block = css.split('.map-credit-trigger {')[1]?.split('}')[0]
-  assert.ok(block)
-  assert.match(block, /display:\s*grid/)
-  assert.match(block, /grid-template-columns:\s*56px/)
-  assert.match(css, /\.map-credit-trigger svg\s*\{[^}]*justify-self:\s*center/)
-  assert.match(css, /\.map-credit-names\s*\{[^}]*grid-column:\s*2/)
+  assert.match(css, /\\.map-credit-entry\\s*\\{[^}]*left:\\s*max\\(12px, env\\(safe-area-inset-left\\)\\)/)
+  assert.match(css, /\\.experience-settings-trigger\\s*\\{[^}]*left:\\s*max\\(12px, env\\(safe-area-inset-left\\)\\)/)
+  const trigger = css.split('.map-credit-trigger {')[1]?.split('}')[0]
+  const names = css.split('.map-credit-names {')[1]?.split('}')[0]
+  assert.ok(trigger && names)
+  assert.match(trigger, /display:\\s*inline-flex/)
+  assert.match(trigger, /align-items:\\s*center/)
+  assert.match(trigger, /justify-content:\\s*center/)
+  assert.match(trigger, /gap:\\s*6px/)
+  assert.doesNotMatch(trigger, /grid-template-columns:\\s*56px/)
+  assert.match(names, /text-align:\\s*center/)
+  assert.match(css, /\\.map-credit-trigger svg\\s*\\{[^}]*flex-shrink:\\s*0/)
 })
