@@ -357,6 +357,22 @@ html[data-appearance='night'] .brand-mark img { filter: invert(1); }
   pointer-events: none;
   z-index: 2;
 }
+/* Keep a comfortable 44px touch target without enlarging the visual avatar.
+   The MapLibre center anchor and the actual location remain unchanged. */
+.user-location-marker--interactive {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  pointer-events: auto;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.user-location-marker--interactive:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+  border-radius: 50%;
+}
 .user-location-blob {
   --location-scale: .73;
   width: 34px;

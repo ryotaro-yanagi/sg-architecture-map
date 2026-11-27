@@ -1,8 +1,9 @@
-// Opt-in implementation of SGM's architecture-derived current-location character.
+// Architecture-derived current-location character, shared across SGM's map themes.
 // The MapLibre marker coordinates remain the only source of geographic position.
 // This module modifies its inner SVG, never the marker's actual lng/lat.
 import { forms, shapeIds, zoomSize } from './locationCharacterShapes'
 import type { ShapeId, Point } from './locationCharacterShapes'
+import { blinkAmount, BLINK_DURATION_MS, BLINK_INTRO_DELAY_MS, BLINK_MIN_INTERVAL_MS, BLINK_RANDOM_RANGE_MS } from './locationCharacterBehavior'
 
 const SVG_NS = 'http://www.w3.org/2000/svg'
 const SAMPLE_COUNT = 72
@@ -83,13 +84,15 @@ const createEllipse = (fill: string) => {
 export interface LocationCharacterOptions {
   map: import('maplibre-gl').Map
   body: HTMLDivElement
+  /** Reserved for a future on-map visit-record panel. */
+  onActivate?: () => void
 }
 
 /**
  * Mount SVG and animation controls on an already-positioned MapLibre user marker.
  * The caller owns the MapLibre marker; call the returned cleanup before removal.
  */
-export function mountLocationCharacter({ map, body }: LocationCharacterOptions): () => void {
+export function mountLocationCharacter({ map, body, onActivate }: LocationCharacterOptions): () => void {
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)')
   let currentShape: ShapeId = 'steps'
   let nextShape: ShapeId | null = null
@@ -99,6 +102,10 @@ export function mountLocationCharacter({ map, body }: LocationCharacterOptions):
   let closed = false
   let morphTimer = 0
   let idleTimer = 0
+  let blinkTimer = 0
+  let blinkFrame = 0
+  let blinkStrength = 0
+  let firstBlink = true
   let frame = 0
   let size = zoomSize(map.getZoom())
   let tiny = size <= 16.05
@@ -107,7 +114,7 @@ export function mountLocationCharacter({ map, body }: LocationCharacterOptions):
   const svg = document.createElementNS(SVG_NS, 'svg')
   svg.setAttribute('viewBox', '0 0 120 120')
   svg.setAttribute('aria-hidden', 'true')
-  svg.style.cssText = 'display:block;width:100%;height:100%;overflow:visible'
+  svg.style.cssText = 'display:block;width:100%;height:100%;overflow:visible;transform-origin:50% 50%'
   const bodyPath = document.createElementNS(SVG_NS, 'path')
   bodyPath.setAttribute('fill', BODY_OCHRE)
   svg.append(bodyPath)
@@ -127,7 +134,7 @@ export function mountLocationCharacter({ map, body }: LocationCharacterOptions):
     console.warn('Location character morph disabled; showing static form', error)
   }
 
-  const paint = (from: ShapeId, to: ShapeId, progress: number, blink = 0) => {
+  const paint = (from: ShapeId, to: ShapeId, progress: number, blink = blinkStrength) => {
     const t = Math.max(0, Math.min(1, progress))
     if (from === to || t <= 0 || !cached) {
       bodyPath.setAttribute('d', opticalPaths(from, tiny))
@@ -169,10 +176,20 @@ export function mountLocationCharacter({ map, body }: LocationCharacterOptions):
     }
   }
 
+  const cancelBlink = () => {
+    window.clearTimeout(blinkTimer)
+    window.cancelAnimationFrame(blinkFrame)
+    blinkTimer = 0
+    blinkFrame = 0
+    blinkStrength = 0
+    svg.style.transform = ''
+  }
+
   const cancelPending = () => {
     window.clearTimeout(morphTimer)
     window.clearTimeout(idleTimer)
     window.cancelAnimationFrame(frame)
+    cancelBlink()
     morphTimer = 0
     idleTimer = 0
     frame = 0
@@ -180,9 +197,48 @@ export function mountLocationCharacter({ map, body }: LocationCharacterOptions):
 
   const canAnimate = () => !closed && !document.hidden && !reduced.matches
 
+  const scheduleBlink = (delayMs = BLINK_MIN_INTERVAL_MS + Math.random() * BLINK_RANDOM_RANGE_MS) => {
+    window.clearTimeout(blinkTimer)
+    if (!canAnimate() || inMorph) return
+    blinkTimer = window.setTimeout(() => playBlink(false), delayMs)
+  }
+
+  const playBlink = (tapped: boolean) => {
+    cancelBlink()
+    if (!canAnimate() || inMorph) return
+    const start = performance.now()
+    const tick = (now: number) => {
+      if (!canAnimate() || inMorph) {
+        cancelBlink()
+        return
+      }
+      const u = Math.min(1, (now - start) / BLINK_DURATION_MS)
+      blinkStrength = blinkAmount(u)
+      // A tap gets a tiny squish; ordinary blinking moves only the eyes.
+      if (tapped) {
+        svg.style.transform = 'scale(' + (1 + blinkStrength * .025) +
+          ', ' + (1 - blinkStrength * .045) + ')'
+      }
+      paint(currentShape, currentShape, 0)
+      if (u < 1) {
+        blinkFrame = window.requestAnimationFrame(tick)
+      } else {
+        blinkStrength = 0
+        svg.style.transform = ''
+        paint(currentShape, currentShape, 0)
+        scheduleBlink()
+      }
+    }
+    blinkFrame = window.requestAnimationFrame(tick)
+  }
+
   const schedule = () => {
     cancelPending()
-    if (!canAnimate() || !cached) return
+    if (!canAnimate()) return
+    // Show an early, small sign of life on first location activation.
+    scheduleBlink(firstBlink ? BLINK_INTRO_DELAY_MS : undefined)
+    firstBlink = false
+    if (!cached) return
 
     idleTimer = window.setTimeout(() => {
       if (!canAnimate() || inMorph) return
@@ -206,6 +262,7 @@ export function mountLocationCharacter({ map, body }: LocationCharacterOptions):
       // frame cannot paint over the new body and eye positions.
       window.clearTimeout(idleTimer)
       window.cancelAnimationFrame(frame)
+      cancelBlink()
       const options = shapeIds.filter(id => id !== currentShape)
       const destination = options[Math.floor(Math.random() * options.length)]
       const source = currentShape
@@ -257,6 +314,37 @@ export function mountLocationCharacter({ map, body }: LocationCharacterOptions):
     schedule()
   }
 
+  // Marker itself is a 44px activation target while the visible body remains
+  // scaled to map zoom. Stop tap propagation so map-pin selection is unaffected.
+  const hitTarget = body.parentElement
+  const oldRole = hitTarget?.getAttribute('role')
+  const oldTabindex = hitTarget?.getAttribute('tabindex')
+  if (hitTarget) {
+    hitTarget.classList.add('user-location-marker--interactive')
+    hitTarget.setAttribute('role', 'button')
+    hitTarget.setAttribute('tabindex', '0')
+  }
+  const stopPointer = (event: Event) => { event.stopPropagation() }
+  const activate = () => {
+    playBlink(true)
+    onActivate?.()
+  }
+  const onTap = (event: MouseEvent) => {
+    event.stopPropagation()
+    activate()
+  }
+  const onKey = (event: KeyboardEvent) => {
+    if (event.key !== 'Enter' && event.key !== ' ') return
+    event.preventDefault()
+    event.stopPropagation()
+    activate()
+  }
+  hitTarget?.addEventListener('pointerdown', stopPointer)
+  hitTarget?.addEventListener('touchstart', stopPointer, { passive: true })
+  hitTarget?.addEventListener('click', onTap)
+  hitTarget?.addEventListener('dblclick', stopPointer)
+  hitTarget?.addEventListener('keydown', onKey)
+
   syncScale()
   paint(currentShape, currentShape, 0)
   map.on('zoom', syncScale)
@@ -270,6 +358,16 @@ export function mountLocationCharacter({ map, body }: LocationCharacterOptions):
     map.off('zoom', syncScale)
     document.removeEventListener('visibilitychange', onVisibility)
     reduced.removeEventListener('change', onVisibility)
+    hitTarget?.removeEventListener('pointerdown', stopPointer)
+    hitTarget?.removeEventListener('touchstart', stopPointer)
+    hitTarget?.removeEventListener('click', onTap)
+    hitTarget?.removeEventListener('dblclick', stopPointer)
+    hitTarget?.removeEventListener('keydown', onKey)
+    hitTarget?.classList.remove('user-location-marker--interactive')
+    if (oldRole === null || oldRole === undefined) hitTarget?.removeAttribute('role')
+    else hitTarget?.setAttribute('role', oldRole)
+    if (oldTabindex === null || oldTabindex === undefined) hitTarget?.removeAttribute('tabindex')
+    else hitTarget?.setAttribute('tabindex', oldTabindex)
     body.replaceChildren()
   }
 }
