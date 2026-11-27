@@ -50,3 +50,16 @@ export const snapshotCartographyLayers = (map: MapLibreMap): CartographyLayerAud
     minzoom: layer.minzoom ?? 'default',
     maxzoom: layer.maxzoom ?? 'default',
   }))
+
+export type CartographyStudyCamera = { center: [number, number]; zoom: number }
+
+// Preview-only deep-link for inspecting the experimental rail labels without
+// changing the default map opening camera: ?cartographyPreview=marina
+export const getCartographyStudyCamera = (location: string | null): CartographyStudyCamera | null => {
+  switch (location) {
+    case 'marina': return { center: [103.851, 1.284], zoom: 15.25 }
+    case 'orchard': return { center: [103.837, 1.305], zoom: 15.25 }
+    case 'west': return { center: [103.681, 1.347], zoom: 15.25 }
+    default: return null
+  }
+}
