@@ -3,6 +3,7 @@ import test from 'node:test'
 import type { Map as MapLibreMap } from 'maplibre-gl'
 import {
   applyRailStationLabels,
+  getCartographyStudyCamera,
   railStationLabelFilter,
   railStationLabelLayerId,
   railStationLabelMinZoom,
@@ -55,4 +56,13 @@ test('audit records effective visibility and zoom without modifying the map', ()
   assert.equal(rows[0].minzoom, 14)
   assert.equal(rows[1].visibility, 'none')
   assert.equal(calls.length, 0)
+})
+
+test('preview focus selects known areas without changing the default camera', () => {
+  assert.equal(getCartographyStudyCamera(null), null)
+  assert.equal(getCartographyStudyCamera('invalid'), null)
+  const study = getCartographyStudyCamera('marina')
+  assert.ok(study)
+  assert.equal(study.zoom, 15.25)
+  assert.deepEqual(study.center, [103.851, 1.284])
 })
