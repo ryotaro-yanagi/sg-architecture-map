@@ -16,7 +16,7 @@ test('map credits remain discoverable on the map and never expand through MapLib
 })
 
 test('visible on-map attribution names OpenStreetMap, OpenMapTiles, OpenFreeMap and LTA', () => {
-  const label = app.match(/<span className="map-credit-names"[^>]*>([\s\S]*?)<\/span>/)?.[1]
+  const label = app.slice(app.indexOf('<span className="map-credit-names"'), app.indexOf('<Info aria-hidden="true" size={17}'))
   assert.ok(label)
   for (const name of ['OpenStreetMap contributors', 'OpenMapTiles', 'OpenFreeMap', 'LTA']) {
     assert.ok(label.includes(name), `attribution missing: ${name}`)
