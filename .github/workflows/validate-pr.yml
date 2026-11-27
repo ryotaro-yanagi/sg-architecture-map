@@ -19,6 +19,7 @@ jobs:
       - run: npm run test:weather
       - run: npm run test:collection
       - run: npm run test:colors
+      - run: npm run test:location-character
       - run: npm run test:cartography
       - run: npm run test:mrt
       - run: npm run test:mrt-network

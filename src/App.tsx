@@ -2,6 +2,7 @@ import { Component, useCallback, useEffect, useMemo, useRef, useState, useSyncEx
 import type { CSSProperties } from 'react'
 import { ArrowLeft, ArrowRight, ArrowSquareOut, CheckCircle, Cloud, CloudRain, CloudSun, DownloadSimple, Gear, Info, Lightning, MagnifyingGlass, Moon, NavigationArrow, Notebook, ShareNetwork, Sneaker, Sun, X } from '@phosphor-icons/react'
 import * as maplibregl from 'maplibre-gl'
+import { mountLocationCharacter } from './locationCharacter'
 import { flushSync } from 'react-dom'
 import type { ExpressionSpecification, GeoJSONSource, Map as MapLibreMap } from 'maplibre-gl'
 import data from './data/buildings.json'
@@ -22,6 +23,9 @@ import { addInitialVisitDate, createArchitectureRecordGroups, getWantToVisitBuil
 import { collectionStateStore } from './collection'
 import type { CollectionUpdate } from './collection'
 import { canShareRecordFile, createShareRecordFile, generateShareRecordPng, SHARE_RECORD_FILENAME } from './shareRecordExport'
+
+// Set only at build time by Vite; true for Vercel Preview, never Production.
+declare const __SGM_VERCEL_PREVIEW__: boolean
 
 type Coordinates = [number, number]
 type Appearance = 'system' | 'day' | 'night'
@@ -1133,6 +1137,7 @@ function App() {
     setInitialMapState('loading')
     let disposed = false
     let disposeMrtNetwork: (() => void) | null = null
+    let disposeCharacterLab: (() => void) | null = null
     let readyTimeout: number | undefined
 
     const finishInitialLoad = () => {
@@ -1311,6 +1316,26 @@ function App() {
       })
       map.on('mouseenter', 'building-hit-targets', () => { map.getCanvas().style.cursor = 'pointer' })
       map.on('mouseleave', 'building-hit-targets', () => { map.getCanvas().style.cursor = '' })
+      // Optional, isolated developer preview on the real map. Never requests GPS,
+      // changes the production marker, or appears in ordinary browsing.
+      const characterBranchPreview = window.location.hostname.endsWith('.vercel.app') &&
+        window.location.hostname.includes('-git-feature-character-lab-')
+      const characterLabRequested = new URLSearchParams(window.location.search).get('lab') === 'character'
+      // Dedicated branch Preview always shows the lab, even when an external
+      // browser strips the query during redirect. All other hosts require opt-in.
+      if (characterBranchPreview ||
+          (characterLabRequested &&
+           (import.meta.env.DEV || __SGM_VERCEL_PREVIEW__ ||
+            import.meta.env.VITE_ENABLE_CHARACTER_LAB === 'true'))) {
+        void import('./characterLab').then(({ mountCharacterLab }) => {
+          if (disposed) return
+          disposeCharacterLab = mountCharacterLab({
+            map,
+            scheme: nightPreviewRef.current ? 'night' : 'day',
+            onSchemeChange: setAppearance,
+          })
+        }).catch(error => console.error('Character Lab failed to load', error))
+      }
     })
 
     const syncBearing = () => setMapBearing(map.getBearing())
@@ -1319,6 +1344,7 @@ function App() {
     mapRef.current = map
     return () => {
       disposed = true
+      disposeCharacterLab?.()
       disposeMrtNetwork?.()
       if (readyTimeout !== undefined) window.clearTimeout(readyTimeout)
       map.off('rotate', syncBearing)
@@ -1545,110 +1571,45 @@ function App() {
     navigator.geolocation.getCurrentPosition(
       ({ coords }) => {
         const location: Coordinates = [coords.longitude, coords.latitude]
+        const map = mapRef.current
+        if (!map) {
+          setLocating(false)
+          setNotice(t.locationFailure)
+          return
+        }
+
         userMarkerZoomCleanupRef.current?.()
         userMarkerZoomCleanupRef.current = null
         userMarkerRef.current?.remove()
+
+        // Same map coordinate and center anchor as the previous marker.
+        // Only the appearance of the marker is replaced.
         const element = document.createElement('div')
         element.className = 'user-location-marker'
         element.setAttribute('aria-label', t.currentLocation)
         element.setAttribute('role', 'img')
         const body = document.createElement('div')
-        body.className = 'user-location-blob'
-        const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)')
-        body.innerHTML = '<svg viewBox="0 0 100 100" aria-hidden="true"><circle class="user-location-shape" cx="50" cy="50" r="46.5" stroke="#FFFFFF" stroke-width="5"/><g class="user-location-face"><rect/><rect/><path d="M33 31L43 40 33 49M67 31L57 40 67 49" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" opacity="0"/></g></svg>'
+        body.className = 'user-location-blob user-location-blob--character'
         element.append(body)
-        const eyes = body.querySelectorAll<SVGRectElement>('rect')
-        const happy = body.querySelector<SVGPathElement>('path')!
-        const neutral = [39.5,40,9,23,0,60.5,40,9,23,0,0]
-        const paint = (v: number[]) => {
-          eyes.forEach((eye, i) => {
-            const [x,y,w,h,angle] = v.slice(i*5,i*5+5)
-            eye.setAttribute('x', String(x-w/2))
-            eye.setAttribute('y', String(y-h/2))
-            eye.setAttribute('width', String(w))
-            eye.setAttribute('height', String(h))
-            eye.setAttribute('rx', String(Math.min(w,h)/2))
-            eye.setAttribute('transform', 'rotate('+angle+' '+x+' '+y+')')
-            eye.setAttribute('opacity', String(1-v[10]))
-          })
-          happy.setAttribute('opacity', String(v[10]))
+        userMarkerRef.current = new maplibregl.Marker({ element, anchor: 'center' })
+          .setLngLat(location).addTo(map)
+
+        try {
+          userMarkerZoomCleanupRef.current = mountLocationCharacter({ map, body })
+        } catch (error) {
+          // If an SVG API is unavailable, keep current location visible rather
+          // than losing the marker; the next location tap can retry.
+          console.error('Location character unavailable; using static location marker', error)
+          body.innerHTML = '<svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="46.5" fill="#FF4534" stroke="#FFFFFF" stroke-width="5"/><ellipse cx="39.5" cy="40" rx="4.5" ry="11.5" fill="#FFFFFF"/><ellipse cx="60.5" cy="40" rx="4.5" ry="11.5" fill="#FFFFFF"/></svg>'
+          body.classList.remove('user-location-blob--character')
+          body.style.setProperty('--location-scale', String(Math.min(1, 0.73 + Math.max(0, map.getZoom() - 14) * .07)))
         }
-        const poses = [
-          [[39.5,44,9,3,0,60.5,44,9,3,0,0],75,45,140],
-          [[39.5,44,13,3,0,60.5,40,9,23,0,0],140,240,200],
-          [[39.5,40,9,23,0,60.5,44,13,3,0,0],140,240,200],
-          [[24.5,41,9,23,-6,45.5,41,9,23,-6,0],220,900,280],
-          [[54.5,41,9,23,6,75.5,41,9,23,6,0],220,900,280],
-          [[39.5,25,9,23,0,60.5,25,9,23,0,0],250,900,300],
-          [[47,35,10,26,-8,68,40,8,17,-8,0],250,1000,350],
-          [[39.5,40,9,3,0,60.5,40,9,3,0,1],190,650,250],
-          [[39.5,48,12,3,0,60.5,48,12,3,0,0],400,1500,350],
-        ] as const
-        let timer = 0
-        let frame = 0
-        let previous = -1
-        let stopped = false
-        const cancelFace = () => {
-          window.clearTimeout(timer)
-          window.cancelAnimationFrame(frame)
-          paint(neutral)
-        }
-        const interpolate = (from: readonly number[], to: readonly number[], duration: number, done: () => void) => {
-          const start = performance.now()
-          const tick = (now: number) => {
-            if (stopped || !element.isConnected || reducedMotion.matches || document.hidden) { paint(neutral); return }
-            const u = Math.min(1, (now-start)*1.1/duration)
-            const e = u*u*(3-2*u)
-            paint(from.map((v,i) => v+(to[i]-v)*e))
-            if (u < 1) frame = window.requestAnimationFrame(tick)
-            else done()
-          }
-          frame = window.requestAnimationFrame(tick)
-        }
-        const schedule = () => {
-          if (stopped || reducedMotion.matches || document.hidden) return
-          timer = window.setTimeout(() => {
-            if (stopped || !element.isConnected) return
-            const choices = [0,0,0,1,2,3,4,5,6,7,8].filter(i => i !== previous)
-            const index = choices[Math.floor(Math.random()*choices.length)]
-            previous = index
-            const [pose, enter, hold, exit] = poses[index]
-            interpolate(neutral, pose, enter, () => {
-              timer = window.setTimeout(() => interpolate(pose, neutral, exit, schedule), hold/1.1)
-            })
-          }, 4000*(0.7+Math.random()*0.6)/1.1)
-        }
-        const resetFace = () => { cancelFace(); schedule() }
-        paint(neutral)
-        const map = mapRef.current
-        if (!map) { setLocating(false); return }
-        const sizeForZoom = (zoom: number) => {
-          const stops = [[9, 16], [11, 19], [13, 23], [14, 26], [16, 31], [18, 34]] as const
-          if (zoom <= stops[0][0]) return stops[0][1]
-          if (zoom >= stops[stops.length - 1][0]) return stops[stops.length - 1][1]
-          for (let i = 1; i < stops.length; i += 1) {
-            const [z1, s1] = stops[i]
-            const [z0, s0] = stops[i - 1]
-            if (zoom <= z1) return s0 + ((zoom - z0) / (z1 - z0)) * (s1 - s0)
-          }
-          return 34
-        }
-        const syncScale = () => body.style.setProperty('--location-scale', String(sizeForZoom(map.getZoom()) / 34))
-        syncScale()
-        map.on('zoom', syncScale)
-        userMarkerZoomCleanupRef.current = () => {
-          stopped = true
-          cancelFace()
-          map.off('zoom', syncScale)
-          document.removeEventListener('visibilitychange', resetFace)
-          reducedMotion.removeEventListener('change', resetFace)
-        }
-        userMarkerRef.current = new maplibregl.Marker({ element, anchor: 'center' }).setLngLat(location).addTo(map)
-        document.addEventListener('visibilitychange', resetFace)
-        reducedMotion.addEventListener('change', resetFace)
-        schedule()
+
         const wide = window.matchMedia('(min-width: 720px)').matches
-        mapRef.current?.flyTo({ center: location, zoom: Math.max(mapRef.current.getZoom(), 14), offset: wide ? [210, 0] : [0, -76], duration: motionDuration(700) })
+        map.flyTo({
+          center: location, zoom: Math.max(map.getZoom(), 14),
+          offset: wide ? [210, 0] : [0, -76], duration: motionDuration(700),
+        })
         setLocating(false)
         setNotice(t.locationSuccess)
       },
