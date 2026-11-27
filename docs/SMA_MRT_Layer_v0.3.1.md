@@ -3,6 +3,7 @@
 **Date:** 2026-11-27  
 **Status:** controlled preview experiment, not merged into main.  
 **Based on:** v0.3 full-network caplets in draft PR #12.
+**Review dependency:** Draft PR #13 targets `main` so the existing pull-request CI runs. The branch still includes the unmerged v0.3 work from PR #12; do not merge PR #13 independently.
 
 ## User observation
 
