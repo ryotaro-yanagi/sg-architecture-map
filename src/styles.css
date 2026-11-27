@@ -646,28 +646,28 @@ html[data-appearance='night'] .brand-mark img { filter: invert(1); }
 .top-ui .control-row { margin-top: 0; pointer-events: none; }
 .top-ui .control-left > *, .top-ui .control-right > * { pointer-events: auto; }
 
-/* One visual size family: hierarchy comes from grouping, not scale. */
+/* A generous control rhythm makes the map feel like one clear experience. */
 .top-ui .brand {
-  width: 56px;
-  height: 56px;
-  flex-basis: 56px;
+  width: 60px;
+  height: 60px;
+  flex-basis: 60px;
   padding: 2px;
 }
 .top-ui .brand-mark,
 .top-ui .brand-mark img {
-  width: 52px;
-  height: 52px;
+  width: 56px;
+  height: 56px;
 }
 .top-ui .weather-chip {
-  min-width: 56px;
-  min-height: 56px;
-  padding-inline: 16px;
-  border-radius: 28px;
+  min-width: 60px;
+  min-height: 60px;
+  padding-inline: 17px;
+  border-radius: 30px;
   gap: 8px;
   font-size: 16px;
   line-height: 22px;
 }
-.top-ui .weather-chip svg { width: 22px; height: 22px; }
+.top-ui .weather-chip svg { width: 23px; height: 23px; }
 
 .experience-actions {
   position: absolute;
@@ -678,19 +678,19 @@ html[data-appearance='night'] .brand-mark img { filter: invert(1); }
   display: flex;
   align-items: center;
   gap: 0;
-  width: 168px;
-  height: 56px;
+  width: 180px;
+  height: 60px;
   overflow: hidden;
   color: var(--ink);
   background: var(--paper-strong);
-  border-radius: 28px;
+  border-radius: 30px;
 }
 .experience-action {
   display: grid;
   place-items: center;
-  flex: 0 0 56px;
-  width: 56px;
-  height: 56px;
+  flex: 0 0 60px;
+  width: 60px;
+  height: 60px;
   padding: 0;
   border: 0;
   border-radius: 0;
@@ -701,14 +701,14 @@ html[data-appearance='night'] .brand-mark img { filter: invert(1); }
 .experience-action svg {
   position: relative;
   z-index: 1;
-  width: 26px;
-  height: 26px;
+  width: 27px;
+  height: 27px;
 }
 
 /* Reusable ring primitive for icon-only grouped actions. */
 .ui-ring-control {
   position: relative;
-  --ui-ring-size: 42px;
+  --ui-ring-size: 45px;
 }
 .ui-ring-control::before {
   content: '';
@@ -732,8 +732,8 @@ html[data-appearance='night'] .brand-mark img { filter: invert(1); }
 
 .experience-settings-trigger,
 .state-explore .map-tools .locate-button {
-  width: 56px;
-  height: 56px;
+  width: 60px;
+  height: 60px;
 }
 .experience-settings-trigger {
   position: absolute;
@@ -741,13 +741,13 @@ html[data-appearance='night'] .brand-mark img { filter: invert(1); }
   left: max(12px, env(safe-area-inset-left));
   bottom: calc(max(4px, env(safe-area-inset-bottom)) + 34px);
 }
-.experience-settings-trigger svg { width: 24px; height: 24px; }
+.experience-settings-trigger svg { width: 25px; height: 25px; }
 .state-explore .map-tools {
   right: max(12px, env(safe-area-inset-right));
   bottom: calc(max(4px, env(safe-area-inset-bottom)) + 34px);
 }
-.state-explore .map-tools .locate-button svg { width: 22px; height: 22px; }
-.state-explore .notice { bottom: calc(max(4px, env(safe-area-inset-bottom)) + 100px); }
+.state-explore .map-tools .locate-button svg { width: 24px; height: 24px; }
+.state-explore .notice { bottom: calc(max(4px, env(safe-area-inset-bottom)) + 106px); }
 
 /* Settings is application-wide, so it remains a centered modal. */
 .experience-settings {
@@ -919,6 +919,16 @@ html[data-appearance='night'] .brand-mark img { filter: invert(1); }
 @media (min-width: 720px) {
   .experience-settings-trigger { left: 22px; }
   .state-explore .map-tools { right: 22px; }
+}
+/* Keep the three large map actions independent on narrow 320–359px devices. */
+@media (max-width: 359px) {
+  .experience-actions { width: 168px; height: 56px; border-radius: 28px; }
+  .experience-action { flex-basis: 56px; width: 56px; height: 56px; }
+  .experience-settings-trigger,
+  .state-explore .map-tools .locate-button { width: 56px; height: 56px; }
+  .top-ui .brand { width: 56px; height: 56px; flex-basis: 56px; }
+  .top-ui .brand-mark, .top-ui .brand-mark img { width: 52px; height: 52px; }
+  .top-ui .weather-chip { min-height: 56px; min-width: 56px; border-radius: 28px; }
 }
 @media (forced-colors: active) {
   .experience-actions,
