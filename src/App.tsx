@@ -14,7 +14,7 @@ import ColorLabPanel from './ColorLabPanel'
 import { cloneColorTokens, colorTokenCssVariables, readColorLabDraft, saveColorLabDraft } from './colorTokens'
 import type { ArchitectureColorTokens, ColorSchemeTokens, ColorTokens } from './colorTokens'
 import { categoryColor, getMapCategory, mapCategories } from './buildingCategories'
-import { applyRailStationLabels, getCartographyStudyCamera, snapshotCartographyLayers, railStationLabelLayerId } from './cartographyRail'
+import { applyRailStationLabels, getCartographyStudyCamera, getCartographyReviewZoom, snapshotCartographyLayers, railStationLabelLayerId } from './cartographyRail'
 import { applyMrtPilotAppearance, installMrtPilot, isMrtPilotEnabled } from './mrtPilot'
 import { applyMrtNetworkAppearance, installMrtNetwork, isMrtNetworkEnabled } from './mrtNetwork'
 import type { MapCategory } from './buildingCategories'
@@ -1141,16 +1141,17 @@ function App() {
     try {
       // Opt-in comparison camera for this experiment; the normal opening
       // view remains unchanged without ?cartographyPreview=marina.
-      const studyCamera = getCartographyStudyCamera(
-        new URLSearchParams(window.location.search).get('cartographyPreview'),
-      )
+      const reviewParams = new URLSearchParams(window.location.search)
+      const studyCamera = getCartographyStudyCamera(reviewParams.get('cartographyPreview'))
+      const reviewZoom = studyCamera ? getCartographyReviewZoom(reviewParams.get('cartographyZoom')) : null
       map = new maplibregl.Map({
         container: mapContainer.current,
         style: 'https://tiles.openfreemap.org/styles/liberty',
-        ...(restoredState
-          ? { center: restoredState.center, zoom: restoredState.zoom }
-          : studyCamera
-            ? { center: studyCamera.center, zoom: studyCamera.zoom }
+        // An explicit comparison URL overrides a saved camera to make A/B reliable.
+        ...(studyCamera
+          ? { center: studyCamera.center, zoom: reviewZoom ?? studyCamera.zoom }
+          : restoredState
+            ? { center: restoredState.center, zoom: restoredState.zoom }
             : { bounds: overviewBounds, fitBoundsOptions: { padding: overviewPadding, maxZoom: 12 } }),
         bearing: restoredState?.bearing ?? 0,
         pitch: 0,

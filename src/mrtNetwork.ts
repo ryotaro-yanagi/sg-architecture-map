@@ -8,9 +8,12 @@ import type { PilotStation, MrtAppearance, MrtIconMode } from './mrtPilot'
 // complete snapshot of 146 operational MRT stations. It remains opt-in.
 // Station codes, geographic proxy points and provenance live in one JSON file.
 export const networkSourceId = 'sma-mrt-network'
+export const networkOverviewLayerId = 'sma-mrt-network-overview'
 export const networkContextLayerId = 'sma-mrt-network-context'
 export const networkFullLayerId = 'sma-mrt-network-full'
-export const networkContextMinZoom = 13.75
+// Three zoom stages: interchange context -> all stations in compact form -> full codes.
+export const networkOverviewMinZoom = 13.25
+export const networkContextMinZoom = 14.25
 export const networkFullMinZoom = 15
 
 export const isMrtNetworkEnabled = (search: string): boolean =>
@@ -56,6 +59,9 @@ const featureCollection = {
       id: station.id,
       name: station.nameEn,
       lineCount: station.codes.length,
+      // Lower symbol-sort-key is placed first when overlap is disabled.
+      // Interchanges are more useful as orientation landmarks at intermediate zooms.
+      labelPriority: 3 - station.codes.length,
     },
   })),
 }
@@ -71,6 +77,9 @@ const appearanceExpression = (scheme: MrtAppearance, mode: MrtIconMode): ['conca
   ['concat', `${imagePrefix}${scheme}-${mode}-`, ['get', 'id']]
 
 export const applyMrtNetworkAppearance = (map: MapLibreMap, scheme: MrtAppearance): void => {
+  if (map.getLayer(networkOverviewLayerId)) {
+    map.setLayoutProperty(networkOverviewLayerId, 'icon-image', appearanceExpression(scheme, 'context'))
+  }
   if (map.getLayer(networkContextLayerId)) {
     map.setLayoutProperty(networkContextLayerId, 'icon-image', appearanceExpression(scheme, 'context'))
   }
@@ -92,7 +101,7 @@ export const installMrtNetwork = (map: MapLibreMap, tokens: ColorTokens, scheme:
     const match = /^sma-network-(day|night)-(context|full)-([a-z0-9-]+)$/.exec(id)
     if (!match) return
     const station = stationsById.get(match[3])
-    if (!station || (match[2] === 'context' && station.codes.length < 2)) return
+    if (!station) return
     const appearance = match[1] as MrtAppearance
     const mode = match[2] as MrtIconMode
     if (id !== imageKey(appearance, mode, station.id) || map.hasImage(id)) return
@@ -128,18 +137,36 @@ export const installMrtNetwork = (map: MapLibreMap, tokens: ColorTokens, scheme:
   if (map.getLayer('poi_transit')) map.setFilter('poi_transit', mrtNetworkFallbackFilter)
   map.addSource(networkSourceId, { type: 'geojson', data: featureCollection })
   // Architecture layers are inserted later in App.tsx and retain their priority.
+  // District view: reveal only interchanges, earlier than v0.3.
   map.addLayer({
-    id: networkContextLayerId,
+    id: networkOverviewLayerId,
     type: 'symbol',
     source: networkSourceId,
-    minzoom: networkContextMinZoom,
-    maxzoom: networkFullMinZoom,
+    minzoom: networkOverviewMinZoom,
+    maxzoom: networkContextMinZoom,
     filter: ['>=', ['get', 'lineCount'], 2],
     layout: {
       'icon-image': appearanceExpression(scheme, 'context'),
       'icon-anchor': 'bottom',
       'icon-allow-overlap': false,
       'icon-ignore-placement': false,
+      'symbol-sort-key': ['get', 'labelPriority'],
+    },
+  })
+  // At intermediate zooms, single-line stations also appear with a small
+  // colour strip and name; full caplets still wait until z15.
+  map.addLayer({
+    id: networkContextLayerId,
+    type: 'symbol',
+    source: networkSourceId,
+    minzoom: networkContextMinZoom,
+    maxzoom: networkFullMinZoom,
+    layout: {
+      'icon-image': appearanceExpression(scheme, 'context'),
+      'icon-anchor': 'bottom',
+      'icon-allow-overlap': false,
+      'icon-ignore-placement': false,
+      'symbol-sort-key': ['get', 'labelPriority'],
     },
   })
   map.addLayer({
@@ -152,6 +179,7 @@ export const installMrtNetwork = (map: MapLibreMap, tokens: ColorTokens, scheme:
       'icon-anchor': 'bottom',
       'icon-allow-overlap': false,
       'icon-ignore-placement': false,
+      'symbol-sort-key': ['get', 'labelPriority'],
     },
   })
   return () => {

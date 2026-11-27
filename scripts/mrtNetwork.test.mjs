@@ -70,3 +70,23 @@ test('full-network icon generation uses the MapLibre GL JS v6 resolver contract'
   assert.doesNotMatch(implementation, /map\.on\('styleimagemissing'/)
   assert.match(implementation, /new Map<string, Promise<void>>\(\)/)
 })
+
+test('v0.3.1 shows earlier MRT context without forcing symbol overlap', () => {
+  const src = readFileSync(new URL('../src/mrtNetwork.ts', import.meta.url), 'utf8')
+  assert.match(src, /networkOverviewMinZoom = 13\.25/)
+  assert.match(src, /networkContextMinZoom = 14\.25/)
+  assert.match(src, /networkFullMinZoom = 15/)
+  const overview = src.split('id: networkOverviewLayerId,')[1]?.split('map.addLayer({')[0]
+  const context = src.split('id: networkContextLayerId,')[1]?.split('map.addLayer({')[0]
+  const full = src.split('id: networkFullLayerId,')[1]?.split('return () =>')[0]
+  assert.ok(overview && context && full, 'all three scale-dependent layers exist')
+  assert.match(overview, /filter: \['>=', \['get', 'lineCount'\], 2\]/)
+  assert.doesNotMatch(context, /filter:/)
+  for (const block of [overview, context, full]) {
+    assert.match(block, /'icon-allow-overlap': false/)
+    assert.match(block, /'icon-ignore-placement': false/)
+    assert.match(block, /'symbol-sort-key': \['get', 'labelPriority'\]/)
+  }
+  assert.match(src, /labelPriority: 3 - station\.codes\.length/)
+  assert.doesNotMatch(src, /match\[2\] === 'context' && station\.codes\.length < 2/)
+})

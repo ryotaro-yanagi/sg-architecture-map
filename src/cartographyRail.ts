@@ -74,3 +74,10 @@ export const getCartographyStudyCamera = (location: string | null): CartographyS
     default: return null
   }
 }
+
+/** A dedicated preview camera may specify a zoom within the existing SMA bounds. */
+export const getCartographyReviewZoom = (raw: string | null): number | null => {
+  if (raw == null || raw.trim() === '') return null
+  const value = Number(raw)
+  return Number.isFinite(value) && value >= 9 && value <= 18 ? value : null
+}

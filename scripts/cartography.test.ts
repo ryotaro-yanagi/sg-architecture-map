@@ -3,7 +3,7 @@ import test from 'node:test'
 import type { Map as MapLibreMap } from 'maplibre-gl'
 import {
   applyRailStationLabels,
-  getCartographyStudyCamera,
+  getCartographyStudyCamera, getCartographyReviewZoom,
   railStationLabelFilter,
   railStationLabelLayerId,
   railStationLabelMinZoom,
@@ -85,4 +85,16 @@ test('v0.3 full-network review covers north, west, east and dense central locati
     assert.ok(camera.center[0] >= 103.6 && camera.center[0] <= 104.1)
     assert.ok(camera.center[1] >= 1.2 && camera.center[1] <= 1.5)
   }
+})
+
+test('explicit comparison zoom is accepted only inside the normal map limits', () => {
+  assert.equal(getCartographyReviewZoom(null), null)
+  assert.equal(getCartographyReviewZoom(''), null)
+  assert.equal(getCartographyReviewZoom('0'), null)
+  assert.equal(getCartographyReviewZoom('NaN'), null)
+  assert.equal(getCartographyReviewZoom('14.4'), 14.4)
+  assert.equal(getCartographyReviewZoom('13.5'), 13.5)
+  assert.equal(getCartographyReviewZoom('9'), 9)
+  assert.equal(getCartographyReviewZoom('18'), 18)
+  assert.equal(getCartographyReviewZoom('18.1'), null)
 })
