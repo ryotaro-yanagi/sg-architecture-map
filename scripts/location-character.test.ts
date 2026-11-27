@@ -18,11 +18,11 @@ test('four unique architecture-derived silhouettes share stable form identifiers
 })
 
 test('marker size follows production zoom stops without arbitrary scale jumps', () => {
-  const stops: Array<[number, number]> = [[9,18],[11,21],[13,26],[14,30],[16,35],[18,38]]
+  const stops: Array<[number, number]> = [[9,20],[11,23],[13,28],[14,32],[16,37],[18,40]]
   for (const [z, size] of stops) assert.equal(zoomSize(z), size)
-  assert.equal(zoomSize(3), 18)
-  assert.equal(zoomSize(20), 38)
-  assert.equal(zoomSize(12), 23.5)
+  assert.equal(zoomSize(3), 20)
+  assert.equal(zoomSize(20), 40)
+  assert.equal(zoomSize(12), 25.5)
   for (let z = 9; z < 18; z += .1) {
     assert.ok(zoomSize(z + .1) >= zoomSize(z))
   }
