@@ -43,7 +43,7 @@ No geolocation permission is requested by the lab. Its sample marker starts at t
 2. Repeat Day / Night and three body colors.
 3. Compare shadow vs keyline near architecture category markers.
 4. Verify white-eye / dark-pupil separation at 16 px at device pixel ratios 1 and 2.
-5. Confirm that ordinary `/en/` and `/ja/`, without the query, show no lab marker or controls.
+5. Confirm that the **production** `/en/` and `/ja/` have no lab marker or controls. The dedicated Character Lab Preview branch intentionally shows the lab automatically.
 6. Confirm `prefers-reduced-motion` is unchanged: the lab does not run automatic morphs or blink animations.
 
 ## Known limits
