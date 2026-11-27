@@ -127,3 +127,15 @@ Confirm: (a) actual icons render in browser; (b) Marina Bay and Outram display a
 - `src/mrtPilot.ts` holds the self-contained station data, SVG label generator, filtered fallback rail labels and MapLibre layers.
 - `src/App.tsx` installs the pilot only if `mrtPilot=1`.
 - `scripts/mrtPilot.test.ts` validates station uniqueness, current codes, contrast, SVG content and opt-in behavior.
+
+### Direct station review URLs
+
+Add `&mrtPilot=1` to each camera URL to see caplets; omit it for the v0.1 station-name baseline:
+
+- `?cartographyPreview=downtown&mrtPilot=1`
+- `?cartographyPreview=bugis&mrtPilot=1`
+- `?cartographyPreview=marina-station&mrtPilot=1`
+- `?cartographyPreview=orchard-station&mrtPilot=1`
+- `?cartographyPreview=outram&mrtPilot=1`
+
+All stations open at z16 for comparable inspection.
