@@ -63,3 +63,10 @@ test('future stations and LRT points are excluded from the operating network', (
   }
   assert.equal(data.metadata.snapshotDate, '2026-11-27')
 })
+
+test('full-network icon generation uses the MapLibre GL JS v6 resolver contract', () => {
+  const implementation = readFileSync(new URL('../src/mrtNetwork.ts', import.meta.url), 'utf8')
+  assert.match(implementation, /setMissingStyleImageResolver\(resolveMissingImage\)/)
+  assert.doesNotMatch(implementation, /map\.on\('styleimagemissing'/)
+  assert.match(implementation, /new Map<string, Promise<void>>\(\)/)
+})
